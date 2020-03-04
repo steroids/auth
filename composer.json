@@ -1,0 +1,15 @@
+{
+    "name": "steroids/auth",
+    "description": "",
+    "license": "MIT",
+    "require": {
+        "php": ">=7.2.0",
+        "ext-mbstring": "*",
+        "ext-curl": "*",
+        "lib-pcre": "*",
+        "steroids/core": "*"
+    },
+    "autoload": {
+        "psr-4": {"steroids\\auth\\": ""}
+    }
+}
