@@ -2,7 +2,7 @@
 
 namespace steroids\auth;
 
-use steroids\base\Model;
+use steroids\core\base\Model;
 use yii\web\IdentityInterface;
 
 interface UserInterface extends IdentityInterface

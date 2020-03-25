@@ -2,7 +2,7 @@
 
 namespace steroids\auth\forms\meta;
 
-use steroids\base\FormModel;
+use steroids\core\base\FormModel;
 use \Yii;
 
 abstract class RecoveryEmailPasswordFormMeta extends FormModel

@@ -4,7 +4,7 @@ namespace steroids\auth\models;
 
 use steroids\auth\models\meta\AuthConfirmMeta;
 use steroids\auth\UserInterface;
-use steroids\base\Model;
+use steroids\core\base\Model;
 use \steroids\exceptions\ModelSaveException;
 use yii\db\ActiveQuery;
 

@@ -2,7 +2,7 @@
 
 namespace steroids\auth\models\meta;
 
-use steroids\base\Model;
+use steroids\core\base\Model;
 use steroids\core\behaviors\TimestampBehavior;
 use \Yii;
 use yii\db\ActiveQuery;

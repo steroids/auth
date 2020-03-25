@@ -5,7 +5,7 @@ namespace steroids\auth\forms;
 use steroids\auth\forms\meta\RegistrationFormMeta;
 use steroids\auth\models\AuthConfirm;
 use steroids\auth\UserInterface;
-use steroids\base\Model;
+use steroids\core\base\Model;
 use steroids\validators\PasswordValidator;
 
 class RegistrationForm extends RegistrationFormMeta

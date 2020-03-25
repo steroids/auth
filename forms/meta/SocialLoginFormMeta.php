@@ -2,7 +2,7 @@
 
 namespace steroids\auth\forms\meta;
 
-use steroids\base\FormModel;
+use steroids\core\base\FormModel;
 use steroids\auth\enums\SocialEnum;
 use \Yii;
 

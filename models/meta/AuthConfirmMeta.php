@@ -3,7 +3,7 @@
 namespace steroids\auth\models\meta;
 
 use \Yii;
-use steroids\base\Model;
+use steroids\core\base\Model;
 use steroids\core\behaviors\TimestampBehavior;
 
 /**
