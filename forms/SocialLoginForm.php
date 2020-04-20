@@ -77,7 +77,7 @@ class SocialLoginForm extends SocialLoginFormMeta
             // Find or create AuthSocial
             $this->social = AuthSocial::findOrCreate($this->socialName, $profile);
 
-            $user = \Yii::$app->user->model;
+            $user = \Yii::$app->user->identity;
             if ($user) {
                 // Connect
                 $this->social->appendUser($user->email);
