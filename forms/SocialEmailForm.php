@@ -2,6 +2,7 @@
 
 namespace steroids\auth\forms;
 
+use steroids\auth\AuthModule;
 use steroids\auth\forms\meta\SocialEmailFormMeta;
 use steroids\auth\models\AuthConfirm;
 use steroids\auth\models\AuthSocial;
@@ -42,7 +43,14 @@ class SocialEmailForm extends SocialEmailFormMeta
     public function send()
     {
         if ($this->validate()) {
-            AuthConfirm::create($this->email);
+            /** @var UserInterface $userClass */
+            $userClass = \Yii::$app->user->identityClass;
+
+            $module = AuthModule::getInstance();
+            $user = $userClass::findBy($this->email, [$module->getUserAttributeName(AuthModule::ATTRIBUTE_EMAIL)]);
+            if ($user) {
+                $module->confirm($user, AuthModule::ATTRIBUTE_EMAIL);
+            }
             return true;
         }
         return false;

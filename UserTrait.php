@@ -19,9 +19,19 @@ trait UserTrait
     /**
      * @inheritdoc
      */
-    public static function findByEmail($email)
+    public static function findBy($login, $attributes)
     {
-        return static::find()->where(['email' => mb_strtolower(trim($email))])->limit(1)->one();
+        $login = mb_strtolower(trim($login));
+        return static::find()
+            ->where([
+                'or',
+                ...array_map(
+                    fn($attribute) => [$attribute => $login],
+                    $attributes
+                )
+            ])
+            ->limit(1)
+            ->one();
     }
 
     /**

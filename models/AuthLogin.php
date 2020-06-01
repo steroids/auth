@@ -2,6 +2,7 @@
 
 namespace steroids\auth\models;
 
+use steroids\auth\AuthModule;
 use steroids\auth\models\meta\AuthLoginMeta;
 use steroids\auth\UserInterface;
 use yii\db\ActiveQuery;
@@ -18,6 +19,14 @@ class AuthLogin extends AuthLoginMeta
     const LOGIN_DURATION_DAYS = 90; // 90 days
 
     /**
+     * @inheritDoc
+     */
+    public static function instantiate($row)
+    {
+        return AuthModule::instantiateClass(static::class, $row);
+    }
+
+    /**
      * @param IdentityInterface $identity
      * @param Request $request
      * @param AuthSocial $social
@@ -26,7 +35,7 @@ class AuthLogin extends AuthLoginMeta
      */
     public static function create($identity, $request, $social = null)
     {
-        $model = new static([
+        $model = static::instantiate([
             'userId' => $identity->getId(),
             'authId' => $social ? $social->primaryKey : null,
             'ipAddress' => $request->userIP,

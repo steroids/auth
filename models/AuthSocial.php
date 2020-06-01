@@ -2,6 +2,7 @@
 
 namespace steroids\auth\models;
 
+use steroids\auth\AuthModule;
 use steroids\auth\SocialProfile;
 use steroids\auth\models\meta\AuthSocialMeta;
 use steroids\auth\UserInterface;
@@ -18,13 +19,21 @@ use steroids\exceptions\ModelSaveException;
  */
 class AuthSocial extends AuthSocialMeta
 {
+    /**
+     * @inheritDoc
+     */
+    public static function instantiate($row)
+    {
+        return AuthModule::instantiateClass(static::class, $row);
+    }
+
     public static function findOrCreate($name, SocialProfile $profile)
     {
         $params = [
             'socialName' => $name,
             'externalId' => $profile->id,
         ];
-        $model = static::findOne($params) ?: new static($params);
+        $model = static::findOne($params) ?: static::instantiate($params);
         $model->profileJson = Json::encode($profile);
         $model->saveOrPanic();
 
@@ -60,7 +69,7 @@ class AuthSocial extends AuthSocialMeta
     public function getProfile()
     {
         return $this->profileJson
-            ? new SocialProfile(Json::decode($this->profileJson))
+            ? AuthModule::instantiateClass(SocialProfile::class, Json::decode($this->profileJson))
             : null;
     }
 

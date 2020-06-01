@@ -8,19 +8,18 @@ use \Yii;
 abstract class RegistrationFormMeta extends FormModel
 {
     public $email;
+    public $phone;
+    public $login;
     public $password;
     public $passwordAgain;
-    public $name;
-    public $birthdate;
 
     public function rules()
     {
         return [
-            [['email', 'name'], 'string', 'max' => 255],
+            [['email', 'login'], 'string', 'max' => 255],
             ['email', 'email'],
-            [['email', 'password', 'passwordAgain', 'name', 'birthdate'], 'required'],
+            ['phone', 'string', 'max' => 32],
             [['password', 'passwordAgain'], 'string', 'min' => 1,'max' => 255],
-            ['birthdate', 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -29,27 +28,24 @@ abstract class RegistrationFormMeta extends FormModel
         return [
             'email' => [
                 'label' => Yii::t('steroids', 'Email'),
-                'appType' => 'email',
-                'isRequired' => true
+                'appType' => 'email'
+            ],
+            'phone' => [
+                'label' => Yii::t('steroids', 'Телефон'),
+                'appType' => 'phone',
+                'isSortable' => false
+            ],
+            'login' => [
+                'label' => Yii::t('steroids', 'Логин'),
+                'isSortable' => false
             ],
             'password' => [
                 'label' => Yii::t('steroids', 'Пароль'),
-                'appType' => 'password',
-                'isRequired' => true
+                'appType' => 'password'
             ],
             'passwordAgain' => [
                 'label' => Yii::t('steroids', 'Повтор пароля'),
-                'appType' => 'password',
-                'isRequired' => true
-            ],
-            'name' => [
-                'label' => Yii::t('steroids', 'Имя'),
-                'isRequired' => true
-            ],
-            'birthdate' => [
-                'label' => Yii::t('steroids', 'Дата рождения'),
-                'appType' => 'date',
-                'isRequired' => true
+                'appType' => 'password'
             ]
         ];
     }

@@ -8,10 +8,11 @@ use yii\web\IdentityInterface;
 interface UserInterface extends IdentityInterface
 {
     /**
-     * @param string $email
+     * @param string $login
+     * @param array $attributes
      * @return UserInterface|Model
      */
-    public static function findByEmail($email);
+    public static function findBy($login, array $attributes);
 
     /**
      * @param string $password

@@ -2,19 +2,20 @@
 
 namespace steroids\auth\models\meta;
 
-use \Yii;
 use steroids\core\base\Model;
 use steroids\core\behaviors\TimestampBehavior;
+use \Yii;
 
 /**
  * @property string $id
  * @property integer $userId
- * @property string $email
+ * @property string $value
  * @property string $code
  * @property boolean $isConfirmed
  * @property string $createTime
  * @property string $updateTime
  * @property string $expireTime
+ * @property string $type
  */
 abstract class AuthConfirmMeta extends Model
 {
@@ -33,12 +34,12 @@ abstract class AuthConfirmMeta extends Model
     {
         return array_merge(parent::rules(), [
             ['userId', 'integer'],
-            [['email', 'code'], 'required'],
-            ['email', 'string', 'max' => 255],
-            ['email', 'email'],
+            [['userId', 'code'], 'required'],
+            ['value', 'string', 'max' => 255],
             ['code', 'string', 'max' => '32'],
-            ['isConfirmed', 'boolean'],
+            ['isConfirmed', 'steroids\\core\\validators\\ExtBooleanValidator'],
             ['expireTime', 'date', 'format' => 'php:Y-m-d H:i:s'],
+            ['type', 'string', 'max' => '10'],
         ]);
     }
 
@@ -61,9 +62,8 @@ abstract class AuthConfirmMeta extends Model
                 'appType' => 'integer',
                 'isRequired' => true
             ],
-            'email' => [
-                'label' => Yii::t('steroids', 'Email'),
-                'appType' => 'email',
+            'value' => [
+                'label' => Yii::t('steroids', 'Логин')
             ],
             'code' => [
                 'label' => Yii::t('steroids', 'Код'),
@@ -76,7 +76,8 @@ abstract class AuthConfirmMeta extends Model
             ],
             'createTime' => [
                 'label' => Yii::t('steroids', 'Добавлен'),
-                'appType' => 'autoTime'
+                'appType' => 'autoTime',
+                'touchOnUpdate' => false
             ],
             'updateTime' => [
                 'label' => Yii::t('steroids', 'Обновлен'),
@@ -86,6 +87,11 @@ abstract class AuthConfirmMeta extends Model
             'expireTime' => [
                 'label' => Yii::t('steroids', 'Дата действия кода'),
                 'appType' => 'dateTime'
+            ],
+            'type' => [
+                'label' => Yii::t('steroids', 'Тип (емаил или телефон)'),
+                'isPublishToFrontend' => false,
+                'stringLength' => '10'
             ]
         ]);
     }

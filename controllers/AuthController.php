@@ -2,41 +2,17 @@
 
 namespace steroids\auth\controllers;
 
+use steroids\auth\AuthModule;
 use Yii;
 use yii\web\Controller;
-use steroids\auth\forms\RecoveryEmailPasswordConfirmForm;
-use steroids\auth\forms\RecoveryEmailPasswordForm;
+use steroids\auth\forms\RecoveryPasswordConfirmForm;
+use steroids\auth\forms\RecoveryPasswordForm;
 use steroids\auth\forms\RegistrationConfirmForm;
 use steroids\auth\forms\RegistrationForm;
 use steroids\auth\forms\LoginForm;
 
 class AuthController extends Controller
 {
-    /**
-     * @var string
-     */
-    public $loginClass = LoginForm::class;
-
-    /**
-     * @var string
-     */
-    public $registrationClass = RegistrationForm::class;
-
-    /**
-     * @var string
-     */
-    public $registrationConfirmClass = RegistrationConfirmForm::class;
-
-    /**
-     * @var string
-     */
-    public $recoveryClass = RecoveryEmailPasswordForm::class;
-
-    /**
-     * @var string
-     */
-    public $recoveryConfirmClass = RecoveryEmailPasswordConfirmForm::class;
-
     public static function apiMap()
     {
         return [
@@ -62,7 +38,7 @@ class AuthController extends Controller
     public function actionRegistration()
     {
         /** @var RegistrationForm $model */
-        $model = new $this->registrationClass();
+        $model = AuthModule::instantiateClass(RegistrationForm::class);
         if ($model->load(Yii::$app->request->post())) {
             $model->register();
         }
@@ -77,7 +53,7 @@ class AuthController extends Controller
     public function actionRegistrationConfirm()
     {
         /** @var RegistrationConfirmForm $model */
-        $model = new $this->registrationConfirmClass();
+        $model = AuthModule::instantiateClass(RegistrationConfirmForm::class);
         if ($model->load(Yii::$app->request->post())) {
             $model->confirm();
         }
@@ -92,7 +68,7 @@ class AuthController extends Controller
     public function actionLogin()
     {
         /** @var LoginForm $model */
-        $model = new $this->loginClass();
+        $model = AuthModule::instantiateClass(LoginForm::class);
         if ($model->load(Yii::$app->request->post())) {
             $model->login();
         }
@@ -101,13 +77,13 @@ class AuthController extends Controller
 
     /**
      * Recovery request (send email)
-     * @return RecoveryEmailPasswordForm
+     * @return RecoveryPasswordForm
      * @throws \Exception
      */
     public function actionRecovery()
     {
-        /** @var RecoveryEmailPasswordForm $model */
-        $model = new $this->recoveryClass();
+        /** @var RecoveryPasswordForm $model */
+        $model = AuthModule::instantiateClass(RecoveryPasswordForm::class);
         if ($model->load(Yii::$app->request->post())) {
             $model->send();
         }
@@ -116,13 +92,13 @@ class AuthController extends Controller
 
     /**
      * Recovery request (confirm and change password)
-     * @return RecoveryEmailPasswordConfirmForm
+     * @return RecoveryPasswordConfirmForm
      * @throws \Exception
      */
     public function actionRecoveryConfirm()
     {
-        /** @var RecoveryEmailPasswordConfirmForm $model */
-        $model = new $this->recoveryConfirmClass();
+        /** @var RecoveryPasswordConfirmForm $model */
+        $model = AuthModule::instantiateClass(RecoveryPasswordConfirmForm::class);
         if ($model->load(Yii::$app->request->post())) {
             $model->confirm();
         }

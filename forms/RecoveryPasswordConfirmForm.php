@@ -2,10 +2,11 @@
 
 namespace steroids\auth\forms;
 
-use steroids\auth\forms\meta\RegistrationConfirmFormMeta;
+use steroids\auth\forms\meta\RecoveryPasswordConfirmFormMeta;
 use steroids\auth\models\AuthConfirm;
+use steroids\core\validators\PasswordValidator;
 
-class RegistrationConfirmForm extends RegistrationConfirmFormMeta
+class RecoveryPasswordConfirmForm extends RecoveryPasswordConfirmFormMeta
 {
     /**
      * @var AuthConfirm
@@ -30,32 +31,27 @@ class RegistrationConfirmForm extends RegistrationConfirmFormMeta
             ['email', 'filter', 'filter' => function($value) {
                 return mb_strtolower(trim($value));
             }],
+            ['newPassword', PasswordValidator::class],
             ['code', function($attribute) {
                 $this->confirm = AuthConfirm::findByCode($this->email, $this->code);
                 if (!$this->confirm) {
                     $this->addError($attribute, \Yii::t('steroids', 'Код неверен или устарел'));
                 }
             }],
+            ['newPassword', 'compare', 'compareAttribute' => 'newPasswordAgain'],
         ]);
     }
 
     public function confirm()
     {
         if ($this->validate()) {
-            $transaction = static::getDb()->beginTransaction();
-            try {
-                // Confirm
-                $this->confirm->markConfirmed();
+            $this->confirm->markConfirmed();
 
-                // Access token
-                \Yii::$app->user->login($this->confirm->user);
-                $this->accessToken = \Yii::$app->user->accessToken;
+            $this->confirm->user->passwordHash = \Yii::$app->security->generatePasswordHash($this->newPassword);
+            $this->confirm->user->saveOrPanic();
 
-                $transaction->commit();
-            } catch (\Exception $e) {
-                $transaction->rollBack();
-                throw $e;
-            }
+            \Yii::$app->user->login($this->confirm->user);
+            $this->accessToken = \Yii::$app->user->accessToken;
         }
     }
 }

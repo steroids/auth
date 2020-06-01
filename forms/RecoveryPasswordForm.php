@@ -2,11 +2,11 @@
 
 namespace steroids\auth\forms;
 
-use steroids\auth\forms\meta\RecoveryEmailPasswordFormMeta;
+use steroids\auth\forms\meta\RecoveryPasswordFormMeta;
 use steroids\auth\models\AuthConfirm;
 use steroids\auth\UserInterface;
 
-class RecoveryEmailPasswordForm extends RecoveryEmailPasswordFormMeta
+class RecoveryPasswordForm extends RecoveryPasswordFormMeta
 {
     public function rules()
     {
@@ -23,10 +23,12 @@ class RecoveryEmailPasswordForm extends RecoveryEmailPasswordFormMeta
             /** @var UserInterface $userClass */
             $userClass = \Yii::$app->user->identityClass;
 
-            $user = $userClass::findByEmail($this->email);
-            if ($user) {
-                AuthConfirm::create($user->email);
-            }
+            // TODO
+//            $user = $userClass::findByEmail($this->email);
+//            if ($user) {
+//
+//                AuthConfirm::create($user->email);
+//            }
             return true;
         }
         return false;

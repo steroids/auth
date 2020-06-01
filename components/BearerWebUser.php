@@ -1,6 +1,6 @@
 <?php
 
-namespace steroids\auth;
+namespace steroids\auth\components;
 
 use Yii;
 use steroids\auth\models\AuthLogin;

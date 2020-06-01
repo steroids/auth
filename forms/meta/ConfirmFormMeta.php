@@ -5,17 +5,19 @@ namespace steroids\auth\forms\meta;
 use steroids\core\base\FormModel;
 use \Yii;
 
-abstract class RegistrationConfirmFormMeta extends FormModel
+abstract class ConfirmFormMeta extends FormModel
 {
     public $email;
     public $code;
+    public $phone;
 
     public function rules()
     {
         return [
             [['email', 'code'], 'string', 'max' => 255],
             ['email', 'email'],
-            [['email', 'code'], 'required'],
+            ['code', 'required'],
+            ['phone', 'string', 'max' => 32],
         ];
     }
 
@@ -24,12 +26,16 @@ abstract class RegistrationConfirmFormMeta extends FormModel
         return [
             'email' => [
                 'label' => Yii::t('steroids', 'Email'),
-                'appType' => 'email',
-                'isRequired' => true
+                'appType' => 'email'
             ],
             'code' => [
                 'label' => Yii::t('steroids', 'Код'),
                 'isRequired' => true
+            ],
+            'phone' => [
+                'label' => Yii::t('steroids', 'Телефон'),
+                'appType' => 'phone',
+                'isSortable' => false
             ]
         ];
     }

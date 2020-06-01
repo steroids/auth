@@ -5,9 +5,9 @@ namespace steroids\auth\forms\meta;
 use steroids\core\base\FormModel;
 use \Yii;
 
-abstract class RecoveryEmailPasswordConfirmFormMeta extends FormModel
+abstract class RecoveryPasswordConfirmFormMeta extends FormModel
 {
-    public $email;
+    public $login;
     public $code;
     public $newPassword;
     public $newPasswordAgain;
@@ -15,9 +15,8 @@ abstract class RecoveryEmailPasswordConfirmFormMeta extends FormModel
     public function rules()
     {
         return [
-            [['email', 'code'], 'string', 'max' => 255],
-            ['email', 'email'],
-            [['email', 'code', 'newPassword', 'newPasswordAgain'], 'required'],
+            [['login', 'code'], 'string', 'max' => 255],
+            [['login', 'code', 'newPassword', 'newPasswordAgain'], 'required'],
             [['newPassword', 'newPasswordAgain'], 'string', 'min' => 1,'max' => 255],
         ];
     }
@@ -25,9 +24,8 @@ abstract class RecoveryEmailPasswordConfirmFormMeta extends FormModel
     public static function meta()
     {
         return [
-            'email' => [
-                'label' => Yii::t('steroids', 'Email'),
-                'appType' => 'email',
+            'login' => [
+                'label' => Yii::t('steroids', 'Логин'),
                 'isRequired' => true
             ],
             'code' => [
