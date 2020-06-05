@@ -12,7 +12,7 @@ interface UserInterface extends IdentityInterface
      * @param array $attributes
      * @return UserInterface|Model
      */
-    public static function findBy($login, array $attributes);
+    public static function findBy(string $login, array $attributes);
 
     /**
      * @param string $password

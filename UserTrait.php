@@ -19,7 +19,7 @@ trait UserTrait
     /**
      * @inheritdoc
      */
-    public static function findBy($login, $attributes)
+    public static function findBy(string $login, array $attributes)
     {
         $login = mb_strtolower(trim($login));
         return static::find()
