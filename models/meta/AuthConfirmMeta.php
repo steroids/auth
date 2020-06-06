@@ -34,7 +34,7 @@ abstract class AuthConfirmMeta extends Model
     {
         return array_merge(parent::rules(), [
             ['userId', 'integer'],
-            [['userId', 'code'], 'required'],
+            [['userId', 'value', 'code'], 'required'],
             ['value', 'string', 'max' => 255],
             ['code', 'string', 'max' => '32'],
             ['isConfirmed', 'steroids\\core\\validators\\ExtBooleanValidator'],
@@ -63,7 +63,8 @@ abstract class AuthConfirmMeta extends Model
                 'isRequired' => true
             ],
             'value' => [
-                'label' => Yii::t('steroids', 'Логин')
+                'label' => Yii::t('steroids', 'Логин'),
+                'isRequired' => true
             ],
             'code' => [
                 'label' => Yii::t('steroids', 'Код'),

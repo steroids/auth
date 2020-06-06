@@ -1,14 +1,13 @@
 <?php
 
-namespace app\auth\providers;
+namespace steroids\auth\providers;
 
-use app\auth\base\BaseAuthProvider;
 use VK\Client\VKApiClient;
 use Exception;
 use VK\OAuth\VKOAuth;
 use yii\helpers\Url;
 
-class VkSocialProvider extends BaseAuthProvider
+class VkAuthProvider extends BaseAuthProvider
 {
     const API_VERSION = '5.92';
 

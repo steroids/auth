@@ -3,7 +3,7 @@
 namespace steroids\auth\models;
 
 use steroids\auth\AuthModule;
-use steroids\auth\SocialProfile;
+use steroids\auth\AuthProfile;
 use steroids\auth\models\meta\AuthSocialMeta;
 use steroids\auth\UserInterface;
 use steroids\core\base\Model;
@@ -13,7 +13,7 @@ use yii\helpers\Json;
 use steroids\exceptions\ModelSaveException;
 
 /**
- * @property-read SocialProfile $profile
+ * @property-read AuthProfile $profile
  * @property-read bool $isEmailNeed
  * @property-read UserInterface|Model $user
  */
@@ -27,7 +27,7 @@ class AuthSocial extends AuthSocialMeta
         return AuthModule::instantiateClass(static::class, $row);
     }
 
-    public static function findOrCreate($name, SocialProfile $profile)
+    public static function findOrCreate($name, AuthProfile $profile)
     {
         $params = [
             'socialName' => $name,
@@ -69,7 +69,7 @@ class AuthSocial extends AuthSocialMeta
     public function getProfile()
     {
         return $this->profileJson
-            ? AuthModule::instantiateClass(SocialProfile::class, Json::decode($this->profileJson))
+            ? AuthModule::instantiateClass(AuthProfile::class, Json::decode($this->profileJson))
             : null;
     }
 

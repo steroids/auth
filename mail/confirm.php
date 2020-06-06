@@ -1,15 +1,15 @@
 <?php
 
-namespace app\views;
+namespace steroids\views;
 
+use steroids\auth\UserInterface;
 use yii\web\View;
 use yii\mail\BaseMessage;
-use app\user\models\User;
 use steroids\auth\models\AuthConfirm;
 
 /* @var $this View */
 /* @var $message BaseMessage */
-/* @var $user User */
+/* @var $user UserInterface */
 /* @var $confirm AuthConfirm */
 
 $message->setSubject(\Yii::t('steroids', 'Проверочный код - {code}. {siteName}', [

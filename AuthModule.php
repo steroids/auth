@@ -9,10 +9,15 @@ use steroids\auth\forms\RecoveryPasswordForm;
 use steroids\auth\forms\RegistrationForm;
 use steroids\auth\forms\SocialEmailConfirmForm;
 use steroids\auth\forms\SocialEmailForm;
-use steroids\auth\forms\SocialLoginForm;
+use steroids\auth\forms\ProviderLoginForm;
 use steroids\auth\models\AuthConfirm;
 use steroids\auth\models\AuthLogin;
 use steroids\auth\models\AuthSocial;
+use steroids\auth\providers\BaseAuthProvider;
+use steroids\auth\providers\FacebookAuthProvider;
+use steroids\auth\providers\GoogleAuthProvider;
+use steroids\auth\providers\SteamAuthProvider;
+use steroids\auth\providers\VkAuthProvider;
 use steroids\core\base\Model;
 use steroids\core\base\Module;
 use yii\helpers\ArrayHelper;
@@ -68,12 +73,24 @@ class AuthModule extends Module
     /**
      * Generated code length (on confirm email or phone)
      */
-    public int $confirmCodeLength = 4;
+    public int $confirmCodeLength = 6;
 
     /**
      * Maximum mins for confirm code
      */
     public int $confirmExpireMins = 60;
+
+    /**
+     * @var BaseAuthProvider[]|array
+     */
+    public array $providers = [];
+
+    public array $providersClasses = [
+        'facebook' => FacebookAuthProvider::class,
+        'google' => GoogleAuthProvider::class,
+        'steam' => SteamAuthProvider::class,
+        'vk' => VkAuthProvider::class,
+    ];
 
     public array $classesMap = [
         'steroids\auth\models\AuthConfirm' => AuthConfirm::class,
@@ -86,8 +103,8 @@ class AuthModule extends Module
         'steroids\auth\forms\RegistrationForm' => RegistrationForm::class,
         'steroids\auth\forms\SocialEmailConfirmForm' => SocialEmailConfirmForm::class,
         'steroids\auth\forms\SocialEmailForm' => SocialEmailForm::class,
-        'steroids\auth\forms\SocialLoginForm' => SocialLoginForm::class,
-        'steroids\auth\SocialProfile' => SocialProfile::class,
+        'steroids\auth\forms\ProviderLoginForm' => ProviderLoginForm::class,
+        'steroids\auth\AuthProfile' => AuthProfile::class,
     ];
 
     /**
@@ -131,6 +148,26 @@ class AuthModule extends Module
         ]);
 
         return $model;
+    }
+
+    /**
+     * @param string $name
+     * @return BaseAuthProvider|null
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function getProvider($name)
+    {
+        if (!isset($this->providers[$name])) {
+            return null;
+        }
+        if (is_array($this->providers[$name])) {
+            $this->providers[$name] = \Yii::createObject(array_merge(
+                ['className' => ArrayHelper::getValue($this->providersClasses, $name)],
+                $this->providers[$name],
+                ['name' => $name]
+            ));
+        }
+        return $this->providers[$name];
     }
 
     /**

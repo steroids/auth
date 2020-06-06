@@ -6,7 +6,7 @@ use Yii;
 use yii\web\Controller;
 use steroids\auth\forms\SocialEmailConfirmForm;
 use steroids\auth\forms\SocialEmailForm;
-use steroids\auth\forms\SocialLoginForm;
+use steroids\auth\forms\ProviderLoginForm;
 
 class SocialController extends Controller
 {
@@ -26,12 +26,12 @@ class SocialController extends Controller
 
     /**
      * Login
-     * @return SocialLoginForm
+     * @return ProviderLoginForm
      * @throws \Exception
      */
     public function actionLogin()
     {
-        $model = new SocialLoginForm();
+        $model = new ProviderLoginForm();
         if ($model->load(Yii::$app->request->post())) {
             $model->login();
         }

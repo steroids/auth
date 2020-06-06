@@ -1,16 +1,14 @@
 <?php
 
-namespace app\auth\providers;
+namespace steroids\auth\providers;
 
-use app\auth\base\BaseAuthProvider;
 use Google_Client;
 use Exception;
 
 /**
  * For get credentials go to https://console.developers.google.com
- * @package app\auth\providers
  */
-class GoogleSocialProvider extends BaseAuthProvider
+class GoogleAuthProvider extends BaseAuthProvider
 {
     /**
      * @var string

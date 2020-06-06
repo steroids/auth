@@ -1,17 +1,16 @@
 <?php
 
-namespace app\auth\providers;
+namespace steroids\auth\providers;
 
-use app\auth\base\BaseAuthProvider;
-use app\auth\base\SocialProfile;
-use app\auth\exceptions\SocialAuthException;
+use steroids\auth\AuthProfile;
+use steroids\auth\exceptions\AuthProviderException;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 
 /**
  * For register api key go to https://steamcommunity.com/dev/apikey
  */
-class SteamSocialProvider extends BaseAuthProvider
+class SteamAuthProvider extends BaseAuthProvider
 {
     public $apiKey = '';
 
@@ -31,16 +30,16 @@ class SteamSocialProvider extends BaseAuthProvider
 
         $steamId = preg_replace('/^.+[^0-9]([0-9]+)$/', '$1', $openid->data['openid_identity']);
         if (!$steamId) {
-            throw new SocialAuthException('Cannot parse steam id');
+            throw new AuthProviderException('Cannot parse steam id');
         }
 
         if (!$openid->validate()) {
-            throw new SocialAuthException('OpenID validation return false');
+            throw new AuthProviderException('OpenID validation return false');
         }
 
         $profile = $this->fetchProfile($steamId);
         if (!$profile) {
-            throw new SocialAuthException('Cannot fetch profile');
+            throw new AuthProviderException('Cannot fetch profile');
         }
 
         return $profile;
@@ -57,7 +56,7 @@ class SteamSocialProvider extends BaseAuthProvider
             return null;
         }
 
-        return new SocialProfile([
+        return new AuthProfile([
             'id' => $steamId,
             'name' => $player['personaname'],
             'avatarUrl' => $player['avatarfull'],

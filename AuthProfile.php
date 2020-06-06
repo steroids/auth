@@ -6,7 +6,7 @@ use yii\base\Arrayable;
 use yii\base\ArrayableTrait;
 use yii\base\BaseObject;
 
-class SocialProfile extends BaseObject implements Arrayable
+class AuthProfile extends BaseObject implements Arrayable
 {
     use ArrayableTrait;
 

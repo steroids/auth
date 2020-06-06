@@ -27,11 +27,9 @@ class ConfirmForm extends ConfirmFormMeta
     public function rules()
     {
         return array_merge(parent::rules(), [
-            ['email', 'filter', 'filter' => function($value) {
-                return mb_strtolower(trim($value));
-            }],
+            ['login', 'filter', 'filter' => fn($value) => mb_strtolower(trim($value))],
             ['code', function($attribute) {
-                $this->confirm = AuthConfirm::findByCode($this->email, $this->code);
+                $this->confirm = AuthConfirm::findByCode($this->login, $this->code);
                 if (!$this->confirm) {
                     $this->addError($attribute, \Yii::t('steroids', 'Код неверен или устарел'));
                 }

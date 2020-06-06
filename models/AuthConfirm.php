@@ -25,21 +25,22 @@ class AuthConfirm extends AuthConfirmMeta
     }
 
     /**
-     * @param string $email
+     * @param string $login
      * @param string $code
      * @return static
-     * @throws ModelSaveException
      */
-    public static function findByCode($email, $code)
+    public static function findByCode($login, $code)
     {
-        return static::find()
+        /** @var static $confirm */
+        $confirm = static::find()
             ->where([
-                'LOWER(email)' => mb_strtolower(trim($email)),
-                'code' => $code,
+                'value' => mb_strtolower(trim($login)),
+                'code' => trim($code),
             ])
             ->andWhere(['>=', 'expireTime', date('Y-m-d H:i:s')])
             ->limit(1)
             ->one() ?: null;
+        return $confirm;
     }
 
     /**
@@ -52,6 +53,7 @@ class AuthConfirm extends AuthConfirmMeta
 
         return [
             ...parent::rules(),
+            ['value', 'filter', 'filter' => fn($value) => mb_strtolower(trim($value))],
             ['isConfirmed', 'default', 'value' => false],
             ['expireTime', 'default', 'value' => $expireTime],
         ];

@@ -1,12 +1,11 @@
 <?php
 
-namespace app\auth\providers;
+namespace steroids\auth\providers;
 
-use app\auth\base\BaseAuthProvider;
 use Facebook\Facebook;
 use Exception;
 
-class FacebookSocialProvider extends BaseAuthProvider
+class FacebookAuthProvider extends BaseAuthProvider
 {
     /**
      * @var string

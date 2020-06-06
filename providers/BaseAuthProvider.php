@@ -1,16 +1,17 @@
 <?php
 
-namespace steroids\auth;
+namespace steroids\auth\providers;
 
+use steroids\auth\AuthProfile;
 use yii\base\Component;
 
-abstract class BaseSocialProvider extends Component
+abstract class BaseAuthProvider extends Component
 {
     public $name;
 
     /**
      * @param array $params
-     * @return SocialProfile
+     * @return AuthProfile
      */
     public abstract function auth(array $params);
 

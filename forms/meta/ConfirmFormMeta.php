@@ -7,35 +7,27 @@ use \Yii;
 
 abstract class ConfirmFormMeta extends FormModel
 {
-    public $email;
+    public $login;
     public $code;
-    public $phone;
 
     public function rules()
     {
         return [
-            [['email', 'code'], 'string', 'max' => 255],
-            ['email', 'email'],
-            ['code', 'required'],
-            ['phone', 'string', 'max' => 32],
+            [['login', 'code'], 'string', 'max' => 255],
+            [['login', 'code'], 'required'],
         ];
     }
 
     public static function meta()
     {
         return [
-            'email' => [
-                'label' => Yii::t('steroids', 'Email'),
-                'appType' => 'email'
+            'login' => [
+                'label' => Yii::t('steroids', 'Логин'),
+                'isRequired' => true
             ],
             'code' => [
                 'label' => Yii::t('steroids', 'Код'),
                 'isRequired' => true
-            ],
-            'phone' => [
-                'label' => Yii::t('steroids', 'Телефон'),
-                'appType' => 'phone',
-                'isSortable' => false
             ]
         ];
     }
