@@ -20,10 +20,13 @@ use steroids\auth\providers\SteamAuthProvider;
 use steroids\auth\providers\VkAuthProvider;
 use steroids\core\base\Model;
 use steroids\core\base\Module;
+use steroids\core\traits\ModuleProvidersTrait;
 use yii\helpers\ArrayHelper;
 
 class AuthModule extends Module
 {
+    use ModuleProvidersTrait;
+
     const ATTRIBUTE_EMAIL = 'email';
     const ATTRIBUTE_PHONE = 'phone';
     const ATTRIBUTE_LOGIN = 'login';
@@ -83,7 +86,7 @@ class AuthModule extends Module
     /**
      * @var BaseAuthProvider[]|array
      */
-    public array $providers = [];
+    public array $providers;
 
     public array $providersClasses = [
         'facebook' => FacebookAuthProvider::class,
@@ -148,26 +151,6 @@ class AuthModule extends Module
         ]);
 
         return $model;
-    }
-
-    /**
-     * @param string $name
-     * @return BaseAuthProvider|null
-     * @throws \yii\base\InvalidConfigException
-     */
-    public function getProvider($name)
-    {
-        if (!isset($this->providers[$name])) {
-            return null;
-        }
-        if (is_array($this->providers[$name])) {
-            $this->providers[$name] = \Yii::createObject(array_merge(
-                ['className' => ArrayHelper::getValue($this->providersClasses, $name)],
-                $this->providers[$name],
-                ['name' => $name]
-            ));
-        }
-        return $this->providers[$name];
     }
 
     /**
