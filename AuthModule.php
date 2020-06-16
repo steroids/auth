@@ -21,6 +21,7 @@ use steroids\auth\providers\VkAuthProvider;
 use steroids\core\base\Model;
 use steroids\core\base\Module;
 use steroids\core\traits\ModuleProvidersTrait;
+use steroids\core\exceptions\ModelSaveException;
 use yii\helpers\ArrayHelper;
 
 class AuthModule extends Module
@@ -128,11 +129,17 @@ class AuthModule extends Module
      * @param UserInterface|Model $user
      * @param string $attribute
      * @return null|AuthConfirm
-     * @throws \steroids\core\exceptions\ModelSaveException
+     * @throws ModelSaveException
      */
     public function confirm($user, $attribute)
     {
-        if (!in_array($attribute, [AuthModule::ATTRIBUTE_EMAIL, AuthModule::ATTRIBUTE_PHONE])) {
+        if (!in_array($attribute,
+            [
+                AuthModule::ATTRIBUTE_EMAIL,
+                AuthModule::ATTRIBUTE_PHONE,
+                AuthModule::ATTRIBUTE_LOGIN
+            ])
+        ) {
             return null;
         }
 
