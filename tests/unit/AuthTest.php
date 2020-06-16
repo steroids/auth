@@ -107,6 +107,9 @@ class AuthTest extends TestCase
 
     /**
      * Авторизация через email без пароля
+     *
+     * @throws YiiBaseException
+     * @throws Exception
      */
     public function testEmailAuthorize()
     {
@@ -127,7 +130,7 @@ class AuthTest extends TestCase
         // Confirm registration
         $regForm->confirm->markConfirmed();
 
-        // Login without password
+        // Login via email without password
         $loginForm = new LoginForm();
         $loginForm->login = $regForm->email;
         $loginForm->login();
@@ -137,6 +140,9 @@ class AuthTest extends TestCase
 
     /**
      * Авторизация через телефон без пароля
+     *
+     * @throws YiiBaseException
+     * @throws Exception
      */
     public function testPhoneAuth()
     {
@@ -157,7 +163,7 @@ class AuthTest extends TestCase
         // Confirm registration
         $regForm->confirm->markConfirmed();
 
-        // Login without password
+        // Login via phone without password
         $loginForm = new LoginForm();
         $loginForm->login = $regForm->phone;
         $loginForm->login();
@@ -169,6 +175,9 @@ class AuthTest extends TestCase
     /**
      * Регистрация через email, указываются phone и login.
      * Возможность выполнить вход через phone и login
+     *
+     * @throws YiiBaseException
+     * @throws Exception
      */
     public function testRegistration()
     {
@@ -180,6 +189,7 @@ class AuthTest extends TestCase
             AuthModule::ATTRIBUTE_LOGIN,
         ];
 
+        //custom fields
         $authModule->registrationCustomAttributes = [
             'phone',
             'login',
@@ -207,6 +217,7 @@ class AuthTest extends TestCase
         // Confirm registration
         $regForm->confirm->markConfirmed();
 
+        //Login via phone
         $loginForm = new LoginForm();
         $loginForm->login = $user->phone;
         $loginForm->login();
@@ -216,6 +227,7 @@ class AuthTest extends TestCase
         //reset user
         $loginForm->user = null;
 
+        //Login via login
         $loginForm->login = $user->login;
         $loginForm->login();
 
@@ -223,7 +235,10 @@ class AuthTest extends TestCase
     }
 
     /**
-     * Обычная регистрация через соц сеть
+     * Регистрация через соц сеть,
+     * восстановление пароля через email,
+     * вход через email + password
+     *
      * @throws YiiBaseException
      * @throws Exception
      */
@@ -254,6 +269,7 @@ class AuthTest extends TestCase
         $regSocialForm->name = $authProviderName;
         $regSocialForm->login();
 
+        /** @var User $user */
         $user = $regSocialForm->social->user;
         $this->assertNotNull($user);
 
@@ -269,6 +285,7 @@ class AuthTest extends TestCase
         $confirmForm = new RecoveryPasswordConfirmForm();
         $confirmForm->login = $recoveryForm->login;
         $confirmForm->code = $recoveryForm->confirm->code;
+
         $password = '123456';
         $confirmForm->newPassword = $password;
         $confirmForm->newPasswordAgain = $password;
@@ -276,6 +293,7 @@ class AuthTest extends TestCase
 
         $this->assertNotNull($confirmForm->confirm->user);
 
+        //Login via email and password
         $loginForm = new LoginForm();
         $loginForm->login = $user->email;
         $loginForm->password = $password;
@@ -285,13 +303,15 @@ class AuthTest extends TestCase
     }
 
     /**
-     * Регистрация с кастомными полями (например, день рождения или пол..)
+     * Регистрация с кастомными полями (например, username)
      * @throws YiiBaseException
      */
     public function testCustomRegistrationFields()
     {
         $authModule = AuthModule::getInstance();
         $authModule->registrationMainAttribute = AuthModule::ATTRIBUTE_EMAIL;
+
+        //custom field
         $authModule->registrationCustomAttributes = [
             'username'
         ];
@@ -305,7 +325,6 @@ class AuthTest extends TestCase
         $regForm->custom = [
             'username' => 'unique-login:' . time(),
         ];
-
         $regForm->register();
 
         $this->assertNotNull($regForm->user);
