@@ -137,7 +137,6 @@ class AuthModule extends Module
             [
                 AuthModule::ATTRIBUTE_EMAIL,
                 AuthModule::ATTRIBUTE_PHONE,
-                AuthModule::ATTRIBUTE_LOGIN
             ])
         ) {
             return null;
