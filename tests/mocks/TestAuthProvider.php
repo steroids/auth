@@ -17,6 +17,7 @@ class TestAuthProvider extends BaseAuthProvider
             'id' => 'test-external-id',
             'email' => 'test@email.com',
             'name' => 'testUsername',
+            'avatarUrl' => 'picture-url.com',
         ]);
     }
 }

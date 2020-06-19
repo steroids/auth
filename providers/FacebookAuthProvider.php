@@ -2,66 +2,80 @@
 
 namespace steroids\auth\providers;
 
-use Facebook\Facebook;
+use League\OAuth2\Client\Provider\Facebook;
 use Exception;
+use League\OAuth2\Client\Provider\FacebookUser;
+use League\OAuth2\Client\Token\AccessToken;
+use steroids\auth\AuthProfile;
 
+/**
+ * Создание приложения https://developers.facebook.com/apps/
+ *
+ * OAuth client: https://github.com/thephpleague/oauth2-facebook
+ */
 class FacebookAuthProvider extends BaseAuthProvider
 {
-    /**
-     * @var string
-     */
-    public $clientId;
+    const API_VERSION = 'v2.10';
+
+    public string $clientId;
+
+    public string $clientSecret;
 
     /**
-     * @var string
+     * @var Facebook
      */
-    public $clientSecret;
+    private $api;
 
-    public function auth(array $params)
+    /**
+     * @var AuthProfile
+     */
+    private $profileData;
+
+    /**
+     * @param array $params
+     * @return AuthProfile
+     * @throws Exception
+     */
+    public function auth(array $params): AuthProfile
     {
+        $accessToken = $params['token'] ?? null;
 
+        if (!$accessToken) {
+            throw new Exception('FB API call isn\'t possible without token');
+        }
+
+        if (!$this->profileData) {
+            $token = new AccessToken(['access_token' => $accessToken]);
+
+            /** @var FacebookUser $user */
+            $user = $this->getApi()->getResourceOwner($token);
+
+            $this->profileData = new AuthProfile([
+                'id' => $user->getId(),
+                'name' => $user->getName(),
+                'email' => $user->getEmail(),
+                'avatar_url' => $user->getPictureUrl()
+            ]);
+        }
+
+        return $this->profileData;
     }
 
     public function getClientConfig()
     {
         return [
             'clientId' => $this->clientId,
+            'clientSecret' => $this->clientSecret,
+            'graphApiVersion' => static::API_VERSION,
         ];
     }
 
-    /*
-    public function getProfileData() {
-        if (!$this->accessToken) {
-            throw new Exception('FB API call isn\'t possible without token');
-        }
-
-        if (!$this->_profileData) {
-            $response = $this->getApi()->get(
-                "/me/?fields=name,email",
-                $this->accessToken
-            );
-
-            $graphUser = $response->getGraphUser();
-
-            $this->_profileData = [
-                'externalId' => $graphUser['id'],
-                'email' => isset($graphUser['email']) ? $graphUser['email'] : null,
-                'name' => $graphUser['name']
-            ];
-        }
-
-        return $this->_profileData;
-    }
-
-    protected function getApi()
+    private function getApi(): Facebook
     {
-        if (!$this->_api) {
-            $this->_api = new Facebook([
-                'app_id' => $this->app_id,
-                'app_secret' => $this->app_secret
-            ]);
+        if (!$this->api) {
+            $this->api = new Facebook($this->getClientConfig());
         }
 
-        return $this->_api;
-    }*/
+        return $this->api;
+    }
 }
