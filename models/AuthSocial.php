@@ -8,9 +8,9 @@ use steroids\auth\models\meta\AuthSocialMeta;
 use steroids\auth\UserInterface;
 use steroids\core\base\Model;
 use steroids\core\behaviors\UidBehavior;
+use steroids\core\exceptions\ModelSaveException;
 use yii\db\ActiveQuery;
 use yii\helpers\Json;
-use steroids\exceptions\ModelSaveException;
 
 /**
  * @property-read AuthProfile $profile

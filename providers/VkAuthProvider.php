@@ -2,56 +2,72 @@
 
 namespace steroids\auth\providers;
 
+use steroids\auth\AuthProfile;
 use VK\Client\VKApiClient;
 use Exception;
+use VK\Exceptions\VKClientException;
+use VK\Exceptions\VKOAuthException;
 use VK\OAuth\VKOAuth;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 
+/**
+ * Создание приложения https://vk.com/editapp?act=create
+ *
+ * VK PHP-SDK
+ * https://vk.com/dev/PHP_SDK
+ */
 class VkAuthProvider extends BaseAuthProvider
 {
     const API_VERSION = '5.92';
 
-    /**
-     * @var string
-     */
-    public $clientId;
+    public string $clientId;
+
+    public string $clientSecret;
 
     /**
-     * @var string
+     * @var AuthProfile
      */
-    public $clientSecret;
+    private $profileData;
 
-    public function auth(array $params)
+    /**
+     * @var VKApiClient
+     */
+    private $api;
+
+    /**
+     * @param array $params
+     * @return AuthProfile
+     * @throws Exception
+     */
+    public function auth(array $params): AuthProfile
     {
+        $token = $params['token'] ?? null;
 
+        if (!$token) {
+            throw new Exception('VK API call isn\'t possible without token');
+        }
+
+        if (!$this->profileData) {
+
+            $accessToken = $this->exchangeTempCodeOnAccessToken($token);
+            $accountInfo = $this->getApi()->users()->get($accessToken);
+
+            $this->profileData = new AuthProfile([
+                'id' => (string)$accountInfo[0]['id'],
+                'name' => $accountInfo[0]['first_name'] . ' ' . $accountInfo[0]['last_name'],
+                'avatar_url' => ArrayHelper::getValue($accountInfo, "0.photo_max")
+            ]);
+        }
+
+        return $this->profileData;
     }
 
-    public function getClientConfig()
+    public function getClientConfig(): array
     {
         return [
             'clientId' => $this->clientId,
         ];
-    }
-
-    /*
-    public function getProfileData()
-    {
-        if (!$this->accessToken) {
-            throw new Exception('VK API call isn\'t possible without token');
-        }
-
-        if (!$this->_profileData) {
-            $this->accessToken = $this->exchangeTempCodeOnAccessToken($this->accessToken);
-
-            $accountInfo = $this->api->users()->get($this->accessToken);
-
-            $this->_profileData = [
-                'externalId' => (string)$accountInfo[0]['id'],
-                'name' => $accountInfo[0]['first_name'] . ' ' . $accountInfo[0]['last_name'],
-            ];
-        }
-
-        return $this->_profileData;
     }
 
     /**
@@ -62,16 +78,16 @@ class VkAuthProvider extends BaseAuthProvider
      * @param string $tempCode
      * @return mixed
      *
-     * @throws \VK\Exceptions\VKClientException
-     * @throws \VK\Exceptions\VKOAuthException
+     * @throws VKClientException
+     * @throws VKOAuthException
      */
-    /*protected function exchangeTempCodeOnAccessToken($tempCode)
+    protected function exchangeTempCodeOnAccessToken(string $tempCode)
     {
         $oauthApi = new VKOAuth();
 
         $response = $oauthApi->getAccessToken(
-            $this->apiId,
-            $this->apiSecret,
+            $this->clientId,
+            $this->clientSecret,
             Url::to(['/auth/auth/modal-proxy', 'version' => 'v2'], true),
             $tempCode
         );
@@ -79,12 +95,12 @@ class VkAuthProvider extends BaseAuthProvider
         return $response['access_token'];
     }
 
-    protected function getApi()
+    private function getApi(): VKApiClient
     {
-        if (!$this->_api) {
-            $this->_api = new VKApiClient(self::API_VERSION);
+        if (!$this->api) {
+            $this->api = new VKApiClient(static::API_VERSION);
         }
 
-        return $this->_api;
-    }*/
+        return $this->api;
+    }
 }
