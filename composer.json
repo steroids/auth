@@ -3,7 +3,7 @@
     "description": "",
     "license": "MIT",
     "require": {
-        "php": ">=7.2.0",
+        "php": ">=7.4",
         "ext-mbstring": "*",
         "ext-curl": "*",
         "lib-pcre": "*",
