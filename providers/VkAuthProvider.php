@@ -55,8 +55,11 @@ class VkAuthProvider extends BaseAuthProvider
 
             $this->profileData = new AuthProfile([
                 'id' => (string)$accountInfo[0]['id'],
-                'name' => $accountInfo[0]['first_name'] . ' ' . $accountInfo[0]['last_name'],
-                'avatar_url' => ArrayHelper::getValue($accountInfo, "0.photo_max")
+                'name' => implode(' ', array_filter([
+                    $accountInfo[0]['first_name'],
+                    $accountInfo[0]['last_name'],
+                ])),
+                'avatarUrl' => ArrayHelper::getValue($accountInfo, "0.photo_max")
             ]);
         }
 
@@ -88,7 +91,7 @@ class VkAuthProvider extends BaseAuthProvider
         $response = $oauthApi->getAccessToken(
             $this->clientId,
             $this->clientSecret,
-            Url::to(['/auth/auth/modal-proxy', 'version' => 'v2'], true),
+            Url::to(['/auth/auth/modal-proxy', 'version' => 'v1'], true),
             $tempCode
         );
 

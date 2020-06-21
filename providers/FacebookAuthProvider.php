@@ -54,7 +54,7 @@ class FacebookAuthProvider extends BaseAuthProvider
                 'id' => $user->getId(),
                 'name' => $user->getName(),
                 'email' => $user->getEmail(),
-                'avatar_url' => $user->getPictureUrl()
+                'avatarUrl' => $user->getPictureUrl()
             ]);
         }
 
