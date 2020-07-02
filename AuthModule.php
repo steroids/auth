@@ -13,7 +13,6 @@ use steroids\auth\forms\ProviderLoginForm;
 use steroids\auth\models\AuthConfirm;
 use steroids\auth\models\AuthLogin;
 use steroids\auth\models\AuthSocial;
-use steroids\auth\providers\BaseAuthProvider;
 use steroids\auth\providers\FacebookAuthProvider;
 use steroids\auth\providers\GoogleAuthProvider;
 use steroids\auth\providers\SteamAuthProvider;
@@ -83,11 +82,6 @@ class AuthModule extends Module
      * Maximum mins for confirm code
      */
     public int $confirmExpireMins = 60;
-
-    /**
-     * @var BaseAuthProvider[]|array
-     */
-    public array $providers;
 
     public array $providersClasses = [
         'facebook' => FacebookAuthProvider::class,
