@@ -3,6 +3,7 @@
 namespace steroids\auth\controllers;
 
 use steroids\auth\AuthModule;
+use steroids\auth\forms\ConfirmForm;
 use Yii;
 use yii\web\Controller;
 use steroids\auth\forms\RecoveryPasswordConfirmForm;
@@ -53,7 +54,7 @@ class AuthController extends Controller
     public function actionRegistrationConfirm()
     {
         /** @var RegistrationConfirmForm $model */
-        $model = AuthModule::instantiateClass(RegistrationConfirmForm::class);
+        $model = AuthModule::instantiateClass(ConfirmForm::class);
         if ($model->load(Yii::$app->request->post())) {
             $model->confirm();
         }
