@@ -47,7 +47,7 @@ class M000000000001Auth extends Migration
             'value' => $this->string(),
             'type' => $this->string(10),
             'code' => $this->string(32),
-            'isConfirmed' => $this->boolean()->notNull()->defaultValue(0),
+            'isConfirmed' => $this->boolean()->notNull()->defaultValue(false),
             'createTime' => $this->dateTime(),
             'updateTime' => $this->dateTime(),
             'expireTime' => $this->dateTime(),

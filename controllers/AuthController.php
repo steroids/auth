@@ -39,9 +39,8 @@ class AuthController extends Controller
     {
         /** @var RegistrationForm $model */
         $model = AuthModule::instantiateClass(RegistrationForm::class);
-        if ($model->load(Yii::$app->request->post())) {
-            $model->register();
-        }
+        $model->load(Yii::$app->request->post());
+        $model->register();
         return $model;
     }
 
@@ -54,9 +53,8 @@ class AuthController extends Controller
     {
         /** @var RegistrationConfirmForm $model */
         $model = AuthModule::instantiateClass(RegistrationConfirmForm::class);
-        if ($model->load(Yii::$app->request->post())) {
-            $model->confirm();
-        }
+        $model->load(Yii::$app->request->post());
+        $model->confirm();
         return $model;
     }
 
@@ -69,9 +67,8 @@ class AuthController extends Controller
     {
         /** @var LoginForm $model */
         $model = AuthModule::instantiateClass(LoginForm::class);
-        if ($model->load(Yii::$app->request->post())) {
-            $model->login();
-        }
+        $model->load(Yii::$app->request->post());
+        $model->login();
         return $model;
     }
 
@@ -84,9 +81,8 @@ class AuthController extends Controller
     {
         /** @var RecoveryPasswordForm $model */
         $model = AuthModule::instantiateClass(RecoveryPasswordForm::class);
-        if ($model->load(Yii::$app->request->post())) {
-            $model->send();
-        }
+        $model->load(Yii::$app->request->post());
+        $model->send();
         return $model;
     }
 
@@ -99,9 +95,8 @@ class AuthController extends Controller
     {
         /** @var RecoveryPasswordConfirmForm $model */
         $model = AuthModule::instantiateClass(RecoveryPasswordConfirmForm::class);
-        if ($model->load(Yii::$app->request->post())) {
-            $model->confirm();
-        }
+        $model->load(Yii::$app->request->post());
+        $model->confirm();
         return $model;
     }
 

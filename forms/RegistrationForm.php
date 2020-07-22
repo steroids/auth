@@ -76,6 +76,7 @@ class RegistrationForm extends RegistrationFormMeta
         if ($module->isPasswordAvailable) {
             $rules = [
                 ...$rules,
+                [$module->registrationMainAttribute, 'required'],
                 ['password', 'required'],
                 ['password', PasswordValidator::class],
                 ['password', 'compare', 'compareAttribute' => 'passwordAgain'],
