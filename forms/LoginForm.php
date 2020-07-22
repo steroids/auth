@@ -6,6 +6,8 @@ use steroids\auth\AuthModule;
 use steroids\auth\forms\meta\LoginFormMeta;
 use steroids\auth\models\AuthConfirm;
 use steroids\auth\UserInterface;
+use steroids\auth\validators\LoginValidator;
+use steroids\core\validators\PhoneValidator;
 use yii\helpers\ArrayHelper;
 
 class LoginForm extends LoginFormMeta
@@ -32,13 +34,31 @@ class LoginForm extends LoginFormMeta
      */
     public function rules()
     {
-        $rules = [
-            ...parent::rules(),
-            ['login', 'filter', 'filter' => function ($value) {
-                return mb_strtolower(trim($value));
-            }],
-        ];
         $module = AuthModule::getInstance();
+
+        switch ($module->registrationMainAttribute) {
+            case AuthModule::ATTRIBUTE_EMAIL:
+                // Email
+                $rules = [
+                    ['login', 'filter', 'filter' => fn($value) => mb_strtolower(trim($value))],
+                ];
+                break;
+
+            case AuthModule::ATTRIBUTE_PHONE:
+                // Phone
+                $rules = [
+                    ['login', PhoneValidator::class],
+                ];
+                break;
+
+            case AuthModule::ATTRIBUTE_LOGIN:
+                // Login
+                $rules = [
+                    ['login', 'filter', 'filter' => fn($value) => mb_strtolower(trim($value))],
+                    ['login', LoginValidator::class],
+                ];
+                break;
+        }
 
         if ($module->isPasswordAvailable) {
             $rules = [
