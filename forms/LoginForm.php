@@ -92,6 +92,7 @@ class LoginForm extends LoginFormMeta
         ];
 
         return [
+            ...parent::rules(),
             ...$rules,
 
             // Check confirms
