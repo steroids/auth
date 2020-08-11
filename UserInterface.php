@@ -26,4 +26,9 @@ interface UserInterface extends IdentityInterface
      * @return void
      */
     public function sendNotify($templateName, $params = []);
+
+    /**
+     * @return string
+     */
+    public function getName();
 }

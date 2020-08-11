@@ -2,6 +2,7 @@
 
 namespace steroids\auth\components;
 
+use steroids\auth\AuthModule;
 use Yii;
 use steroids\auth\models\AuthLogin;
 use yii\helpers\ArrayHelper;
@@ -48,7 +49,9 @@ class BearerWebUser extends \yii\web\User
     public function getLogin()
     {
         if ($this->_login === false) {
-            $this->_login = AuthLogin::findByToken($this->accessToken);
+            /** @var AuthLogin $authLoginClass */
+            $authLoginClass = AuthModule::resolveClass(AuthLogin::class);
+            $this->_login = $authLoginClass::findByToken($this->accessToken);
         }
         return $this->_login;
     }
@@ -98,7 +101,9 @@ class BearerWebUser extends \yii\web\User
      */
     public function login(IdentityInterface $identity, $duration = 0)
     {
-        $this->_login = AuthLogin::create($identity, \Yii::$app->request);
+        /** @var AuthLogin $authLoginClass */
+        $authLoginClass = AuthModule::resolveClass(AuthLogin::class);
+        $this->_login = $authLoginClass::create($identity, \Yii::$app->request);
         $this->_accessToken = false;
         $this->regenerateCsrfToken();
     }
