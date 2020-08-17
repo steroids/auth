@@ -6,11 +6,13 @@ use steroids\auth\AuthModule;
 use steroids\auth\models\meta\AuthLoginMeta;
 use steroids\auth\UserInterface;
 use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
 use yii\web\Request;
 
 /**
  * @property-read UserInterface $user
+ * @property-read bool $isExpired
  */
 class AuthLogin extends AuthLoginMeta
 {
@@ -50,7 +52,7 @@ class AuthLogin extends AuthLoginMeta
 
     /**
      * @param string $token
-     * @return AuthLogin|null
+     * @return AuthLogin|null|ActiveRecord
      */
     public static function findByToken($token)
     {
@@ -68,7 +70,22 @@ class AuthLogin extends AuthLoginMeta
     }
 
     /**
-     * @throws \steroids\exceptions\ModelSaveException
+     * @param $userId
+     * @return int
+     */
+    public static function logoutAll($userId)
+    {
+        return static::updateAll([
+            'expireTime' => date('Y-m-d H:i:s'),
+        ], [
+            'and',
+            ['>=', 'expireTime', date('Y-m-d H:i:s')],
+            ['userId' => $userId]
+        ]);
+    }
+
+    /**
+     * @throws \steroids\core\exceptions\ModelSaveException
      */
     public function logout()
     {
@@ -86,5 +103,10 @@ class AuthLogin extends AuthLoginMeta
         $userClass = \Yii::$app->user->identityClass;
 
         return $this->hasOne($userClass, ['id' => 'userId']);
+    }
+
+    public function getIsExpired()
+    {
+        return date('Y-m-d H:i:s') > $this->expireTime;
     }
 }

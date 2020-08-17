@@ -88,20 +88,23 @@ abstract class AuthLoginMeta extends Model
                 'stringLength' => '16'
             ],
             'ipAddress' => [
+                'label' => Yii::t('steroids', 'IP адрес'),
                 'isRequired' => true,
                 'stringLength' => '64'
             ],
             'location' => [
-
+                'label' => Yii::t('steroids', 'Месторасположение'),
             ],
             'userAgent' => [
+                'label' => Yii::t('steroids', 'Браузер'),
                 'isRequired' => true
             ],
             'createTime' => [
-                'label' => Yii::t('steroids', 'Добавлен'),
+                'label' => Yii::t('steroids', 'Время входа'),
                 'appType' => 'autoTime'
             ],
             'expireTime' => [
+                'label' => Yii::t('steroids', 'Действителен до'),
                 'appType' => 'dateTime'
             ]
         ]);

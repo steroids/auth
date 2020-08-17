@@ -76,17 +76,17 @@ abstract class AuthConfirmMeta extends Model
                 'appType' => 'boolean'
             ],
             'createTime' => [
-                'label' => Yii::t('steroids', 'Добавлен'),
+                'label' => Yii::t('steroids', 'Время отправки'),
                 'appType' => 'autoTime',
                 'touchOnUpdate' => false
             ],
             'updateTime' => [
-                'label' => Yii::t('steroids', 'Обновлен'),
+                'label' => Yii::t('steroids', 'Время обновления'),
                 'appType' => 'autoTime',
                 'touchOnUpdate' => true
             ],
             'expireTime' => [
-                'label' => Yii::t('steroids', 'Дата действия кода'),
+                'label' => Yii::t('steroids', 'Действителен до'),
                 'appType' => 'dateTime'
             ],
             'type' => [
