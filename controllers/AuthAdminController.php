@@ -2,20 +2,20 @@
 
 namespace steroids\auth\controllers;
 
+use Yii;
 use steroids\auth\AuthModule;
 use steroids\auth\models\AuthConfirm;
 use steroids\auth\models\AuthLogin;
 use steroids\core\base\CrudApiController;
 use steroids\core\base\Model;
 use steroids\core\base\SearchModel;
-use Yii;
 use yii\web\NotFoundHttpException;
 
 class AuthAdminController extends CrudApiController
 {
     public static function modelClass()
     {
-        return Yii::$app->has('user') ? Yii::$app->user->identityClass : null;
+        return AuthModule::getInstance()->userClass;
     }
 
     public static function apiMap($baseUrl = '/api/v1/admin/auth')

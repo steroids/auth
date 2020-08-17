@@ -21,6 +21,7 @@ use steroids\core\base\Model;
 use steroids\core\base\Module;
 use steroids\core\traits\ModuleProvidersTrait;
 use steroids\core\exceptions\ModelSaveException;
+use yii\base\InvalidConfigException;
 use yii\helpers\ArrayHelper;
 
 class AuthModule extends Module
@@ -83,6 +84,12 @@ class AuthModule extends Module
      */
     public int $confirmExpireMins = 60;
 
+    /**
+     * User class name which implement UserInterface
+     * @var string
+     */
+    public string $userClass;
+
     public array $providersClasses = [
         'facebook' => FacebookAuthProvider::class,
         'google' => GoogleAuthProvider::class,
@@ -104,6 +111,15 @@ class AuthModule extends Module
         'steroids\auth\forms\ProviderLoginForm' => ProviderLoginForm::class,
         'steroids\auth\AuthProfile' => AuthProfile::class,
     ];
+
+    public function init()
+    {
+        parent::init();
+
+        if (!$this->userClass) {
+            throw new InvalidConfigException('Please set "userClass" property in AuthModule configuration');
+        }
+    }
 
     /**
      * @param string $attribute
