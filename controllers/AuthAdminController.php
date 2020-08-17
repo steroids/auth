@@ -15,7 +15,7 @@ class AuthAdminController extends CrudApiController
 {
     public static function modelClass()
     {
-        return Yii::$app->user->identityClass;
+        return Yii::$app->has('user') ? Yii::$app->user->identityClass : null;
     }
 
     public static function apiMap($baseUrl = '/api/v1/admin/auth')
