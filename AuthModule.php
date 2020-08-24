@@ -88,7 +88,7 @@ class AuthModule extends Module
      * User class name which implement UserInterface
      * @var string
      */
-    public string $userClass;
+    public string $userClass = '';
 
     public array $providersClasses = [
         'facebook' => FacebookAuthProvider::class,
