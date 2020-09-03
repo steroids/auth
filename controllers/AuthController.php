@@ -4,11 +4,11 @@ namespace steroids\auth\controllers;
 
 use steroids\auth\AuthModule;
 use steroids\auth\forms\ConfirmForm;
+use steroids\auth\models\AuthConfirm;
 use Yii;
 use yii\web\Controller;
 use steroids\auth\forms\RecoveryPasswordConfirmForm;
 use steroids\auth\forms\RecoveryPasswordForm;
-use steroids\auth\forms\RegistrationConfirmForm;
 use steroids\auth\forms\RegistrationForm;
 use steroids\auth\forms\LoginForm;
 
@@ -24,6 +24,8 @@ class AuthController extends Controller
                     'login' => 'POST api/v1/auth/login',
                     'recovery' => 'POST api/v1/auth/recovery',
                     'recovery-confirm' => 'POST api/v1/auth/recovery/confirm',
+                    'confirm' => 'POST api/v1/auth/confirms/<uid>',
+                    'resend-confirm' => 'POST api/v1/auth/confirms/<uid>/resend',
                     'logout' => 'POST api/v1/auth/logout',
                     'ws' => 'GET api/v1/auth/ws',
                 ],
@@ -47,16 +49,12 @@ class AuthController extends Controller
 
     /**
      * Registration
-     * @return RegistrationConfirmForm
+     * @return ConfirmForm
      * @throws \Exception
      */
     public function actionRegistrationConfirm()
     {
-        /** @var RegistrationConfirmForm $model */
-        $model = AuthModule::instantiateClass(ConfirmForm::class);
-        $model->load(Yii::$app->request->post());
-        $model->confirm();
-        return $model;
+        return $this->actionConfirm();
     }
 
     /**
@@ -99,6 +97,35 @@ class AuthController extends Controller
         $model->load(Yii::$app->request->post());
         $model->confirm();
         return $model;
+    }
+
+    /**
+     * Resend confirm code
+     * @param string $uid
+     * @return ConfirmForm
+     * @throws \Exception
+     */
+    public function actionConfirm(string $uid = null)
+    {
+        /** @var ConfirmForm $model */
+        $model = AuthModule::instantiateClass(ConfirmForm::class);
+        $model->login = $uid;
+        $model->load(Yii::$app->request->post());
+        $model->confirm();
+        return $model;
+    }
+
+    /**
+     * Resend confirm code
+     * @param string $uid
+     * @return AuthConfirm|null
+     * @throws \steroids\core\exceptions\ModelSaveException
+     * @throws \yii\base\Exception
+     * @throws \yii\web\NotFoundHttpException
+     */
+    public function actionResendConfirm(string $uid)
+    {
+        return AuthModule::getInstance()->resendConfirm($uid);
     }
 
     /**

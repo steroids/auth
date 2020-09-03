@@ -2,20 +2,20 @@
 
 namespace steroids\views;
 
+use yii\base\View;
 use steroids\auth\UserInterface;
-use yii\web\View;
-use yii\mail\BaseMessage;
+use steroids\notifier\NotifierMessage;
 use steroids\auth\models\AuthConfirm;
 
 /* @var $this View */
-/* @var $message BaseMessage */
+/* @var $message NotifierMessage */
 /* @var $user UserInterface */
 /* @var $confirm AuthConfirm */
 
-$message->setSubject(\Yii::t('steroids', 'Проверочный код - {code}. {siteName}', [
+$message->title = \Yii::t('steroids', 'Проверочный код - {code}. {siteName}', [
     'siteName' => \Yii::$app->name,
     'code' => $confirm->code,
-]));
+]);
 ?>
 
 <p>

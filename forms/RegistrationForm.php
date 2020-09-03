@@ -13,6 +13,8 @@ use steroids\core\base\Model;
 use steroids\core\validators\PasswordValidator;
 use steroids\core\validators\PhoneValidator;
 use yii\base\Exception;
+use yii\helpers\ArrayHelper;
+use yii\validators\RequiredValidator;
 
 class RegistrationForm extends RegistrationFormMeta
 {
@@ -31,6 +33,19 @@ class RegistrationForm extends RegistrationFormMeta
      */
     public $confirm;
 
+    public function fields()
+    {
+        return [
+            'user',
+            'confirm' => [
+                'uid',
+                'type',
+                'value',
+                'expireTime',
+            ],
+        ];
+    }
+
     /**
      * @inheritDoc
      */
@@ -42,34 +57,35 @@ class RegistrationForm extends RegistrationFormMeta
         $rules = parent::rules();
         $module = AuthModule::getInstance();
 
-        switch ($module->registrationMainAttribute) {
-            case AuthModule::ATTRIBUTE_EMAIL:
-                // Email
-                $rules = [
-                    ...$rules,
-                    ['email', 'filter', 'filter' => fn($value) => mb_strtolower(trim($value))],
-                    ['email', 'unique', 'targetClass' => $userClass, 'targetAttribute' => $module->emailAttribute],
-                ];
-                break;
+        // Email
+        if ($module->registrationMainAttribute === AuthModule::ATTRIBUTE_EMAIL ||
+            in_array(AuthModule::ATTRIBUTE_EMAIL, $module->loginAvailableAttributes)) {
+            $rules = [
+                ...$rules,
+                ['email', 'filter', 'filter' => fn($value) => mb_strtolower(trim($value))],
+                ['email', 'unique', 'targetClass' => $userClass, 'targetAttribute' => $module->emailAttribute],
+            ];
+        }
 
-            case AuthModule::ATTRIBUTE_PHONE:
-                // Phone
-                $rules = [
-                    ...$rules,
-                    ['phone', PhoneValidator::class],
-                    ['phone', 'unique', 'targetClass' => $userClass, 'targetAttribute' => $module->phoneAttribute],
-                ];
-                break;
+        // Phone
+        if ($module->registrationMainAttribute === AuthModule::ATTRIBUTE_PHONE ||
+            in_array(AuthModule::ATTRIBUTE_PHONE, $module->loginAvailableAttributes)) {
+            $rules = [
+                ...$rules,
+                ['phone', PhoneValidator::class],
+                ['phone', 'unique', 'targetClass' => $userClass, 'targetAttribute' => $module->phoneAttribute],
+            ];
+        }
 
-            case AuthModule::ATTRIBUTE_LOGIN:
-                // Login
-                $rules = [
-                    ...$rules,
-                    ['login', 'filter', 'filter' => fn($value) => mb_strtolower(trim($value))],
-                    ['login', LoginValidator::class],
-                    ['login', 'unique', 'targetClass' => $userClass, 'targetAttribute' => $module->loginAttribute],
-                ];
-                break;
+        // Login
+        if ($module->registrationMainAttribute === AuthModule::ATTRIBUTE_LOGIN ||
+            in_array(AuthModule::ATTRIBUTE_LOGIN, $module->loginAvailableAttributes)) {
+            $rules = [
+                ...$rules,
+                ['login', 'filter', 'filter' => fn($value) => mb_strtolower(trim($value))],
+                ['login', LoginValidator::class],
+                ['login', 'unique', 'targetClass' => $userClass, 'targetAttribute' => $module->loginAttribute],
+            ];
         }
 
         // Password
@@ -102,18 +118,14 @@ class RegistrationForm extends RegistrationFormMeta
             $this->user = new $userClass();
 
             // Set email/phone/login
-            switch ($module->registrationMainAttribute) {
-                case AuthModule::ATTRIBUTE_EMAIL:
-                    $this->user->setAttribute($module->emailAttribute, $this->email);
-                    break;
-
-                case AuthModule::ATTRIBUTE_PHONE:
-                    $this->user->setAttribute($module->phoneAttribute, $this->phone);
-                    break;
-
-                case AuthModule::ATTRIBUTE_LOGIN:
-                    $this->user->setAttribute($module->loginAttribute, $this->login);
-                    break;
+            if ($this->email) {
+                $this->user->setAttribute($module->emailAttribute, $this->email);
+            }
+            if ($this->phone) {
+                $this->user->setAttribute($module->phoneAttribute, $this->phone);
+            }
+            if ($this->login) {
+                $this->user->setAttribute($module->loginAttribute, $this->login);
             }
 
             // Set password
@@ -154,6 +166,25 @@ class RegistrationForm extends RegistrationFormMeta
             return true;
         }
         return false;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function beforeValidate()
+    {
+        // Check custom required attributes
+        $validator = new RequiredValidator();
+        foreach (AuthModule::getInstance()->registrationRequiredAttributes as $attribute) {
+            $value = $this->isAttributeSafe($attribute)
+                ? $this->$attribute
+                : ArrayHelper::getValue($this->custom, $attribute);
+            if ($validator->isEmpty($value)) {
+                $this->addError($attribute, $validator->message);
+            }
+        }
+
+        return parent::beforeValidate();
     }
 
     /**

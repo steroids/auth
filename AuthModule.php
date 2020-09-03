@@ -70,6 +70,11 @@ class AuthModule extends Module
     public array $registrationCustomAttributes = [];
 
     /**
+     * Required attributes (default or custom)
+     */
+    public array $registrationRequiredAttributes = [];
+
+    /**
      * Set false for auth only by email/phone + code
      */
     public bool $isPasswordAvailable = true;
@@ -137,27 +142,26 @@ class AuthModule extends Module
 
     /**
      * @param UserInterface|Model $user
-     * @param string $attribute
+     * @param string $attributeType
      * @return null|AuthConfirm
      * @throws ModelSaveException
      */
-    public function confirm($user, $attribute)
+    public function confirm($user, $attributeType)
     {
-        if (!in_array($attribute,
-            [
-                AuthModule::ATTRIBUTE_EMAIL,
-                AuthModule::ATTRIBUTE_PHONE,
-            ])
-        ) {
+        if (!in_array($attributeType, [AuthModule::ATTRIBUTE_EMAIL, AuthModule::ATTRIBUTE_PHONE])) {
             return null;
         }
 
+        $attribute = $attributeType === AuthModule::ATTRIBUTE_PHONE
+            ? $this->phoneAttribute
+            : $this->emailAttribute;
+
         // Create confirm
         $model = AuthConfirm::instantiate([
-            'type' => $attribute,
+            'type' => $attributeType,
             'value' => $user->getAttribute($attribute),
             'userId' => $user->getId(),
-            'code' => $this->generateCode($attribute),
+            'code' => $this->generateCode($attributeType),
         ]);
         $model->saveOrPanic();
 
@@ -170,12 +174,24 @@ class AuthModule extends Module
     }
 
     /**
-     * @param string $attribute
+     * @param string $prevConfirmUid
+     * @return AuthConfirm|null
+     * @throws ModelSaveException
+     * @throws \yii\web\NotFoundHttpException
+     */
+    public function resendConfirm(string $prevConfirmUid)
+    {
+        $prevConfirm = AuthConfirm::findOrPanic(['uid' => $prevConfirmUid]);
+        return $this->confirm($prevConfirm->user, $prevConfirm->type);
+    }
+
+    /**
+     * @param string $attributeType
      * @param int|null $length
      * @return int
      * @throws \Exception
      */
-    protected function generateCode($attribute, $length = null)
+    protected function generateCode($attributeType, $length = null)
     {
         $length = $length ?: $this->confirmCodeLength;
         $length = max(1, $length);

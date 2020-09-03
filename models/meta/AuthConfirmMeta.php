@@ -16,6 +16,7 @@ use \Yii;
  * @property string $updateTime
  * @property string $expireTime
  * @property string $type
+ * @property string $uid
  */
 abstract class AuthConfirmMeta extends Model
 {
@@ -32,7 +33,8 @@ abstract class AuthConfirmMeta extends Model
 
     public function rules()
     {
-        return array_merge(parent::rules(), [
+        return [
+            ...parent::rules(),
             ['userId', 'integer'],
             [['userId', 'value', 'code'], 'required'],
             ['value', 'string', 'max' => 255],
@@ -40,14 +42,16 @@ abstract class AuthConfirmMeta extends Model
             ['isConfirmed', 'steroids\\core\\validators\\ExtBooleanValidator'],
             ['expireTime', 'date', 'format' => 'php:Y-m-d H:i:s'],
             ['type', 'string', 'max' => '10'],
-        ]);
+            ['uid', 'string', 'max' => '36'],
+        ];
     }
 
     public function behaviors()
     {
-        return array_merge(parent::behaviors(), [
+        return [
+            ...parent::behaviors(),
             TimestampBehavior::class,
-        ]);
+        ];
     }
 
     public static function meta()
@@ -93,6 +97,11 @@ abstract class AuthConfirmMeta extends Model
                 'label' => Yii::t('steroids', 'Тип (емаил или телефон)'),
                 'isPublishToFrontend' => false,
                 'stringLength' => '10'
+            ],
+            'uid' => [
+                'label' => Yii::t('steroids', 'UID'),
+                'isPublishToFrontend' => false,
+                'stringLength' => '36'
             ]
         ]);
     }

@@ -6,6 +6,8 @@ use steroids\auth\AuthModule;
 use steroids\auth\models\meta\AuthConfirmMeta;
 use steroids\auth\UserInterface;
 use steroids\core\base\Model;
+use steroids\core\behaviors\TimestampBehavior;
+use steroids\core\behaviors\UidBehavior;
 use \steroids\exceptions\ModelSaveException;
 use yii\db\ActiveQuery;
 
@@ -14,7 +16,7 @@ use yii\db\ActiveQuery;
  */
 class AuthConfirm extends AuthConfirmMeta
 {
-    const TEMPLATE_NAME = 'authConfirm';
+    const TEMPLATE_NAME = 'auth/confirm';
 
     /**
      * @inheritDoc
@@ -31,16 +33,33 @@ class AuthConfirm extends AuthConfirmMeta
      */
     public static function findByCode($login, $code)
     {
+        // Check if login is uid
+        $login = static::find()
+            ->select('value')
+            ->where(['uid' => $login])
+            ->scalar() ?: $login;
+
         /** @var static $confirm */
         $confirm = static::find()
-            ->where([
-                'value' => mb_strtolower(trim($login)),
-                'code' => trim($code),
+            ->where(['code' => trim($code)])
+            ->andWhere([
+                'or',
+                ['value' => mb_strtolower(trim($login))],
+                ['uid' => mb_strtolower(trim($login))],
             ])
             ->andWhere(['>=', 'expireTime', date('Y-m-d H:i:s')])
+            ->orderBy(['id' => SORT_DESC])
             ->limit(1)
             ->one() ?: null;
         return $confirm;
+    }
+
+    public function behaviors()
+    {
+        return [
+            ...parent::behaviors(),
+            UidBehavior::class,
+        ];
     }
 
     /**
