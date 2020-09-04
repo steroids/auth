@@ -146,8 +146,11 @@ class AuthModule extends Module
      * @return null|AuthConfirm
      * @throws ModelSaveException
      */
-    public function confirm($user, $attributeType)
+    public function confirm($user, $attributeType = null)
     {
+        if (!$attributeType) {
+            $attributeType = $this->registrationMainAttribute;
+        }
         if (!in_array($attributeType, [AuthModule::ATTRIBUTE_EMAIL, AuthModule::ATTRIBUTE_PHONE])) {
             return null;
         }

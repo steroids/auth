@@ -2,6 +2,8 @@
 
 namespace steroids\auth\controllers;
 
+use steroids\auth\forms\ChangePasswordForm;
+use steroids\auth\forms\RegistrationForm;
 use Yii;
 use steroids\auth\AuthModule;
 use steroids\auth\models\AuthConfirm;
@@ -9,6 +11,7 @@ use steroids\auth\models\AuthLogin;
 use steroids\core\base\CrudApiController;
 use steroids\core\base\Model;
 use steroids\core\base\SearchModel;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 
 class AuthAdminController extends CrudApiController
@@ -172,15 +175,22 @@ class AuthAdminController extends CrudApiController
     public function actionPassword()
     {
         $user = $this->findModel();
-        $newPassword = Yii::$app->request->post('newPassword');
+        if (!$user->canUpdate(Yii::$app->user->identity)) {
+            throw new ForbiddenHttpException();
+        }
 
-        // TODO Form
+        /** @var ChangePasswordForm $model */
+        $model = AuthModule::instantiateClass(ChangePasswordForm::class);
+        $model->user = $user;
+        $model->load(Yii::$app->request->post());
+        $model->change();
+        return $model;
     }
 
     public function actionConfirmSend()
     {
         $user = $this->findModel();
-
+        return AuthModule::getInstance()->confirm($user);
     }
 
     public function actionConfirmAccept()
@@ -188,5 +198,10 @@ class AuthAdminController extends CrudApiController
         $user = $this->findModel();
         $confirmId = Yii::$app->request->get('confirmId');
 
+        /** @var AuthConfirm $authConfirmClass */
+        $authConfirmClass = AuthModule::resolveClass(AuthConfirm::class);
+        $confirm = $authConfirmClass::findOrPanic(['id' => $confirmId]);
+        $confirm->markConfirmed();
+        return $confirm;
     }
 }
