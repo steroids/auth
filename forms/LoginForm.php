@@ -36,35 +36,21 @@ class LoginForm extends LoginFormMeta
     {
         $module = AuthModule::getInstance();
 
-        switch ($module->registrationMainAttribute) {
-            case AuthModule::ATTRIBUTE_EMAIL:
-                // Email
-                $rules = [
-                    ['login', 'filter', 'filter' => fn($value) => mb_strtolower(trim($value))],
-                ];
-                break;
-
-            case AuthModule::ATTRIBUTE_PHONE:
-                // Phone
-                $rules = [
-                    ['login', PhoneValidator::class],
-                ];
-                break;
-
-            case AuthModule::ATTRIBUTE_LOGIN:
-                // Login
-                $rules = [
-                    ['login', 'filter', 'filter' => fn($value) => mb_strtolower(trim($value))],
-                    ['login', LoginValidator::class],
-                ];
-                break;
-        }
-
         if ($module->isPasswordAvailable) {
             $rules = [
-                ...$rules,
+                ['login', 'filter', 'filter' => fn($value) => mb_strtolower(trim($value))],
                 ['password', 'required'],
             ];
+        }
+
+        if (in_array(AuthModule::ATTRIBUTE_EMAIL, $module->loginAvailableAttributes)
+            && strpos($this->login, '@') !== false) {
+            $rules[] = ['login', 'email'];
+        } elseif (in_array(AuthModule::ATTRIBUTE_PHONE, $module->loginAvailableAttributes)
+            && preg_match('/^\+?[0-9]+$/', trim($this->login))) {
+            $rules[] = ['login', PhoneValidator::class];
+        } elseif (in_array(AuthModule::ATTRIBUTE_LOGIN, $module->loginAvailableAttributes)) {
+            $rules[] = ['login', LoginValidator::class];
         }
 
         // Find user and check password (if enable)
