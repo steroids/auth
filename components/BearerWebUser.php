@@ -35,6 +35,15 @@ class BearerWebUser extends \yii\web\User
      */
     private $_accessToken = false;
 
+    public function init()
+    {
+        if ($this->identityClass === null) {
+            $this->identityClass = AuthModule::getInstance()->userClass;
+        }
+
+        parent::init();
+    }
+
     /**
      * @return bool
      */
