@@ -35,6 +35,7 @@ class LoginForm extends LoginFormMeta
     public function rules()
     {
         $module = AuthModule::getInstance();
+        $rules = [];
 
         if ($module->isPasswordAvailable) {
             $rules = [
