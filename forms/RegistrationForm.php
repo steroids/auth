@@ -51,11 +51,9 @@ class RegistrationForm extends RegistrationFormMeta
      */
     public function rules()
     {
-        /** @var UserInterface $userClass */
-        $userClass = Yii::$app->user->identityClass;
-
         $rules = parent::rules();
         $module = AuthModule::getInstance();
+        $userClass = $module->userClass;
 
         // Email
         if ($module->registrationMainAttribute === AuthModule::ATTRIBUTE_EMAIL ||
@@ -108,12 +106,10 @@ class RegistrationForm extends RegistrationFormMeta
      */
     public function register()
     {
-        /** @var UserInterface $userClass */
-        $userClass = Yii::$app->user->identityClass;
+        $module = AuthModule::getInstance();
+        $userClass = $module->userClass;
 
         if ($this->validate()) {
-            $module = AuthModule::getInstance();
-
             // Create user
             $this->user = new $userClass();
 

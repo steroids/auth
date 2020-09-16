@@ -117,6 +117,19 @@ class AuthModule extends Module
         'steroids\auth\AuthProfile' => AuthProfile::class,
     ];
 
+    /**
+     * @param int|null $length
+     * @param string $attributeType
+     * @return int
+     * @throws \Exception
+     */
+    public static function generateCode($length = 6, $attributeType = null)
+    {
+        $length = max(1, $length);
+        $number = random_int(pow(10, $length - 1), pow(10, $length) - 1);
+        return str_pad($number, $length, '0', STR_PAD_LEFT);
+    }
+
     public function init()
     {
         parent::init();
@@ -164,7 +177,7 @@ class AuthModule extends Module
             'type' => $attributeType,
             'value' => $user->getAttribute($attribute),
             'userId' => $user->getId(),
-            'code' => $this->generateCode($attributeType),
+            'code' => static::generateCode($this->confirmCodeLength, $attributeType),
         ]);
         $model->saveOrPanic();
 
@@ -186,19 +199,5 @@ class AuthModule extends Module
     {
         $prevConfirm = AuthConfirm::findOrPanic(['uid' => $prevConfirmUid]);
         return $this->confirm($prevConfirm->user, $prevConfirm->type);
-    }
-
-    /**
-     * @param string $attributeType
-     * @param int|null $length
-     * @return int
-     * @throws \Exception
-     */
-    protected function generateCode($attributeType, $length = null)
-    {
-        $length = $length ?: $this->confirmCodeLength;
-        $length = max(1, $length);
-        $number = random_int(pow(10, $length - 1), pow(10, $length) - 1);
-        return str_pad($number, $length, '0', STR_PAD_LEFT);
     }
 }
