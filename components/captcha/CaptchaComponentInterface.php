@@ -1,7 +1,7 @@
 <?php
 
 
-namespace auth\components\captcha;
+namespace steroids\auth\components\captcha;
 
 
 interface CaptchaComponentInterface

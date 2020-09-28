@@ -2,8 +2,8 @@
 
 namespace steroids\auth;
 
-use auth\components\captcha\CaptchaComponentInterface;
-use auth\components\captcha\ReCaptchaV3;
+use steroids\auth\components\captcha\CaptchaComponentInterface;
+use steroids\auth\components\captcha\ReCaptchaV3;
 use ReflectionClass;
 use steroids\auth\forms\ConfirmForm;
 use steroids\auth\forms\LoginForm;
@@ -104,12 +104,10 @@ class AuthModule extends Module
      */
     public bool $isCaptchaEnabled = false;
 
-    /**
-     * Captcha component class (should implement auth\components\captcha\CaptchaComponentInterface)
-     *
-     * @var string
-     */
-    public string $captchaComponentClass = ReCaptchaV3::class;
+    public array $captcha = [
+        'class' => ReCaptchaV3::class,
+        'secretKey' => 'google secret key'
+    ];
 
     public array $providersClasses = [
         'facebook' => FacebookAuthProvider::class,
@@ -169,16 +167,16 @@ class AuthModule extends Module
      */
     private function initCaptchaComponent()
     {
-        if (!$this->captchaComponentClass) {
+        if (!$this->captcha['class']) {
             throw new InvalidConfigException('You must provide captchaComponentClass when captcha is enabled');
         }
 
-        $captchaReflection = new ReflectionClass($this->captchaComponentClass);
+        $captchaReflection = new ReflectionClass($this->captcha['class']);
         if (!$captchaReflection->implementsInterface(CaptchaComponentInterface::class)) {
-            throw new InvalidConfigException("Provided captcha class {$this->captchaComponentClass} must implement CaptchaComponentInterface");
+            throw new InvalidConfigException("Provided captcha class {$this->captcha['class']} must implement CaptchaComponentInterface");
         }
 
-        $this->set('captcha', $this->captchaComponentClass);
+        $this->set('captcha', $this->captcha);
     }
 
     /**
