@@ -9,8 +9,6 @@ use yii\validators\Validator;
 
 class ReCaptchaValidator extends Validator
 {
-
-    public AuthModule $module;
     /**
      * {@inheritdoc}
      */
@@ -18,16 +16,16 @@ class ReCaptchaValidator extends Validator
     {
         parent::init();
 
-        $this->module = AuthModule::getInstance();
-
         if ($this->message === null) {
-            $this->message = \Yii::t('steroids', 'Каптча не пройдена');
+            $this->message = \Yii::t('steroids', 'Проверка на робота не пройдена');
         }
     }
 
     public function validateAttribute($model, $attribute)
     {
-        if($this->module->isCaptchaEnable && !(new $this->module->captcha['class'])->validate($model->$attribute)){
+        $module = AuthModule::getInstance();
+
+        if($module->isCaptchaEnable && !$module->captcha->validate($model->$attribute)){
             $this->addError($model, $attribute, $this->message);
         }
     }

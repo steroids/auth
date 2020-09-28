@@ -21,6 +21,11 @@ class RecoveryPasswordForm extends RecoveryPasswordFormMeta
      */
     public $confirm;
 
+    /**
+     * @var string
+     */
+    public $token;
+
     public function rules()
     {
         return array_merge(parent::rules(), [

@@ -34,6 +34,11 @@ class RegistrationForm extends RegistrationFormMeta
      */
     public $confirm;
 
+    /**
+     * @var string
+     */
+    public $token;
+
     public function fields()
     {
         return [
