@@ -102,12 +102,12 @@ class AuthModule extends Module
      * Should captcha be used in auth forms
      * @var bool
      */
-    public bool $isCaptchaEnabled = false;
+    public bool $isCaptchaEnable = false;
 
-    public array $captcha = [
-        'class' => ReCaptchaV3::class,
-        'secretKey' => 'google secret key'
-    ];
+    /**
+     * @var CaptchaComponentInterface|array|null
+     */
+    public ?array $captcha = [];
 
     public array $providersClasses = [
         'facebook' => FacebookAuthProvider::class,
@@ -156,27 +156,10 @@ class AuthModule extends Module
             throw new InvalidConfigException('Please set "userClass" property in AuthModule configuration');
         }
 
-        if ($this->isCaptchaEnabled) {
-            $this->initCaptchaComponent();
-        }
-    }
-
-    /**
-     * @throws InvalidConfigException
-     * @throws \ReflectionException
-     */
-    private function initCaptchaComponent()
-    {
-        if (!$this->captcha['class']) {
-            throw new InvalidConfigException('You must provide captchaComponentClass when captcha is enabled');
-        }
-
-        $captchaReflection = new ReflectionClass($this->captcha['class']);
-        if (!$captchaReflection->implementsInterface(CaptchaComponentInterface::class)) {
-            throw new InvalidConfigException("Provided captcha class {$this->captcha['class']} must implement CaptchaComponentInterface");
-        }
-
-        $this->set('captcha', $this->captcha);
+        $this->captcha = array_merge(
+            ['class' => ReCaptchaV3::class],
+            $this->captcha
+        );
     }
 
     /**
