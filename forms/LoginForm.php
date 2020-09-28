@@ -3,10 +3,12 @@
 namespace steroids\auth\forms;
 
 use steroids\auth\AuthModule;
+use steroids\auth\components\captcha\ReCaptchaV3;
 use steroids\auth\forms\meta\LoginFormMeta;
 use steroids\auth\models\AuthConfirm;
 use steroids\auth\UserInterface;
 use steroids\auth\validators\LoginValidator;
+use steroids\auth\validators\ReCaptchaValidator;
 use steroids\core\validators\PhoneValidator;
 use yii\helpers\ArrayHelper;
 
@@ -21,6 +23,11 @@ class LoginForm extends LoginFormMeta
      * @var string
      */
     public $accessToken;
+
+    /**
+     * @var string
+     */
+    public $token;
 
     public function fields()
     {
@@ -43,6 +50,9 @@ class LoginForm extends LoginFormMeta
                 ['password', 'required'],
             ];
         }
+
+        //Add captcha
+        $rules[] = ['token', ReCaptchaValidator::class];
 
         if (in_array(AuthModule::ATTRIBUTE_EMAIL, $module->loginAvailableAttributes)
             && strpos($this->login, '@') !== false) {
