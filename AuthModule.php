@@ -109,6 +109,11 @@ class AuthModule extends Module
      */
     public ?array $captcha = [];
 
+    /**
+     * @var array|null
+     */
+    public ?array $authentificators = [];
+
     public array $providersClasses = [
         'facebook' => FacebookAuthProvider::class,
         'google' => GoogleAuthProvider::class,
