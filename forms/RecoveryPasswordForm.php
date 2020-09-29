@@ -20,6 +20,18 @@ class RecoveryPasswordForm extends RecoveryPasswordFormMeta
      */
     public $confirm;
 
+    public function fields()
+    {
+        return [
+            'confirm' => [
+                'uid',
+                'type',
+                'value',
+                'expireTime',
+            ],
+        ];
+    }
+
     public function rules()
     {
         return array_merge(parent::rules(), [
