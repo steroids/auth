@@ -3,6 +3,7 @@
 namespace steroids\auth\forms;
 
 use steroids\auth\models\AuthConfirm;
+use steroids\auth\validators\ReCaptchaValidator;
 use steroids\core\exceptions\ModelSaveException;
 use Yii;
 use steroids\auth\AuthModule;
@@ -33,6 +34,11 @@ class RegistrationForm extends RegistrationFormMeta
      */
     public $confirm;
 
+    /**
+     * @var string
+     */
+    public $token;
+
     public function fields()
     {
         return [
@@ -54,6 +60,9 @@ class RegistrationForm extends RegistrationFormMeta
         $rules = parent::rules();
         $module = AuthModule::getInstance();
         $userClass = $module->userClass;
+
+        //Token
+        $rules[] = ['token', ReCaptchaValidator::class];
 
         // Email
         if ($module->registrationMainAttribute === AuthModule::ATTRIBUTE_EMAIL ||

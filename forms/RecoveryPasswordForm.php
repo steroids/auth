@@ -6,6 +6,7 @@ use steroids\auth\AuthModule;
 use steroids\auth\forms\meta\RecoveryPasswordFormMeta;
 use steroids\auth\models\AuthConfirm;
 use steroids\auth\UserInterface;
+use steroids\auth\validators\ReCaptchaValidator;
 use steroids\core\base\Model;
 
 class RecoveryPasswordForm extends RecoveryPasswordFormMeta
@@ -19,6 +20,11 @@ class RecoveryPasswordForm extends RecoveryPasswordFormMeta
      * @var AuthConfirm
      */
     public $confirm;
+
+    /**
+     * @var string
+     */
+    public $token;
 
     public function fields()
     {
@@ -38,6 +44,7 @@ class RecoveryPasswordForm extends RecoveryPasswordFormMeta
             ['login', 'filter', 'filter' => function($value) {
                 return mb_strtolower(trim($value));
             }],
+            ['token', ReCaptchaValidator::class]
         ]);
     }
 
