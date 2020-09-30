@@ -34,8 +34,7 @@ class GoogleAuthentificator extends BaseAuthentificator
         ]);
 
         if(!$userAuthKeys){
-            $userAuthKeys->secretKey = $google2fa->generateSecretKey();
-            $userAuthKeys->saveOrPanic();
+            return false;
         }
 
         $valid = $google2fa->verifyKey($userAuthKeys->secretKey, $code, 8);

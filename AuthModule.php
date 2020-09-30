@@ -184,10 +184,11 @@ class AuthModule extends Module
     /**
      * @param UserInterface|Model $user
      * @param string $attributeType
+     * @param bool $is2fa
      * @return null|AuthConfirm
      * @throws ModelSaveException
      */
-    public function confirm($user, $attributeType = null)
+    public function confirm($user, $attributeType = null, $is2fa = false)
     {
         if (!$attributeType) {
             $attributeType = $this->registrationMainAttribute;
@@ -205,6 +206,7 @@ class AuthModule extends Module
             'type' => $attributeType,
             'value' => $user->getAttribute($attribute),
             'userId' => $user->getId(),
+            'isTwoFa' => $is2fa,
             'code' => static::generateCode($this->confirmCodeLength, $attributeType),
         ]);
         $model->saveOrPanic();
