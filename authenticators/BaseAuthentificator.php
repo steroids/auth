@@ -16,8 +16,8 @@ abstract class BaseAuthentificator
 
     public function onCorrectCode(){
         (new Auth2FaValidation([
-            'authentificatorType' => ''
+            'authentificatorType' => $this->type,
+            'userId' => $this->type,
         ]))->saveOrPanic();
     }
-
 }

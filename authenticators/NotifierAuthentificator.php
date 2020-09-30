@@ -8,7 +8,7 @@ class NotifierAuthentificator extends BaseAuthentificator
 {
     public function getType()
     {
-        return 'NotifierAuthentificator';
+        return 'NotifierAuth';
     }
 
     public function sendCode()

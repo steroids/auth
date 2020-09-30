@@ -9,6 +9,7 @@ use \Yii;
  * @property string $id
  * @property string $createTime
  * @property string $authentificatorType
+ * @property integer $userId
  */
 abstract class Auth2FaValidationMeta extends Model
 {
@@ -28,7 +29,8 @@ abstract class Auth2FaValidationMeta extends Model
         return [
             ...parent::rules(),
             ['createTime', 'date', 'format' => 'php:Y-m-d H:i:s'],
-            ['authentIficatorType', 'string', 'max' => 255],
+            ['authentificatorType', 'string', 'max' => 255],
+            ['userId', 'integer'],
         ];
     }
 
@@ -36,16 +38,21 @@ abstract class Auth2FaValidationMeta extends Model
     {
         return array_merge(parent::meta(), [
             'id' => [
-                'label' => Yii::t('app', 'ID'),
+                'label' => Yii::t('steroids', 'ID'),
                 'appType' => 'primaryKey',
                 'isPublishToFrontend' => false
             ],
             'createTime' => [
-                'label' => Yii::t('app', 'Время создания'),
+                'label' => Yii::t('steroids', 'Время создания'),
                 'appType' => 'dateTime',
                 'isPublishToFrontend' => false
             ],
             'authentificatorType' => [
+                'isPublishToFrontend' => false
+            ],
+            'userId' => [
+                'label' => Yii::t('steroids', 'id пользователя'),
+                'appType' => 'integer',
                 'isPublishToFrontend' => false
             ]
         ]);
