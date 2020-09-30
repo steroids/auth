@@ -5,7 +5,10 @@ namespace steroids\auth\authenticators;
 
 use PragmaRX\Google2FA\Google2FA;
 use steroids\auth\authenticators\BaseAuthentificator;
+use steroids\auth\models\Auth2FaValidation;
+use steroids\auth\models\UserAuthentificatorKeys;
 use Yii;
+
 
 class GoogleAuthentificator extends BaseAuthentificator
 {
@@ -17,21 +20,35 @@ class GoogleAuthentificator extends BaseAuthentificator
 
     public function getType()
     {
-        return 'GoogleAuth';
+        return 'googleAuth';
     }
 
     public function validateCode(string $code)
     {
         $google2fa = new Google2FA();
 
-        if(!Yii::$app->user->google2faSecretKey){
-            Yii::$app->user->model->google2faSecretKey = $google2fa->generateSecretKey();
-            Yii::$app->user->model->saveOrPanic();
+        $userAuthKeys = UserAuthentificatorKeys::findOne([
+            'userId' => Yii::$app->user->id,
+            'authentificatorType' => $this->type
+        ]);
+
+        if(!$userAuthKeys){
+            $userAuthKeys->secretKey = $google2fa->generateSecretKey();
+            $userAuthKeys->saveOrPanic();
         }
 
-        $valid = $google2fa->verifyKey(Yii::$app->user->google2faSecretKey, $code, 8);
+        $valid = $google2fa->verifyKey($userAuthKeys->secretKey, $code, 8);
 
-        return $valid ?? false;
+        if($valid){
+            $this->onCorrectCode(new Auth2FaValidation([
+                'userId' => Yii::$app->user->id,
+                'authentificatorType' => $this->type
+            ]));
+
+            return true;
+        }
+
+        return false;
     }
 
 }

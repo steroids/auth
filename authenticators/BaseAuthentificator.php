@@ -4,6 +4,11 @@ namespace steroids\auth\authenticators;
 
 use steroids\auth\models\Auth2FaValidation;
 
+/**
+ * Class BaseAuthentificator
+ * @package steroids\auth\authenticators
+ *  @property-read string $type
+ */
 abstract class BaseAuthentificator
 {
     abstract public function sendCode();
@@ -14,10 +19,10 @@ abstract class BaseAuthentificator
         return true;
     }
 
-    public function onCorrectCode(){
-        (new Auth2FaValidation([
-            'authentificatorType' => $this->type,
-            'userId' => $this->type,
-        ]))->saveOrPanic();
+    /**
+     * @param $auth2FaValidationModel
+     */
+    public function onCorrectCode($auth2FaValidationModel){
+        $auth2FaValidationModel->saveOrPanic();
     }
 }
