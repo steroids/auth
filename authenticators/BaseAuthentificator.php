@@ -20,9 +20,10 @@ abstract class BaseAuthentificator
     }
 
     /**
-     * @param $auth2FaValidationModel
+     * @param Auth2FaValidation $auth2FaValidationModel
+     * @throws \steroids\core\exceptions\ModelSaveException
      */
-    public function onCorrectCode($auth2FaValidationModel){
+    public function onCorrectCode(Auth2FaValidation $auth2FaValidationModel){
         $auth2FaValidationModel->saveOrPanic();
     }
 }

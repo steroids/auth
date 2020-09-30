@@ -13,6 +13,7 @@ use Yii;
 class GoogleAuthentificator extends BaseAuthentificator
 {
 
+    //not use for Google Authentificator
     public function sendCode()
     {
         return '';
@@ -38,7 +39,6 @@ class GoogleAuthentificator extends BaseAuthentificator
         }
 
         $valid = $google2fa->verifyKey($userAuthKeys->secretKey, $code, 8);
-
         if($valid){
             $this->onCorrectCode(new Auth2FaValidation([
                 'userId' => Yii::$app->user->id,
