@@ -19,7 +19,6 @@ class Auth2FAController extends Controller
             'auth' => [
                 'items' => [
                     'two-fa' => 'POST /auth/2fa/validate-code/<code>',
-                    'two-fa-information' => '/auth/2fa/information',
                 ],
             ],
         ];
@@ -34,6 +33,7 @@ class Auth2FAController extends Controller
     {
         $validate = AuthModule::getInstance()->authenticate2FA(
             Yii::$app->user,
+            Yii::$app->request->post('login'),
             $code,
             Yii::$app->request->post('authType')
         );
@@ -42,12 +42,5 @@ class Auth2FAController extends Controller
             : ['errors' => 'validate code error'];
     }
 
-    /**
-     * @return array
-     */
-    public function actionInformation()
-    {
-        return GoogleAuthentificator::getUser2FaInformation();
-    }
 
 }

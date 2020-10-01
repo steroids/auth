@@ -17,10 +17,11 @@ abstract class BaseAuthentificator
 
     /**
      * @param string $code
+     * @param string $login
      * With success result must call onCorrectCode
      * @return bool
      */
-    abstract public function validateCode(string $code);
+    abstract public function validateCode(string $code, string $login);
 
 
     /**

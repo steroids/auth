@@ -244,10 +244,11 @@ class AuthModule extends Module
     /**
      * @param User $user
      * @param string $authType
+     * @param string $login
      * @param string $code
      * @return bool
      */
-    public function authenticate2FA($user,$code,$authType)
+    public function authenticate2FA($user,$login,$code,$authType)
     {
         $authentificator = ($authType === AuthentificatorEnum::GOOGLE_AUTH)
             ? new GoogleAuthentificator()
@@ -266,6 +267,6 @@ class AuthModule extends Module
             return true;
         }
 
-        return $authentificator->validateCode($code);
+        return $authentificator->validateCode($code,$login);
     }
 }

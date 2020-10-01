@@ -24,13 +24,17 @@ class GoogleAuthentificator extends BaseAuthentificator
         return '';
     }
 
+    public string $company;
+
+    public string $holder;
+
+
     public function getType()
     {
         return AuthentificatorEnum::GOOGLE_AUTH;
     }
 
-
-    public static function getUser2FaInformation()
+    public function getUser2FaInformation()
     {
         $userAuthKeys = UserAuthentificatorKeys::findOne([
             'userId' => Yii::$app->user->id,
@@ -48,11 +52,10 @@ class GoogleAuthentificator extends BaseAuthentificator
             $userAuthKeys->saveOrPanic();
         }
 
-        //@todo получить информацю о сайте для Google Auth
         //generate QR code
         $qrCodeUrl = $google2fa->getQRCodeUrl(
-            '',
-            '',
+            $this->company,
+            $this->holder,
             $userAuthKeys->secretKey
         );
 
@@ -61,16 +64,14 @@ class GoogleAuthentificator extends BaseAuthentificator
             new SvgImageBackEnd()
         );
         $writer = new Writer($renderer);
-        //@todo определится с папкой где ханить qr codes
-        $writer->writeFile($qrCodeUrl, 'qrcode.svg');
 
         return [
             'secretKey' => $userAuthKeys->secretKey,
-            'qrCodeUrl' => ''
+            'qrCodeUrl' => $writer->writeString($qrCodeUrl)
         ];
     }
 
-    public function validateCode(string $code)
+    public function validateCode(string $code, $login)
     {
         $google2fa = new Google2FA();
 
@@ -84,16 +85,17 @@ class GoogleAuthentificator extends BaseAuthentificator
         }
 
         $valid = $google2fa->verifyKey($userAuthKeys->secretKey, $code, 8);
-        if($valid){
-            $this->onCorrectCode(new Auth2FaValidation([
-                'userId' => Yii::$app->user->id,
-                'authentificatorType' => $this->type
-            ]));
 
-            return true;
+        if(!$valid){
+            return false;
         }
 
-        return false;
+        $this->onCorrectCode(new Auth2FaValidation([
+            'userId' => Yii::$app->user->id,
+            'authentificatorType' => $this->type
+        ]));
+
+        return true;
     }
 
 }

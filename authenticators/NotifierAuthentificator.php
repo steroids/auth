@@ -12,13 +12,10 @@ use steroids\auth\UserInterface;
 /**
  * Class NotifierAuthentificator
  * @package steroids\auth\models
- * @property-read string $login
  */
 
 class NotifierAuthentificator extends BaseAuthentificator
 {
-    public string $login;
-
     public function getType()
     {
         return AuthentificatorEnum::NOTIFIER_AUTH;
@@ -35,11 +32,12 @@ class NotifierAuthentificator extends BaseAuthentificator
 
     /**
      * @param string $code
+     * @param string $login
      * @return bool
      */
-    public function validateCode(string $code)
+    public function validateCode(string $code,string $login)
     {
-        $confirm = AuthConfirm::findByCode($this->login,$code);
+        $confirm = AuthConfirm::findByCode($login,$code);
 
         if($confirm !== null){
             $this->onCorrectCode(new Auth2FaValidation([
@@ -49,6 +47,7 @@ class NotifierAuthentificator extends BaseAuthentificator
 
             return true;
         }
+        
         return false;
     }
 }
