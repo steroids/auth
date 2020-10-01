@@ -5,6 +5,7 @@ namespace steroids\auth\authenticators;
 
 use PragmaRX\Google2FA\Google2FA;
 use steroids\auth\authenticators\BaseAuthentificator;
+use steroids\auth\enums\AuthentificatorEnum;
 use steroids\auth\models\Auth2FaValidation;
 use steroids\auth\models\UserAuthentificatorKeys;
 use Yii;
@@ -21,8 +22,9 @@ class GoogleAuthentificator extends BaseAuthentificator
 
     public function getType()
     {
-        return 'googleAuth';
+        return AuthentificatorEnum::GOOGLE_AUTH;
     }
+
 
     public function validateCode(string $code)
     {

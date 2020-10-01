@@ -8,13 +8,18 @@ use steroids\auth\models\Auth2FaValidation;
 /**
  * Class BaseAuthentificator
  * @package steroids\auth\authenticators
- *  @property-read string $type
+ * @property-read string $type
  */
 abstract class BaseAuthentificator
 {
     abstract public function sendCode();
     abstract public function getType();
 
+    /**
+     * @param string $code
+     * With success result must call onCorrectCode
+     * @return bool
+     */
     abstract public function validateCode(string $code);
 
 

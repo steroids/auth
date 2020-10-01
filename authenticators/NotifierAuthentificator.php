@@ -3,10 +3,17 @@
 
 namespace steroids\auth\models;
 
+use steroids\auth\enums\AuthentificatorEnum;
 use Yii;
 use steroids\auth\authenticators\BaseAuthentificator;
 use steroids\auth\AuthModule;
 use steroids\auth\UserInterface;
+
+/**
+ * Class NotifierAuthentificator
+ * @package steroids\auth\models
+ * @property-read string $login
+ */
 
 class NotifierAuthentificator extends BaseAuthentificator
 {
@@ -14,7 +21,7 @@ class NotifierAuthentificator extends BaseAuthentificator
 
     public function getType()
     {
-        return 'notifierAuth';
+        return AuthentificatorEnum::NOTIFIER_AUTH;
     }
 
     public function sendCode()
