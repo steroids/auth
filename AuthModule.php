@@ -206,7 +206,7 @@ class AuthModule extends Module
             'type' => $attributeType,
             'value' => $user->getAttribute($attribute),
             'userId' => $user->getId(),
-            'isTwoFa' => $is2fa,
+            'is2Fa' => $is2fa,
             'code' => static::generateCode($this->confirmCodeLength, $attributeType),
         ]);
         $model->saveOrPanic();

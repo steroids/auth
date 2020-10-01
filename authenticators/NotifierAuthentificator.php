@@ -22,7 +22,8 @@ class NotifierAuthentificator extends BaseAuthentificator
         /** @var UserInterface $userClass */
         $userClass = \Yii::$app->user->identityClass;
 
-        AuthModule::getInstance()->confirm($userClass,null,true);
+        $attribute = strpos($this->login, '@') !== false ? AuthModule::ATTRIBUTE_EMAIL : AuthModule::ATTRIBUTE_PHONE;
+        AuthModule::getInstance()->confirm($userClass,$attribute,true);
     }
 
     /**
