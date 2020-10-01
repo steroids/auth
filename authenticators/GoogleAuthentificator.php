@@ -34,6 +34,14 @@ class GoogleAuthentificator extends BaseAuthentificator
         return AuthentificatorEnum::GOOGLE_AUTH;
     }
 
+    /**
+     * Find or create secretKey and QR code for user
+     * @return array
+     * @throws \PragmaRX\Google2FA\Exceptions\IncompatibleWithGoogleAuthenticatorException
+     * @throws \PragmaRX\Google2FA\Exceptions\InvalidCharactersException
+     * @throws \PragmaRX\Google2FA\Exceptions\SecretKeyTooShortException
+     * @throws \steroids\core\exceptions\ModelSaveException
+     */
     public function getUser2FaInformation()
     {
         $userAuthKeys = UserAuthentificatorKeys::findOne([

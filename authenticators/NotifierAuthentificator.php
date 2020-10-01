@@ -34,6 +34,7 @@ class NotifierAuthentificator extends BaseAuthentificator
      * @param string $code
      * @param string $login
      * @return bool
+     * @throws \steroids\core\exceptions\ModelSaveException
      */
     public function validateCode(string $code,string $login)
     {
