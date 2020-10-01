@@ -248,9 +248,9 @@ class AuthModule extends Module
      * @param string $code
      * @return bool
      */
-    public function authenticate2FA($user,$login,$code,$authType)
+    public function authenticate2FA($user,$login,$code)
     {
-        $authentificator = ($authType === AuthentificatorEnum::GOOGLE_AUTH)
+        $authentificator = (!$login)
             ? new GoogleAuthentificator()
             : new NotifierAuthentificator();
 
@@ -258,7 +258,7 @@ class AuthModule extends Module
         $authValidate = Auth2FaValidation::find()
             ->where([
                 'userId' => $user->id,
-                'authentificatorType' => $authType,
+                'authentificatorType' => $authentificator->type,
             ])
             ->andWhere(['>=','createTime', date("Y-m-d H:i", strtotime('-2 minutes'))])
             ->one();

@@ -34,8 +34,7 @@ class Auth2FAController extends Controller
         $validate = AuthModule::getInstance()->authenticate2FA(
             Yii::$app->user,
             Yii::$app->request->post('login'),
-            $code,
-            Yii::$app->request->post('authType')
+            $code
         );
         return $validate
             ? ['validate code success']
