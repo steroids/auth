@@ -35,6 +35,6 @@ class Auth2FAController extends Controller
         );
         return $validate
             ? ['validate code success']
-            : ['validate code error'];
+            : ['errors' => 'validate code error'];
     }
 }
