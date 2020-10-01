@@ -48,10 +48,11 @@ class GoogleAuthentificator extends BaseAuthentificator
             $userAuthKeys->saveOrPanic();
         }
 
+        //@todo получить информацю о сайте для Google Auth
         //generate QR code
         $qrCodeUrl = $google2fa->getQRCodeUrl(
-            'asd',
-            'asda',
+            '',
+            '',
             $userAuthKeys->secretKey
         );
 
