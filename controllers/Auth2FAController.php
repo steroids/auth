@@ -15,15 +15,26 @@ class Auth2FAController extends Controller
         return [
             'auth' => [
                 'items' => [
-                    'registration' => 'POST /auth/2fa/validate-code',
+                    'registration' => 'POST /auth/2fa/validate-code/<code>',
                 ],
             ],
         ];
     }
 
-
-    public function actionValidateCode()
+    /**
+     * @param $code
+     * @throws \yii\base\Exception
+     * @return array
+     */
+    public function actionValidateCode($code)
     {
-        $authResult = AuthModule::getInstance()->authenticate2FA(Yii::$app->user->identityClass,Yii::$app->request->post('authType'));
+        $validate = AuthModule::getInstance()->authenticate2FA(
+            Yii::$app->user,
+            $code,
+            Yii::$app->request->post('authType')
+        );
+        return $validate
+            ? ['validate code success']
+            : ['validate code error'];
     }
 }

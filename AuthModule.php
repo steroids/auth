@@ -244,6 +244,7 @@ class AuthModule extends Module
     /**
      * @param User $user
      * @param string $authType
+     * @param string $code
      * @return bool
      */
     public function authenticate2FA($user,$code,$authType)
