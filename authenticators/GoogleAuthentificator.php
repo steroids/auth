@@ -30,7 +30,7 @@ class GoogleAuthentificator extends BaseAuthentificator
     }
 
 
-    public static function generateUserSecretKey()
+    public static function getUser2FaInformation()
     {
         $userAuthKeys = UserAuthentificatorKeys::findOne([
             'userId' => Yii::$app->user->id,

@@ -47,7 +47,7 @@ class Auth2FAController extends Controller
      */
     public function actionInformation()
     {
-        return GoogleAuthentificator::generateUserSecretKey();
+        return GoogleAuthentificator::getUser2FaInformation();
     }
 
 }
