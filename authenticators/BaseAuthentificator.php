@@ -2,6 +2,7 @@
 
 namespace steroids\auth\authenticators;
 
+use Yii;
 use steroids\auth\models\Auth2FaValidation;
 
 /**
@@ -14,10 +15,8 @@ abstract class BaseAuthentificator
     abstract public function sendCode();
     abstract public function getType();
 
-    public function validateCode(string $code){
-        $this->onCorrectCode();
-        return true;
-    }
+    abstract public function validateCode(string $code);
+
 
     /**
      * @param Auth2FaValidation $auth2FaValidationModel

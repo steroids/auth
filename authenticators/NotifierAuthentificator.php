@@ -3,7 +3,7 @@
 
 namespace steroids\auth\models;
 
-
+use Yii;
 use steroids\auth\authenticators\BaseAuthentificator;
 use steroids\auth\AuthModule;
 use steroids\auth\UserInterface;
@@ -34,6 +34,14 @@ class NotifierAuthentificator extends BaseAuthentificator
     {
         $confirm = AuthConfirm::findByCode($this->login,$code);
 
-        return $confirm !== null;
+        if($confirm !== null){
+            $this->onCorrectCode(new Auth2FaValidation([
+                'userId' => Yii::$app->user->id,
+                'authentificatorType' => $this->type
+            ]));
+
+            return true;
+        }
+        return false;
     }
 }
