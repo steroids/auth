@@ -21,12 +21,12 @@ class NotifierAuthentificator extends BaseAuthentificator
         return AuthentificatorEnum::NOTIFIER_AUTH;
     }
 
-    public function sendCode()
+    public function sendCode(string $login)
     {
         /** @var UserInterface $userClass */
         $userClass = \Yii::$app->user->identityClass;
 
-        $attribute = strpos($this->login, '@') !== false ? AuthModule::ATTRIBUTE_EMAIL : AuthModule::ATTRIBUTE_PHONE;
+        $attribute = strpos($login, '@') !== false ? AuthModule::ATTRIBUTE_EMAIL : AuthModule::ATTRIBUTE_PHONE;
         AuthModule::getInstance()->confirm($userClass,$attribute,true);
     }
 
@@ -47,7 +47,7 @@ class NotifierAuthentificator extends BaseAuthentificator
 
             return true;
         }
-        
+
         return false;
     }
 }

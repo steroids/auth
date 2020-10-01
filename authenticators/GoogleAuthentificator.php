@@ -19,7 +19,7 @@ class GoogleAuthentificator extends BaseAuthentificator
 {
 
     //not use for Google Authentificator
-    public function sendCode()
+    public function sendCode(string $login)
     {
         return '';
     }

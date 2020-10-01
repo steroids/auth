@@ -12,7 +12,7 @@ use steroids\auth\models\Auth2FaValidation;
  */
 abstract class BaseAuthentificator
 {
-    abstract public function sendCode();
+    abstract public function sendCode(string $login);
     abstract public function getType();
 
     /**
