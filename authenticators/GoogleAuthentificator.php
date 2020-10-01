@@ -3,6 +3,10 @@
 
 namespace steroids\auth\authenticators;
 
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
 use PragmaRX\Google2FA\Google2FA;
 use steroids\auth\authenticators\BaseAuthentificator;
 use steroids\auth\enums\AuthentificatorEnum;
@@ -25,6 +29,45 @@ class GoogleAuthentificator extends BaseAuthentificator
         return AuthentificatorEnum::GOOGLE_AUTH;
     }
 
+
+    public static function generateUserSecretKey()
+    {
+        $userAuthKeys = UserAuthentificatorKeys::findOne([
+            'userId' => Yii::$app->user->id,
+            'authentificatorType' => AuthentificatorEnum::GOOGLE_AUTH
+        ]);
+
+        $google2fa = new Google2FA();
+
+        if(!$userAuthKeys){
+            $userAuthKeys = new UserAuthentificatorKeys([
+                'userId' => Yii::$app->user->id,
+                'secretKey' => $google2fa->generateSecretKey()
+            ]);
+
+            $userAuthKeys->saveOrPanic();
+        }
+
+        //generate QR code
+        $qrCodeUrl = $google2fa->getQRCodeUrl(
+            'asd',
+            'asda',
+            $userAuthKeys->secretKey
+        );
+
+        $renderer = new ImageRenderer(
+            new RendererStyle(400),
+            new SvgImageBackEnd()
+        );
+        $writer = new Writer($renderer);
+        //@todo определится с папкой где ханить qr codes
+        $writer->writeFile($qrCodeUrl, 'qrcode.svg');
+
+        return [
+            'secretKey' => $userAuthKeys->secretKey,
+            'qrCodeUrl' => ''
+        ];
+    }
 
     public function validateCode(string $code)
     {

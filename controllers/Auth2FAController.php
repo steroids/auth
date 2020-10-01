@@ -3,6 +3,9 @@
 
 namespace steroids\auth\controllers;
 
+use steroids\auth\authenticators\GoogleAuthentificator;
+use steroids\auth\enums\AuthentificatorEnum;
+use steroids\auth\models\UserAuthentificatorKeys;
 use Yii;
 use PragmaRX\Google2FA\Google2FA;
 use steroids\auth\AuthModule;
@@ -15,7 +18,8 @@ class Auth2FAController extends Controller
         return [
             'auth' => [
                 'items' => [
-                    'registration' => 'POST /auth/2fa/validate-code/<code>',
+                    'two-fa' => 'POST /auth/2fa/validate-code/<code>',
+                    'two-fa-information' => '/auth/2fa/information',
                 ],
             ],
         ];
@@ -37,4 +41,13 @@ class Auth2FAController extends Controller
             ? ['validate code success']
             : ['errors' => 'validate code error'];
     }
+
+    /**
+     * @return array
+     */
+    public function actionInformation()
+    {
+        return GoogleAuthentificator::generateUserSecretKey();
+    }
+
 }
