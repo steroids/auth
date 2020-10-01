@@ -54,6 +54,22 @@ class AuthConfirm extends AuthConfirmMeta
         return $confirm;
     }
 
+    /**
+     * @param string $type
+     * @param string $value
+     * @return bool
+     */
+    public static function checkIsConfirmed(string $type, string $value)
+    {
+        return (bool) AuthConfirm::find()
+            ->where([
+                'type' => $type,
+                'value' => $value,
+                'isConfirmed' => true,
+            ])
+            ->exists();
+    }
+
     public function behaviors()
     {
         return [

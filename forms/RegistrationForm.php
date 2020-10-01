@@ -14,6 +14,7 @@ use steroids\core\base\Model;
 use steroids\core\validators\PasswordValidator;
 use steroids\core\validators\PhoneValidator;
 use yii\base\Exception;
+use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
 use yii\validators\RequiredValidator;
 
@@ -61,7 +62,7 @@ class RegistrationForm extends RegistrationFormMeta
         $module = AuthModule::getInstance();
         $userClass = $module->userClass;
 
-        //Token
+        // Token
         $rules[] = ['token', ReCaptchaValidator::class];
 
         // Email
@@ -70,7 +71,18 @@ class RegistrationForm extends RegistrationFormMeta
             $rules = [
                 ...$rules,
                 ['email', 'filter', 'filter' => fn($value) => mb_strtolower(trim($value))],
-                ['email', 'unique', 'targetClass' => $userClass, 'targetAttribute' => $module->emailAttribute],
+                [
+                    'email',
+                    'unique',
+                    'targetClass' => AuthModule::resolveClass(AuthConfirm::class),
+                    'targetAttribute' => 'value',
+                    'filter' => function (ActiveQuery $query) {
+                        $query->andWhere([
+                            'type' => AuthModule::ATTRIBUTE_EMAIL,
+                            'isConfirmed' => true,
+                        ]);
+                    },
+                ],
             ];
         }
 
@@ -80,7 +92,18 @@ class RegistrationForm extends RegistrationFormMeta
             $rules = [
                 ...$rules,
                 ['phone', PhoneValidator::class],
-                ['phone', 'unique', 'targetClass' => $userClass, 'targetAttribute' => $module->phoneAttribute],
+                [
+                    'phone',
+                    'unique',
+                    'targetClass' => AuthModule::resolveClass(AuthConfirm::class),
+                    'targetAttribute' => 'value',
+                    'filter' => function (ActiveQuery $query) {
+                        $query->andWhere([
+                            'type' => AuthModule::ATTRIBUTE_PHONE,
+                            'isConfirmed' => true,
+                        ]);
+                    },
+                ],
             ];
         }
 
@@ -119,8 +142,20 @@ class RegistrationForm extends RegistrationFormMeta
         $userClass = $module->userClass;
 
         if ($this->validate()) {
-            // Create user
-            $this->user = new $userClass();
+            // Check user already exists, but not phone/email confirmed
+            $mainAttribute = $module->registrationMainAttribute;
+            if (in_array($mainAttribute, [AuthModule::ATTRIBUTE_EMAIL, AuthModule::ATTRIBUTE_PHONE])
+                && !AuthConfirm::checkIsConfirmed($mainAttribute, $this->$mainAttribute)
+            ) {
+                /** @var UserInterface $userClass */
+                $userClass = $module->userClass;
+                $this->user = $userClass::findBy($this->$mainAttribute, [$module->getUserAttributeName($mainAttribute)]);
+            }
+
+            // Create new user
+            if (!$this->user) {
+                $this->user = new $userClass();
+            }
 
             // Set email/phone/login
             if ($this->email) {
