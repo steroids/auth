@@ -14,7 +14,12 @@ use steroids\auth\models\Auth2FaValidation;
 use steroids\auth\models\UserAuthentificatorKeys;
 use Yii;
 
-
+/**
+ * Class GoogleAuthentificator
+ * @package steroids\auth\authenticators
+ * @property-read string $secretKey
+ * @property-read string $qrCode
+ */
 class GoogleAuthentificator extends BaseAuthentificator
 {
 
@@ -35,14 +40,13 @@ class GoogleAuthentificator extends BaseAuthentificator
     }
 
     /**
-     * Find or create secretKey and QR code for user
-     * @return array
+     * @return string
      * @throws \PragmaRX\Google2FA\Exceptions\IncompatibleWithGoogleAuthenticatorException
      * @throws \PragmaRX\Google2FA\Exceptions\InvalidCharactersException
      * @throws \PragmaRX\Google2FA\Exceptions\SecretKeyTooShortException
      * @throws \steroids\core\exceptions\ModelSaveException
      */
-    public function getUser2FaInformation()
+    public function getSecretKey()
     {
         $userAuthKeys = UserAuthentificatorKeys::findOne([
             'userId' => Yii::$app->user->id,
@@ -60,11 +64,21 @@ class GoogleAuthentificator extends BaseAuthentificator
             $userAuthKeys->saveOrPanic();
         }
 
+        return $userAuthKeys->secretKey;
+    }
+
+    /**
+     * @return string
+     */
+    public function getQrCode()
+    {
+        $google2fa = new Google2FA();
+
         //generate QR code
         $qrCodeUrl = $google2fa->getQRCodeUrl(
             $this->company,
             $this->holder,
-            $userAuthKeys->secretKey
+            $this->secretKey
         );
 
         $renderer = new ImageRenderer(
@@ -73,10 +87,7 @@ class GoogleAuthentificator extends BaseAuthentificator
         );
         $writer = new Writer($renderer);
 
-        return [
-            'secretKey' => $userAuthKeys->secretKey,
-            'qrCodeUrl' => $writer->writeString($qrCodeUrl)
-        ];
+        return $writer->writeString($qrCodeUrl);
     }
 
     public function validateCode(string $code, $login)
