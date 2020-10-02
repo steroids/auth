@@ -13,8 +13,8 @@ abstract class AuthentificatorEnumMeta extends Enum
     public static function getLabels()
     {
         return [
-            self::GOOGLE_AUTH => Yii::t('app', NULL),
-            self::NOTIFIER_AUTH => Yii::t('app', NULL)
+            self::GOOGLE_AUTH => Yii::t('app', '2fa аутентификация с использованием google'),
+            self::NOTIFIER_AUTH => Yii::t('app', '2fa аутентификация с использованием уведомлений на телефон или почту')
         ];
     }
 }

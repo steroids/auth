@@ -19,7 +19,7 @@ class Auth2FAController extends Controller
         return [
             'auth' => [
                 'items' => [
-                    'two-fa' => 'POST /auth/2fa/validate-code',
+                    'two-fa-validate-code' => 'POST /auth/2fa/validate-code',
                 ],
             ],
         ];
