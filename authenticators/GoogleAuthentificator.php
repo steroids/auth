@@ -81,8 +81,6 @@ class GoogleAuthentificator extends BaseAuthentificator
 
     public function validateCode(string $code, $login)
     {
-        $google2fa = new Google2FA();
-
         $userAuthKeys = UserAuthentificatorKeys::findOne([
             'userId' => Yii::$app->user->id,
             'authentificatorType' => $this->type
@@ -92,9 +90,9 @@ class GoogleAuthentificator extends BaseAuthentificator
             return false;
         }
 
-        $valid = $google2fa->verifyKey($userAuthKeys->secretKey, $code);
+        $isCodeValid = (new Google2FA())->verifyKey($userAuthKeys->secretKey, $code);
 
-        if(!$valid){
+        if(!$isCodeValid){
             return false;
         }
 

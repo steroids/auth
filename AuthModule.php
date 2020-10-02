@@ -6,8 +6,6 @@ use app\user\models\User;
 use steroids\auth\authenticators\GoogleAuthentificator;
 use steroids\auth\components\captcha\CaptchaComponentInterface;
 use steroids\auth\components\captcha\ReCaptchaV3;
-use ReflectionClass;
-use steroids\auth\enums\AuthentificatorEnum;
 use steroids\auth\forms\ConfirmForm;
 use steroids\auth\forms\LoginForm;
 use steroids\auth\forms\RecoveryPasswordConfirmForm;
@@ -188,7 +186,7 @@ class AuthModule extends Module
 
     /**
      * @param UserInterface|Model $user
-     * @param string $attributeType
+     * @param string $attributeType one of AuthModule::ATTRIBUTE_EMAIL, AuthModule::ATTRIBUTE_PHONE
      * @param bool $is2fa
      * @return null|AuthConfirm
      * @throws ModelSaveException
@@ -247,6 +245,7 @@ class AuthModule extends Module
      * @param string $login
      * @param string $code
      * @return bool
+     * @throws ModelSaveException
      */
     public function authenticate2FA($user,$login,$code)
     {
@@ -261,6 +260,7 @@ class AuthModule extends Module
                 'userId' => $user->id,
                 'authentificatorType' => $authentificator->type,
             ])
+            // @todo move 2 min to const
             ->andWhere(['>=','createTime', date("Y-m-d H:i", strtotime('-2 minutes'))])
             ->one();
 
@@ -269,5 +269,12 @@ class AuthModule extends Module
         }
 
         return $authentificator->validateCode($code,$login);
+    }
+
+    public static function getNotifierAttributeTypeFromLogin(string $login): string
+    {
+        return strpos($login, '@') !== false
+            ? AuthModule::ATTRIBUTE_EMAIL
+            : AuthModule::ATTRIBUTE_PHONE;
     }
 }

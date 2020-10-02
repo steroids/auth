@@ -8,6 +8,7 @@ use Yii;
 use steroids\auth\authenticators\BaseAuthentificator;
 use steroids\auth\AuthModule;
 use steroids\auth\UserInterface;
+use yii\base\InvalidConfigException;
 
 /**
  * Class NotifierAuthentificator
@@ -21,13 +22,26 @@ class NotifierAuthentificator extends BaseAuthentificator
         return AuthentificatorEnum::NOTIFIER_AUTH;
     }
 
+    /**
+     * @param string $login
+     * @throws InvalidConfigException
+     * @throws \steroids\core\exceptions\ModelSaveException
+     * @throws \yii\base\Exception
+     */
     public function sendCode(string $login)
     {
-        /** @var UserInterface $userClass */
-        $userClass = \Yii::$app->user->identityClass;
+        /** @var UserInterface $user */
+        $user = \Yii::$app->user->identityClass;
 
-        $attribute = strpos($login, '@') !== false ? AuthModule::ATTRIBUTE_EMAIL : AuthModule::ATTRIBUTE_PHONE;
-        AuthModule::getInstance()->confirm($userClass,$attribute,true);
+        if (!$user) {
+            throw new InvalidConfigException('Context app user must be set before sending 2FA code');
+        }
+
+        AuthModule::getInstance()->confirm(
+            $user,
+            AuthModule::getNotifierAttributeTypeFromLogin($login),
+            true
+        );
     }
 
     /**
