@@ -24,7 +24,7 @@ class AuthTest extends TestCase
     public function testEmailWithConfirmAndRecovery()
     {
         $module = AuthModule::getInstance();
-        $module->registrationMainAttribute = is2FaRIBUTE_EMAIL;
+        $module->registrationMainAttribute = AuthAttributeTypes::EMAIL;
         $module->loginAvailableAttributes = [AuthAttributeTypes::EMAIL];
 
         // Register
