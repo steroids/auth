@@ -5,6 +5,7 @@ namespace steroids\auth\controllers;
 
 use steroids\auth\authenticators\GoogleAuthentificator;
 use steroids\auth\enums\AuthentificatorEnum;
+use steroids\auth\forms\Validate2FaCode;
 use steroids\auth\models\UserAuthentificatorKeys;
 use Yii;
 use PragmaRX\Google2FA\Google2FA;
@@ -18,28 +19,21 @@ class Auth2FAController extends Controller
         return [
             'auth' => [
                 'items' => [
-                    'two-fa' => 'POST /auth/2fa/validate-code/<code>',
+                    'two-fa' => 'POST /auth/2fa/validate-code',
                 ],
             ],
         ];
     }
 
     /**
-     * @param $code
-     * @throws \yii\base\Exception
-     * @return array
+     * @return Validate2FaCode
      */
-    public function actionValidateCode($code)
+    public function actionValidateCode()
     {
-        $validate = AuthModule::getInstance()->authenticate2FA(
-            Yii::$app->user,
-            Yii::$app->request->post('login'),
-            $code
-        );
-        return $validate
-            ? ['validate code success']
-            : ['errors' => 'validate code error'];
-    }
+        $model = new Validate2FaCode();
+        $model->load(Yii::$app->request->post());
 
+        return $model;
+    }
 
 }
