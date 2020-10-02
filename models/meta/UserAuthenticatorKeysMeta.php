@@ -9,13 +9,13 @@ use \Yii;
  * @property string $id
  * @property integer $userId
  * @property string $secretKey
- * @property string $authentificatorType
+ * @property string $authenticatorType
  */
 abstract class UserAuthenticatorKeysMeta extends Model
 {
     public static function tableName()
     {
-        return 'user_authentificator_keys';
+        return 'user_authenticator_keys';
     }
 
     public function fields()
@@ -29,7 +29,7 @@ abstract class UserAuthenticatorKeysMeta extends Model
         return [
             ...parent::rules(),
             ['userId', 'integer'],
-            [['secretKey', 'authentificatorType'], 'string', 'max' => 255],
+            [['secretKey', 'authenticatorType'], 'string', 'max' => 255],
         ];
     }
 
@@ -48,7 +48,7 @@ abstract class UserAuthenticatorKeysMeta extends Model
                 'label' => Yii::t('steroids', 'ключ для 2fa'),
                 'isPublishToFrontend' => false
             ],
-            'authentificatorType' => [
+            'authenticatorType' => [
                 'label' => Yii::t('steroids', 'тип аутентификации'),
                 'isPublishToFrontend' => false
             ]

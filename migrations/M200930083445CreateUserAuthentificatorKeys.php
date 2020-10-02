@@ -8,16 +8,16 @@ class M200930083445CreateUserAuthentificatorKeys extends Migration
 {
     public function safeUp()
     {
-        $this->createTable('user_authentificator_keys', [
+        $this->createTable('user_authenticator_keys', [
             'id' => $this->primaryKey(),
             'userId' => $this->integer(),
             'secretKey' => $this->string(),
-            'authentificatorType' => $this->string(),
+            'authenticatorType' => $this->string(),
         ]);
     }
 
     public function safeDown()
     {
-        $this->dropTable('user_authentificator_keys');
+        $this->dropTable('user_authenticator_keys');
     }
 }
