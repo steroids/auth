@@ -92,7 +92,7 @@ class GoogleAuthentificator extends BaseAuthentificator
             return false;
         }
 
-        $valid = $google2fa->verifyKey($userAuthKeys->secretKey, $code, 8);
+        $valid = $google2fa->verifyKey($userAuthKeys->secretKey, $code);
 
         if(!$valid){
             return false;

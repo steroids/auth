@@ -255,6 +255,7 @@ class AuthModule extends Module
             : new NotifierAuthentificator();
 
 
+        //checking if the user recently used 2Fa
         $authValidate = Auth2FaValidation::find()
             ->where([
                 'userId' => $user->id,
