@@ -50,7 +50,7 @@ class GoogleAuthenticator extends BaseAuthenticator
     {
         $userAuthKeys = UserAuthenticatorKeys::findOne([
             'userId' => Yii::$app->user->id,
-            'authentificatorType' => AuthenticatorEnum::GOOGLE_AUTH
+            'authenticatorType' => AuthenticatorEnum::GOOGLE_AUTH
         ]);
 
         $google2fa = new Google2FA();
