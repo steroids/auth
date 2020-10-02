@@ -10,7 +10,7 @@ use steroids\auth\models\Auth2FaValidation;
  * @package steroids\auth\authenticators
  * @property-read string $type
  */
-abstract class BaseAuthentificator
+abstract class BaseAuthenticator
 {
     abstract public function sendCode(string $login);
     abstract public function getType();

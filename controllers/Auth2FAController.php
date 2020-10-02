@@ -3,10 +3,10 @@
 
 namespace steroids\auth\controllers;
 
-use steroids\auth\authenticators\GoogleAuthentificator;
-use steroids\auth\enums\AuthentificatorEnum;
+use steroids\auth\authenticators\GoogleAuthenticator;
+use steroids\auth\enums\AuthenticatorEnum;
 use steroids\auth\forms\Validate2FaCode;
-use steroids\auth\models\UserAuthentificatorKeys;
+use steroids\auth\models\UserAuthenticatorKeys;
 use Yii;
 use PragmaRX\Google2FA\Google2FA;
 use steroids\auth\AuthModule;

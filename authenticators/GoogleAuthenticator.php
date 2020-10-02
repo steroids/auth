@@ -8,10 +8,10 @@ use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
 use PragmaRX\Google2FA\Google2FA;
-use steroids\auth\authenticators\BaseAuthentificator;
-use steroids\auth\enums\AuthentificatorEnum;
+use steroids\auth\authenticators\BaseAuthenticator;
+use steroids\auth\enums\AuthenticatorEnum;
 use steroids\auth\models\Auth2FaValidation;
-use steroids\auth\models\UserAuthentificatorKeys;
+use steroids\auth\models\UserAuthenticatorKeys;
 use Yii;
 
 /**
@@ -20,7 +20,7 @@ use Yii;
  * @property-read string $secretKey
  * @property-read string $qrCode
  */
-class GoogleAuthentificator extends BaseAuthentificator
+class GoogleAuthenticator extends BaseAuthenticator
 {
 
     //not use for Google Authentificator
@@ -36,7 +36,7 @@ class GoogleAuthentificator extends BaseAuthentificator
 
     public function getType()
     {
-        return AuthentificatorEnum::GOOGLE_AUTH;
+        return AuthenticatorEnum::GOOGLE_AUTH;
     }
 
     /**
@@ -48,15 +48,15 @@ class GoogleAuthentificator extends BaseAuthentificator
      */
     public function getSecretKey()
     {
-        $userAuthKeys = UserAuthentificatorKeys::findOne([
+        $userAuthKeys = UserAuthenticatorKeys::findOne([
             'userId' => Yii::$app->user->id,
-            'authentificatorType' => AuthentificatorEnum::GOOGLE_AUTH
+            'authentificatorType' => AuthenticatorEnum::GOOGLE_AUTH
         ]);
 
         $google2fa = new Google2FA();
 
         if(!$userAuthKeys){
-            $userAuthKeys = new UserAuthentificatorKeys([
+            $userAuthKeys = new UserAuthenticatorKeys([
                 'userId' => Yii::$app->user->id,
                 'secretKey' => $google2fa->generateSecretKey()
             ]);
@@ -92,7 +92,7 @@ class GoogleAuthentificator extends BaseAuthentificator
 
     public function validateCode(string $code, $login)
     {
-        $userAuthKeys = UserAuthentificatorKeys::findOne([
+        $userAuthKeys = UserAuthenticatorKeys::findOne([
             'userId' => Yii::$app->user->id,
             'authentificatorType' => $this->type
         ]);

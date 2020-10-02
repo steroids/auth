@@ -5,7 +5,7 @@ namespace steroids\auth\enums\meta;
 use Yii;
 use steroids\core\base\Enum;
 
-abstract class AuthentificatorEnumMeta extends Enum
+abstract class AuthenticatorEnumMeta extends Enum
 {
     const GOOGLE_AUTH = 'google_auth';
     const NOTIFIER_AUTH = 'notifier_auth';

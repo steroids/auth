@@ -3,23 +3,23 @@
 
 namespace steroids\auth\models;
 
-use steroids\auth\enums\AuthentificatorEnum;
+use steroids\auth\enums\AuthenticatorEnum;
 use Yii;
-use steroids\auth\authenticators\BaseAuthentificator;
+use steroids\auth\authenticators\BaseAuthenticator;
 use steroids\auth\AuthModule;
 use steroids\auth\UserInterface;
 use yii\base\InvalidConfigException;
 
 /**
- * Class NotifierAuthentificator
+ * Class NotifierAuthenticator
  * @package steroids\auth\models
  */
 
-class NotifierAuthentificator extends BaseAuthentificator
+class NotifierAuthenticator extends BaseAuthenticator
 {
     public function getType()
     {
-        return AuthentificatorEnum::NOTIFIER_AUTH;
+        return AuthenticatorEnum::NOTIFIER_AUTH;
     }
 
     /**

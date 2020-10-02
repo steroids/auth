@@ -3,7 +3,7 @@
 namespace steroids\auth;
 
 use app\user\models\User;
-use steroids\auth\authenticators\GoogleAuthentificator;
+use steroids\auth\authenticators\GoogleAuthenticator;
 use steroids\auth\components\captcha\CaptchaComponentInterface;
 use steroids\auth\components\captcha\ReCaptchaV3;
 use steroids\auth\enums\AuthAttributeTypes;
@@ -19,7 +19,7 @@ use steroids\auth\models\Auth2FaValidation;
 use steroids\auth\models\AuthConfirm;
 use steroids\auth\models\AuthLogin;
 use steroids\auth\models\AuthSocial;
-use steroids\auth\models\NotifierAuthentificator;
+use steroids\auth\models\NotifierAuthenticator;
 use steroids\auth\providers\FacebookAuthProvider;
 use steroids\auth\providers\GoogleAuthProvider;
 use steroids\auth\providers\SteamAuthProvider;
@@ -249,8 +249,8 @@ class AuthModule extends Module
     public function authenticate2FA($user,$login,$code)
     {
         $authentificator = (!$login)
-            ? new GoogleAuthentificator()
-            : new NotifierAuthentificator();
+            ? new GoogleAuthenticator()
+            : new NotifierAuthenticator();
 
 
         //checking if user recently used 2Fa
