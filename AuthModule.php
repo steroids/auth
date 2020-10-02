@@ -6,6 +6,7 @@ use app\user\models\User;
 use steroids\auth\authenticators\GoogleAuthentificator;
 use steroids\auth\components\captcha\CaptchaComponentInterface;
 use steroids\auth\components\captcha\ReCaptchaV3;
+use steroids\auth\enums\AuthAttributeTypes;
 use steroids\auth\forms\ConfirmForm;
 use steroids\auth\forms\LoginForm;
 use steroids\auth\forms\RecoveryPasswordConfirmForm;
@@ -34,10 +35,6 @@ class AuthModule extends Module
 {
     use ModuleProvidersTrait;
 
-    const ATTRIBUTE_EMAIL = 'email';
-    const ATTRIBUTE_PHONE = 'phone';
-    const ATTRIBUTE_LOGIN = 'login';
-
     /**
      * Email attribute in User model
      */
@@ -62,13 +59,13 @@ class AuthModule extends Module
      * What attributes user can be used as a login
      */
     public array $loginAvailableAttributes = [
-        self::ATTRIBUTE_EMAIL,
+        AuthAttributeTypes::EMAIL,
     ];
 
     /**
      * Main required attribute as login
      */
-    public string $registrationMainAttribute = self::ATTRIBUTE_EMAIL;
+    public string $registrationMainAttribute = AuthAttributeTypes::EMAIL;
 
     /**
      * Additional attributes for registration form. Will be validated by User model
@@ -177,7 +174,7 @@ class AuthModule extends Module
     public function getUserAttributeName($attribute)
     {
         $map = [
-            static::ATTRIBUTE_EMAIL => $this->emailAttribute,
+            AuthAttributeTypes::EMAIL => $this->emailAttribute,
             static::ATTRIBUTE_PHONE => $this->phoneAttribute,
             static::ATTRIBUTE_LOGIN => $this->loginAttribute,
         ];
@@ -186,21 +183,23 @@ class AuthModule extends Module
 
     /**
      * @param UserInterface|Model $user
-     * @param string $attributeType one of AuthModule::ATTRIBUTE_EMAIL, AuthModule::ATTRIBUTE_PHONE
+     * @param string $attributeType one of AuthAttributeTypes::EMAIL, AuthAttributeTypes::PHONE
      * @param bool $is2fa
      * @return null|AuthConfirm
      * @throws ModelSaveException
      */
+
     public function confirm($user, $attributeType = null, $is2fa = false)
     {
         if (!$attributeType) {
             $attributeType = $this->registrationMainAttribute;
         }
-        if (!in_array($attributeType, [AuthModule::ATTRIBUTE_EMAIL, AuthModule::ATTRIBUTE_PHONE])) {
+
+        if (!in_array($attributeType, self::getNotifierTypes())) {
             return null;
         }
 
-        $attribute = $attributeType === AuthModule::ATTRIBUTE_PHONE
+        $attribute = $attributeType === AuthAttributeTypes::PHONE
             ? $this->phoneAttribute
             : $this->emailAttribute;
 
@@ -274,7 +273,15 @@ class AuthModule extends Module
     public static function getNotifierAttributeTypeFromLogin(string $login): string
     {
         return strpos($login, '@') !== false
-            ? AuthModule::ATTRIBUTE_EMAIL
-            : AuthModule::ATTRIBUTE_PHONE;
+            ? AuthAttributeTypes::EMAIL
+            : AuthAttributeTypes::PHONE;
+    }
+
+    public static function getNotifierTypes()
+    {
+        return [
+            AuthAttributeTypes::EMAIL,
+            AuthAttributeTypes::PHONE
+        ];
     }
 }

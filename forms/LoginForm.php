@@ -4,6 +4,7 @@ namespace steroids\auth\forms;
 
 use steroids\auth\AuthModule;
 use steroids\auth\components\captcha\ReCaptchaV3;
+use steroids\auth\enums\AuthAttributeTypes;
 use steroids\auth\forms\meta\LoginFormMeta;
 use steroids\auth\models\AuthConfirm;
 use steroids\auth\UserInterface;
@@ -54,13 +55,13 @@ class LoginForm extends LoginFormMeta
         //Add captcha
         $rules[] = ['token', ReCaptchaValidator::class];
 
-        if (in_array(AuthModule::ATTRIBUTE_EMAIL, $module->loginAvailableAttributes)
+        if (in_array(AuthAttributeTypes::EMAIL, $module->loginAvailableAttributes)
             && strpos($this->login, '@') !== false) {
             $rules[] = ['login', 'email'];
-        } elseif (in_array(AuthModule::ATTRIBUTE_PHONE, $module->loginAvailableAttributes)
+        } elseif (in_array(AuthAttributeTypes::PHONE, $module->loginAvailableAttributes)
             && preg_match('/^\+?[0-9]+$/', trim($this->login))) {
             $rules[] = ['login', PhoneValidator::class];
-        } elseif (in_array(AuthModule::ATTRIBUTE_LOGIN, $module->loginAvailableAttributes)) {
+        } elseif (in_array(AuthAttributeTypes::LOGIN, $module->loginAvailableAttributes)) {
             $rules[] = ['login', LoginValidator::class];
         }
 
@@ -104,8 +105,8 @@ class LoginForm extends LoginFormMeta
                         ->exists();
                     if (!$isConfirmed) {
                         $messages = [
-                            AuthModule::ATTRIBUTE_EMAIL => \Yii::t('steroids', 'Email не подтвержден. Проверьте почту или восстановите пароль'),
-                            AuthModule::ATTRIBUTE_PHONE => \Yii::t('steroids', 'Телефон не подтвержден. Проверьте телефон или восстановите пароль'),
+                            AuthAttributeTypes::EMAIL => \Yii::t('steroids', 'Email не подтвержден. Проверьте почту или восстановите пароль'),
+                            AuthAttributeTypes::PHONE => \Yii::t('steroids', 'Телефон не подтвержден. Проверьте телефон или восстановите пароль'),
                         ];
                         $message = ArrayHelper::getValue($messages, $module->registrationMainAttribute, \Yii::t('steroids', 'Логин не подтвержден.'));
                         $this->addError($attribute, $message);

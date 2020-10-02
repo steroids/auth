@@ -2,6 +2,7 @@
 
 namespace steroids\auth\forms;
 
+use steroids\auth\enums\AuthAttributeTypes;
 use steroids\auth\models\AuthConfirm;
 use steroids\auth\validators\ReCaptchaValidator;
 use steroids\core\exceptions\ModelSaveException;
@@ -65,8 +66,8 @@ class RegistrationForm extends RegistrationFormMeta
         $rules[] = ['token', ReCaptchaValidator::class];
 
         // Email
-        if ($module->registrationMainAttribute === AuthModule::ATTRIBUTE_EMAIL ||
-            in_array(AuthModule::ATTRIBUTE_EMAIL, $module->loginAvailableAttributes)) {
+        if ($module->registrationMainAttribute === AuthAttributeTypes::EMAIL ||
+            in_array(AuthAttributeTypes::EMAIL, $module->loginAvailableAttributes)) {
             $rules = [
                 ...$rules,
                 ['email', 'filter', 'filter' => fn($value) => mb_strtolower(trim($value))],
@@ -75,8 +76,8 @@ class RegistrationForm extends RegistrationFormMeta
         }
 
         // Phone
-        if ($module->registrationMainAttribute === AuthModule::ATTRIBUTE_PHONE ||
-            in_array(AuthModule::ATTRIBUTE_PHONE, $module->loginAvailableAttributes)) {
+        if ($module->registrationMainAttribute === AuthAttributeTypes::PHONE||
+            in_array(AuthAttributeTypes::PHONE, $module->loginAvailableAttributes)) {
             $rules = [
                 ...$rules,
                 ['phone', PhoneValidator::class],
@@ -85,8 +86,8 @@ class RegistrationForm extends RegistrationFormMeta
         }
 
         // Login
-        if ($module->registrationMainAttribute === AuthModule::ATTRIBUTE_LOGIN ||
-            in_array(AuthModule::ATTRIBUTE_LOGIN, $module->loginAvailableAttributes)) {
+        if ($module->registrationMainAttribute === AuthAttributeTypes::LOGIN ||
+            in_array(AuthAttributeTypes::LOGIN, $module->loginAvailableAttributes)) {
             $rules = [
                 ...$rules,
                 ['login', 'filter', 'filter' => fn($value) => mb_strtolower(trim($value))],
