@@ -104,6 +104,8 @@ class AuthModule extends Module
      */
     public bool $isCaptchaEnable = false;
 
+    public string $auth2FaValidationLiveTime = '-2 minutes';
+
     /**
      * @var CaptchaComponentInterface|array|null
      */
@@ -240,10 +242,9 @@ class AuthModule extends Module
 
     /**
      * @param User $user
-     * @param string $authType
      * @param string $login
      * @param string $code
-     * @return bool
+     * @return bool | string
      * @throws ModelSaveException
      */
     public function authenticate2FA($user,$login,$code)
@@ -259,12 +260,17 @@ class AuthModule extends Module
                 'userId' => $user->id,
                 'authentificatorType' => $authentificator->type,
             ])
-            // @todo move 2 min to const
-            ->andWhere(['>=','createTime', date("Y-m-d H:i", strtotime('-2 minutes'))])
+            ->andWhere(['>=','createTime', date("Y-m-d H:i", strtotime($this->auth2FaValidationLiveTime))])
             ->one();
 
         if($authValidate){
             return true;
+        }
+
+        if($authentificator instanceof NotifierAuthenticator && !$authValidate){
+            $authentificator->sendCode($login);
+
+            return '2fa auth code send';
         }
 
         return $authentificator->validateCode($code,$login);
