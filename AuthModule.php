@@ -258,7 +258,7 @@ class AuthModule extends Module
         $authValidate = Auth2FaValidation::find()
             ->where([
                 'userId' => $user->id,
-                'authentificatorType' => $authentificator->type,
+                'authenticatorType' => $authentificator->type,
             ])
             ->andWhere(['>=','createTime', date("Y-m-d H:i", strtotime($this->auth2FaValidationLiveTime))])
             ->one();

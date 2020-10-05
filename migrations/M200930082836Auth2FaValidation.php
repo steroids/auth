@@ -11,7 +11,7 @@ class M200930082836Auth2FaValidation extends Migration
         $this->createTable('auth_2fa_validation', [
             'id' => $this->primaryKey(),
             'createTime' => $this->dateTime(),
-            'authentificatorType' => $this->string(),
+            'authenticatorType' => $this->string(),
             'userId' => $this->integer(),
         ]);
     }

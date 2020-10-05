@@ -29,7 +29,7 @@ abstract class Auth2FaValidationMeta extends Model
         return [
             ...parent::rules(),
             ['createTime', 'date', 'format' => 'php:Y-m-d H:i:s'],
-            ['authentificatorType', 'string', 'max' => 255],
+            ['authenticatorType', 'string', 'max' => 255],
             ['userId', 'integer'],
         ];
     }
@@ -47,7 +47,7 @@ abstract class Auth2FaValidationMeta extends Model
                 'appType' => 'dateTime',
                 'isPublishToFrontend' => false
             ],
-            'authentificatorType' => [
+            'authenticatorType' => [
                 'isPublishToFrontend' => false
             ],
             'userId' => [
