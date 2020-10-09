@@ -3,6 +3,7 @@
 namespace steroids\auth\components;
 
 use steroids\auth\AuthModule;
+use steroids\auth\UserInterface;
 use Yii;
 use steroids\auth\models\AuthLogin;
 use yii\helpers\ArrayHelper;
@@ -18,6 +19,8 @@ use yii\web\IdentityInterface;
  */
 class BearerWebUser extends \yii\web\User
 {
+    protected const WS_TOKEN_CACHE_TIME = 60;
+
     public $defaultRole = 'user';
 
     /**
@@ -175,5 +178,35 @@ class BearerWebUser extends \yii\web\User
     public function loginRequired($checkAjax = true, $checkAcceptHeader = true)
     {
         throw new ForbiddenHttpException(Yii::t('yii', 'Login Required'));
+    }
+
+    /**
+     * @param false $force
+     * @return string|null
+     * @throws \yii\base\Exception
+     */
+    public function refreshWsToken($force = false)
+    {
+        $authLogin = $this->getLogin();
+
+        if (!$authLogin) {
+            return null;
+        }
+
+        if (
+            !$authLogin->wsToken
+            || $force
+            // Don't refresh token more often than static::WS_TOKEN_CACHE_TIME seconds
+            || time() - strtotime($authLogin->createTime) > static::WS_TOKEN_CACHE_TIME
+        ) {
+            $authLogin->updateAttributes([
+                'wsToken' => \Yii::$app->security->generateRandomString(AuthLogin::WS_TOKEN_LENGTH),
+            ]);
+
+            // Set in redis
+            \Yii::$app->ws->addToken($this->identity, $authLogin->wsToken);
+        }
+
+        return $authLogin->wsToken;
     }
 }
