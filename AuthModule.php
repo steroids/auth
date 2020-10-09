@@ -109,27 +109,7 @@ class AuthModule extends Module
      */
     public ?array $captcha = [];
 
-    public array $providersClasses = [
-        'facebook' => FacebookAuthProvider::class,
-        'google' => GoogleAuthProvider::class,
-        'steam' => SteamAuthProvider::class,
-        'vk' => VkAuthProvider::class,
-    ];
-
-    public array $classesMap = [
-        'steroids\auth\models\AuthConfirm' => AuthConfirm::class,
-        'steroids\auth\models\AuthLogin' => AuthLogin::class,
-        'steroids\auth\models\AuthSocial' => AuthSocial::class,
-        'steroids\auth\forms\ConfirmForm' => ConfirmForm::class,
-        'steroids\auth\forms\LoginForm' => LoginForm::class,
-        'steroids\auth\forms\RecoveryPasswordConfirmForm' => RecoveryPasswordConfirmForm::class,
-        'steroids\auth\forms\RecoveryPasswordForm' => RecoveryPasswordForm::class,
-        'steroids\auth\forms\RegistrationForm' => RegistrationForm::class,
-        'steroids\auth\forms\SocialEmailConfirmForm' => SocialEmailConfirmForm::class,
-        'steroids\auth\forms\SocialEmailForm' => SocialEmailForm::class,
-        'steroids\auth\forms\ProviderLoginForm' => ProviderLoginForm::class,
-        'steroids\auth\AuthProfile' => AuthProfile::class,
-    ];
+    public array $providersClasses = [];
 
     /**
      * @param int|null $length
@@ -155,6 +135,28 @@ class AuthModule extends Module
         if (!$this->userClass) {
             throw new InvalidConfigException('Please set "userClass" property in AuthModule configuration');
         }
+
+        $this->classesMap = array_merge([
+            'steroids\auth\models\AuthConfirm' => AuthConfirm::class,
+            'steroids\auth\models\AuthLogin' => AuthLogin::class,
+            'steroids\auth\models\AuthSocial' => AuthSocial::class,
+            'steroids\auth\forms\ConfirmForm' => ConfirmForm::class,
+            'steroids\auth\forms\LoginForm' => LoginForm::class,
+            'steroids\auth\forms\RecoveryPasswordConfirmForm' => RecoveryPasswordConfirmForm::class,
+            'steroids\auth\forms\RecoveryPasswordForm' => RecoveryPasswordForm::class,
+            'steroids\auth\forms\RegistrationForm' => RegistrationForm::class,
+            'steroids\auth\forms\SocialEmailConfirmForm' => SocialEmailConfirmForm::class,
+            'steroids\auth\forms\SocialEmailForm' => SocialEmailForm::class,
+            'steroids\auth\forms\ProviderLoginForm' => ProviderLoginForm::class,
+            'steroids\auth\AuthProfile' => AuthProfile::class,
+        ], $this->classesMap);
+
+        $this->providersClasses = array_merge([
+            'facebook' => FacebookAuthProvider::class,
+            'google' => GoogleAuthProvider::class,
+            'steam' => SteamAuthProvider::class,
+            'vk' => VkAuthProvider::class,
+        ], $this->providersClasses);
 
         $this->captcha = array_merge(
             ['class' => ReCaptchaV3::class],
