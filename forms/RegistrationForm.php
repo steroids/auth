@@ -3,7 +3,7 @@
 namespace steroids\auth\forms;
 
 use steroids\auth\models\AuthConfirm;
-use steroids\auth\validators\CodeAlreadySendValidator;
+use steroids\auth\validators\VerifyCodeIsSendValidator;
 use steroids\auth\validators\ReCaptchaValidator;
 use steroids\core\exceptions\ModelSaveException;
 use Yii;
@@ -71,7 +71,7 @@ class RegistrationForm extends RegistrationFormMeta
             in_array(AuthModule::ATTRIBUTE_EMAIL, $module->loginAvailableAttributes)) {
             $rules = [
                 ...$rules,
-                ['email', CodeAlreadySendValidator::class],
+                ['email', VerifyCodeIsSendValidator::class],
                 ['email', 'filter', 'filter' => fn($value) => mb_strtolower(trim($value))],
                 [
                     'email',
@@ -93,7 +93,7 @@ class RegistrationForm extends RegistrationFormMeta
             in_array(AuthModule::ATTRIBUTE_PHONE, $module->loginAvailableAttributes)) {
             $rules = [
                 ...$rules,
-                ['phone', CodeAlreadySendValidator::class],
+                ['phone', VerifyCodeIsSendValidator::class],
                 ['phone', PhoneValidator::class],
                 [
                     'phone',

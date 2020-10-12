@@ -3,12 +3,10 @@
 
 namespace steroids\auth\validators;
 
-
-use steroids\auth\AuthModule;
 use steroids\auth\models\AuthConfirm;
 use yii\validators\Validator;
 
-class CodeAlreadySendValidator extends Validator
+class VerifyCodeIsSendValidator extends Validator
 {
 
     public function init()
@@ -22,14 +20,12 @@ class CodeAlreadySendValidator extends Validator
 
     public function validateAttribute($model, $attribute)
     {
-        $authConfirmAttributes = [
-            'type' => $attribute,
-            'value' => \Yii::$app->user->getAttribute($attribute),
-            'userId' => \Yii::$app->user->getId(),
-        ];
-
         $confirmAlreadySend = AuthConfirm::find()
-            ->where($authConfirmAttributes)
+            ->where([
+                'type' => $attribute,
+                'value' => \Yii::$app->user->getAttribute($attribute),
+                'userId' => \Yii::$app->user->getId(),
+            ])
             ->andWhere(['>=', 'expireTime', date('Y-m-d H:i:s')])
             ->one();
 

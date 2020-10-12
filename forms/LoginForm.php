@@ -7,7 +7,7 @@ use steroids\auth\components\captcha\ReCaptchaV3;
 use steroids\auth\forms\meta\LoginFormMeta;
 use steroids\auth\models\AuthConfirm;
 use steroids\auth\UserInterface;
-use steroids\auth\validators\CodeAlreadySendValidator;
+use steroids\auth\validators\VerifyCodeIsSendValidator;
 use steroids\auth\validators\LoginValidator;
 use steroids\auth\validators\ReCaptchaValidator;
 use steroids\core\validators\PhoneValidator;
@@ -94,7 +94,7 @@ class LoginForm extends LoginFormMeta
             ...$rules,
 
             // Check confirms
-            ['login',CodeAlreadySendValidator::class],
+            ['login',VerifyCodeIsSendValidator::class],
             ['login', function ($attribute) use ($module) {
                 if ($this->user && !$this->hasErrors()) {
                     $isConfirmed = AuthConfirm::find()
