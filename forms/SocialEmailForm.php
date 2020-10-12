@@ -7,6 +7,7 @@ use steroids\auth\forms\meta\SocialEmailFormMeta;
 use steroids\auth\models\AuthConfirm;
 use steroids\auth\models\AuthSocial;
 use steroids\auth\UserInterface;
+use steroids\auth\validators\CodeAlreadySendValidator;
 
 class SocialEmailForm extends SocialEmailFormMeta
 {
@@ -27,6 +28,7 @@ class SocialEmailForm extends SocialEmailFormMeta
             ['email', 'filter', 'filter' => function($value) {
                 return mb_strtolower(trim($value));
             }],
+            ['email', CodeAlreadySendValidator::class],
             ['email', 'unique', 'targetClass' => $userClass],
             ['uid', function($attribute) {
                 $this->social = AuthSocial::findOne([

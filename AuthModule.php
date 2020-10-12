@@ -5,6 +5,7 @@ namespace steroids\auth;
 use steroids\auth\components\captcha\CaptchaComponentInterface;
 use steroids\auth\components\captcha\ReCaptchaV3;
 use ReflectionClass;
+use InvalidArgumentException;
 use steroids\auth\forms\ConfirmForm;
 use steroids\auth\forms\LoginForm;
 use steroids\auth\forms\RecoveryPasswordConfirmForm;
@@ -182,7 +183,7 @@ class AuthModule extends Module
      * @param UserInterface|Model $user
      * @param string $attributeType
      * @return null|AuthConfirm
-     * @throws ModelSaveException
+     * @throws ModelSaveException|InvalidArgumentException
      */
     public function confirm($user, $attributeType = null)
     {
@@ -197,13 +198,25 @@ class AuthModule extends Module
             ? $this->phoneAttribute
             : $this->emailAttribute;
 
-        // Create confirm
-        $model = AuthConfirm::instantiate([
+        $authConfirmAttributes = [
             'type' => $attributeType,
             'value' => $user->getAttribute($attribute),
             'userId' => $user->getId(),
-            'code' => static::generateCode($this->confirmCodeLength, $attributeType),
-        ]);
+        ];
+
+        $confirmHasBeenAlreadySend = AuthConfirm::find()
+            ->where($authConfirmAttributes)
+            ->andWhere(['>=', 'expireTime', date('Y-m-d H:i:s')])
+            ->one();
+
+        if($confirmHasBeenAlreadySend){
+            return null;
+        }
+
+        // Create confirm
+        $model = AuthConfirm::instantiate(array_merge($authConfirmAttributes,[
+            'code' => static::generateCode($this->confirmCodeLength, $attributeType)
+        ]));
         $model->saveOrPanic();
 
         // Send mail
@@ -212,6 +225,19 @@ class AuthModule extends Module
         ]);
 
         return $model;
+    }
+
+    public function confirmInForm($user, $attributeType)
+    {
+        try {
+            return $this->confirm($user, $attributeType);
+        } catch (InvalidArgumentException $e) {
+            return [
+                'errors' => [
+                    $attributeType => $e->getMessage()
+                ]
+            ];
+        }
     }
 
     /**
