@@ -4,10 +4,10 @@
 namespace steroids\auth\models;
 
 use steroids\auth\enums\AuthenticatorEnum;
-use Yii;
 use steroids\auth\authenticators\BaseAuthenticator;
 use steroids\auth\AuthModule;
 use steroids\auth\UserInterface;
+use Yii;
 use yii\base\InvalidConfigException;
 
 /**
@@ -23,46 +23,34 @@ class NotifierAuthenticator extends BaseAuthenticator
     }
 
     /**
-     * @param string $login
-     * @throws InvalidConfigException
-     * @throws \steroids\core\exceptions\ModelSaveException
+     * @inheritDoc
      * @throws \yii\base\Exception
      */
     public function sendCode(string $login)
     {
         /** @var UserInterface $user */
-        $user = \Yii::$app->user->identityClass;
+        $user = Yii::$app->user->identityClass;
 
         if (!$user) {
             throw new InvalidConfigException('Context app user must be set before sending 2FA code');
         }
 
-        AuthModule::getInstance()->confirm(
-            $user,
-            AuthModule::getNotifierAttributeTypeFromLogin($login),
-            true
-        );
+        $userAttributeType = AuthModule::getNotifierAttributeTypeFromLogin($login);
+        AuthModule::getInstance()->confirm($user, $userAttributeType, true);
     }
 
     /**
-     * @param string $code
-     * @param string $login
-     * @return bool
+     * @inheritDoc
      * @throws \steroids\core\exceptions\ModelSaveException
      */
-    public function validateCode(string $code,string $login)
+    public function validateCode(string $code, string $login)
     {
-        $confirm = AuthConfirm::findByCode($login,$code);
-
-        if($confirm !== null){
-            $this->onCorrectCode(new Auth2FaValidation([
-                'userId' => Yii::$app->user->id,
-                'authentificatorType' => $this->type
-            ]));
-
-            return true;
+        if (!AuthConfirm::findByCode($login, $code)){
+            return false;
         }
 
-        return false;
+        $this->onCorrectCodeValidation();
+
+        return true;
     }
 }

@@ -7,10 +7,9 @@ use BaconQrCode\Renderer\Image\SvgImageBackEnd;
 use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
+use PragmaRX\Google2FA\Exceptions\Google2FAException;
 use PragmaRX\Google2FA\Google2FA;
-use steroids\auth\authenticators\BaseAuthenticator;
 use steroids\auth\enums\AuthenticatorEnum;
-use steroids\auth\models\Auth2FaValidation;
 use steroids\auth\models\UserAuthenticatorKeys;
 use Yii;
 
@@ -22,11 +21,13 @@ use Yii;
  */
 class GoogleAuthenticator extends BaseAuthenticator
 {
-
-    //not use for Google Authentificator
+    /**
+     * Code is not sent in Google Authenticator
+     *
+     * @inheritDoc
+     */
     public function sendCode(string $login)
     {
-        return '';
     }
 
     public string $company;
@@ -53,12 +54,10 @@ class GoogleAuthenticator extends BaseAuthenticator
             'authenticatorType' => AuthenticatorEnum::GOOGLE_AUTH
         ]);
 
-        $google2fa = new Google2FA();
-
         if(!$userAuthKeys){
             $userAuthKeys = new UserAuthenticatorKeys([
                 'userId' => Yii::$app->user->id,
-                'secretKey' => $google2fa->generateSecretKey()
+                'secretKey' => (new Google2FA())->generateSecretKey()
             ]);
 
             $userAuthKeys->saveOrPanic();
@@ -72,10 +71,7 @@ class GoogleAuthenticator extends BaseAuthenticator
      */
     public function getQrCode()
     {
-        $google2fa = new Google2FA();
-
-        //generate QR code
-        $qrCodeUrl = $google2fa->getQRCodeUrl(
+        $qrCodeUrl = (new Google2FA())->getQRCodeUrl(
             $this->company,
             $this->holder,
             $this->secretKey
@@ -90,6 +86,10 @@ class GoogleAuthenticator extends BaseAuthenticator
         return $writer->writeString($qrCodeUrl);
     }
 
+    /**
+     * @inheritDoc
+     * @throws \steroids\core\exceptions\ModelSaveException
+     */
     public function validateCode(string $code, $login)
     {
         $userAuthKeys = UserAuthenticatorKeys::findOne([
@@ -101,16 +101,17 @@ class GoogleAuthenticator extends BaseAuthenticator
             return false;
         }
 
-        $isCodeValid = (new Google2FA())->verifyKey($userAuthKeys->secretKey, $code);
+        try {
+            $isCodeValid = (new Google2FA())->verifyKey($userAuthKeys->secretKey, $code);
+        } catch (Google2FAException $e) {
+            return false;
+        }
 
         if(!$isCodeValid){
             return false;
         }
 
-        $this->onCorrectCode(new Auth2FaValidation([
-            'userId' => Yii::$app->user->id,
-            'authentificatorType' => $this->type
-        ]));
+        $this->onCorrectCodeValidation();
 
         return true;
     }

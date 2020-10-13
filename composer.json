@@ -7,7 +7,7 @@
         "ext-mbstring": "*",
         "ext-curl": "*",
         "lib-pcre": "*",
-        "steroids/core": "*",
+        "steroids/core": "^2.0@beta",
         "vkcom/vk-php-sdk": "^5.101",
         "league/oauth2-facebook": "^2.0",
         "google/apiclient": "^2.5",

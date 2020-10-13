@@ -261,7 +261,7 @@ class AuthModule extends Module
      */
     public function authenticate2FA($user,$login,$code)
     {
-        $authentificator = (!$login)
+        $authenticator = !$login
             ? new GoogleAuthenticator()
             : new NotifierAuthenticator();
 
@@ -270,7 +270,7 @@ class AuthModule extends Module
         $authValidate = Auth2FaValidation::find()
             ->where([
                 'userId' => $user->id,
-                'authenticatorType' => $authentificator->type,
+                'authenticatorType' => $authenticator->type,
             ])
             ->andWhere(['>=','createTime', date("Y-m-d H:i", strtotime($this->auth2FaValidationLiveTime))])
             ->one();
@@ -279,15 +279,19 @@ class AuthModule extends Module
             return true;
         }
 
-        if($authentificator instanceof NotifierAuthenticator && !$authValidate){
-            $authentificator->sendCode($login);
+        if($authenticator instanceof NotifierAuthenticator && !$authValidate){
+            $authenticator->sendCode($login);
 
             return '2fa auth code send';
         }
 
-        return $authentificator->validateCode($code,$login);
+        return $authenticator->validateCode($code,$login);
     }
 
+    /**
+     * @param string $login value of the user's login attributes
+     * @return string one of AuthAttributeTypes
+     */
     public static function getNotifierAttributeTypeFromLogin(string $login): string
     {
         return strpos($login, '@') !== false
