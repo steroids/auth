@@ -4,7 +4,6 @@ namespace steroids\auth;
 
 use steroids\auth\components\captcha\CaptchaComponentInterface;
 use steroids\auth\components\captcha\ReCaptchaV3;
-use ReflectionClass;
 use InvalidArgumentException;
 use steroids\auth\forms\ConfirmForm;
 use steroids\auth\forms\LoginForm;
@@ -225,19 +224,6 @@ class AuthModule extends Module
         ]);
 
         return $model;
-    }
-
-    public function confirmInForm($user, $attributeType)
-    {
-        try {
-            return $this->confirm($user, $attributeType);
-        } catch (InvalidArgumentException $e) {
-            return [
-                'errors' => [
-                    $attributeType => $e->getMessage()
-                ]
-            ];
-        }
     }
 
     /**
