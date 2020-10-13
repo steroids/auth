@@ -65,8 +65,10 @@ class RecoveryPasswordForm extends RecoveryPasswordFormMeta
             $this->user = $userClass::findBy($this->login, $attributes);
 
             if ($this->user) {
-                $attribute = strpos($this->login, '@') !== false ? AuthModule::ATTRIBUTE_EMAIL : AuthModule::ATTRIBUTE_PHONE;
-                $this->confirm = $module->confirm($this->user, $attribute);
+                $this->confirm = $module->confirm(
+                    $this->user,
+                    AuthModule::getNotifierAttributeTypeFromLogin($this->login)
+                );
             }
             return true;
         }
