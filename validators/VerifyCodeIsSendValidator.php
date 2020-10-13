@@ -33,19 +33,19 @@ class VerifyCodeIsSendValidator extends Validator
 
         if (!$user) {
             $this->addError($model, $attribute, \Yii::t('steroids', 'Пользователь не найден'));
-        }
+        }else{
+            $confirmAlreadySend = AuthConfirm::find()
+                ->where([
+                    'type' => $attribute,
+                    'value' => $user->getAttribute($attribute),
+                    'userId' => $user->getId(),
+                ])
+                ->andWhere(['>=', 'expireTime', date('Y-m-d H:i:s')])
+                ->one();
 
-        $confirmAlreadySend = AuthConfirm::find()
-            ->where([
-                'type' => $attribute,
-                'value' => $user->getAttribute($attribute),
-                'userId' => $user->getId(),
-            ])
-            ->andWhere(['>=', 'expireTime', date('Y-m-d H:i:s')])
-            ->one();
-
-        if($confirmAlreadySend){
-            $this->addError($model, $attribute, $this->message);
+            if($confirmAlreadySend){
+                $this->addError($model, $attribute, $this->message);
+            }
         }
     }
 }

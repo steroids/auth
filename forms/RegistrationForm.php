@@ -81,7 +81,7 @@ class RegistrationForm extends RegistrationFormMeta
                     'targetAttribute' => 'value',
                     'filter' => function (ActiveQuery $query) {
                         $query->andWhere([
-                            'type' => AuthModule::ATTRIBUTE_EMAIL,
+                            'type' => AuthAttributeTypeEnum::EMAIL,
                             'isConfirmed' => true,
                         ]);
                     },
@@ -103,7 +103,7 @@ class RegistrationForm extends RegistrationFormMeta
                     'targetAttribute' => 'value',
                     'filter' => function (ActiveQuery $query) {
                         $query->andWhere([
-                            'type' => AuthModule::ATTRIBUTE_PHONE,
+                            'type' => AuthAttributeTypeEnum::PHONE,
                             'isConfirmed' => true,
                         ]);
                     },
@@ -148,7 +148,7 @@ class RegistrationForm extends RegistrationFormMeta
         if ($this->validate()) {
             // Check user already exists, but not phone/email confirmed
             $mainAttribute = $module->registrationMainAttribute;
-            if (in_array($mainAttribute, [AuthModule::ATTRIBUTE_EMAIL, AuthModule::ATTRIBUTE_PHONE])
+            if (in_array($mainAttribute, [AuthAttributeTypeEnum::EMAIL, AuthAttributeTypeEnum::PHONE])
                 && !AuthConfirm::checkIsConfirmed($mainAttribute, $this->$mainAttribute)
             ) {
                 /** @var UserInterface $userClass */
