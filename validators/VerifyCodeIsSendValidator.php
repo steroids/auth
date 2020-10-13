@@ -6,6 +6,7 @@ namespace steroids\auth\validators;
 use steroids\auth\AuthModule;
 use steroids\auth\models\AuthConfirm;
 use steroids\auth\UserInterface;
+use Yii;
 use yii\validators\Validator;
 
 class VerifyCodeIsSendValidator extends Validator
@@ -15,7 +16,7 @@ class VerifyCodeIsSendValidator extends Validator
         parent::init();
 
         if ($this->message === null) {
-            $this->message = \Yii::t('steroids', 'Код уже был отправлен');
+            $this->message = Yii::t('steroids', 'Код уже был отправлен');
         }
     }
 
@@ -27,25 +28,26 @@ class VerifyCodeIsSendValidator extends Validator
     public function validateAttribute($model, $attribute)
     {
         /** @var UserInterface $userClass */
-        $userClass = \Yii::$app->user->identityClass;
+        $userClass = Yii::$app->user->identityClass;
         $module = AuthModule::getInstance();
         $user = $userClass::findBy($model->$attribute, [$module->getUserAttributeName($attribute)]);
 
         if (!$user) {
-            $this->addError($model, $attribute, \Yii::t('steroids', 'Пользователь не найден'));
-        }else{
-            $confirmAlreadySend = AuthConfirm::find()
-                ->where([
-                    'type' => $attribute,
-                    'value' => $user->getAttribute($attribute),
-                    'userId' => $user->getId(),
-                ])
-                ->andWhere(['>=', 'expireTime', date('Y-m-d H:i:s')])
-                ->one();
+            $this->addError($model, $attribute, Yii::t('steroids', 'Пользователь не найден'));
+            return;
+        }
 
-            if($confirmAlreadySend){
-                $this->addError($model, $attribute, $this->message);
-            }
+        $confirmAlreadySend = AuthConfirm::find()
+            ->where([
+                'type' => $attribute,
+                'value' => $user->getAttribute($attribute),
+                'userId' => $user->getId(),
+            ])
+            ->andWhere(['>=', 'expireTime', date('Y-m-d H:i:s')])
+            ->one();
+
+        if($confirmAlreadySend){
+            $this->addError($model, $attribute, $this->message);
         }
     }
 }

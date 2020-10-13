@@ -260,10 +260,10 @@ class AuthModule extends Module
      * @param User $user
      * @param string $login user email or phone for authenticate
      * @param string $code verification code
-     * @return string
-     * @throws ModelSaveException
+     * @return string one of self::TWOFA_CODE_IS_SEND, self::TWOFA_CODE_SUCCESS, self::TWOFA_CODE_FAILED
+     * @throws ModelSaveException|\yii\base\Exception
      */
-    public function authenticate2FA($user,$login,$code)
+    public function authenticate2FA(User $user, string $login, string $code)
     {
         $authenticator = !$login
             ? new GoogleAuthenticator()
@@ -280,18 +280,18 @@ class AuthModule extends Module
             ->one();
 
         if($authValidate){
-            return AuthModule::TWOFA_CODE_IS_SEND;
+            return self::TWOFA_CODE_IS_SEND;
         }
 
         if($authenticator instanceof NotifierAuthenticator && !$authValidate){
             $authenticator->sendCode($login);
 
-            return AuthModule::TWOFA_CODE_IS_SEND;
+            return self::TWOFA_CODE_IS_SEND;
         }
 
         return $authenticator->validateCode($code,$login)
-            ? AuthModule::TWOFA_CODE_SUCCESS
-            : AuthModule::TWOFA_CODE_FAILED;
+            ? self::TWOFA_CODE_SUCCESS
+            : self::TWOFA_CODE_FAILED;
     }
 
     /**
