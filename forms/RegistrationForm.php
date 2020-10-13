@@ -4,6 +4,7 @@ namespace steroids\auth\forms;
 
 use steroids\auth\enums\AuthAttributeTypes;
 use steroids\auth\models\AuthConfirm;
+use steroids\auth\validators\VerifyCodeIsSendValidator;
 use steroids\auth\validators\ReCaptchaValidator;
 use steroids\core\exceptions\ModelSaveException;
 use Yii;
@@ -71,6 +72,7 @@ class RegistrationForm extends RegistrationFormMeta
             in_array(AuthAttributeTypes::EMAIL, $module->loginAvailableAttributes)) {
             $rules = [
                 ...$rules,
+                ['email', VerifyCodeIsSendValidator::class],
                 ['email', 'filter', 'filter' => fn($value) => mb_strtolower(trim($value))],
                 [
                     'email',
@@ -92,6 +94,7 @@ class RegistrationForm extends RegistrationFormMeta
             in_array(AuthAttributeTypes::PHONE, $module->loginAvailableAttributes)) {
             $rules = [
                 ...$rules,
+                ['phone', VerifyCodeIsSendValidator::class],
                 ['phone', PhoneValidator::class],
                 [
                     'phone',

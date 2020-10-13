@@ -6,6 +6,7 @@ use steroids\auth\AuthModule;
 use steroids\auth\forms\meta\RecoveryPasswordFormMeta;
 use steroids\auth\models\AuthConfirm;
 use steroids\auth\UserInterface;
+use steroids\auth\validators\VerifyCodeIsSendValidator;
 use steroids\auth\validators\ReCaptchaValidator;
 use steroids\core\base\Model;
 
@@ -41,6 +42,7 @@ class RecoveryPasswordForm extends RecoveryPasswordFormMeta
     public function rules()
     {
         return array_merge(parent::rules(), [
+            ['login', VerifyCodeIsSendValidator::class],
             ['login', 'filter', 'filter' => function($value) {
                 return mb_strtolower(trim($value));
             }],
