@@ -6,7 +6,7 @@ namespace steroids\auth\controllers;
 use steroids\auth\authenticators\GoogleAuthenticator;
 use steroids\auth\enums\AuthenticatorEnum;
 use steroids\auth\forms\Validate2FaCode;
-use steroids\auth\models\UserAuthenticatorKeys;
+use steroids\auth\models\UserAuthenticatorKey;
 use Yii;
 use PragmaRX\Google2FA\Google2FA;
 use steroids\auth\AuthModule;

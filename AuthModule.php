@@ -6,7 +6,7 @@ use app\user\models\User;
 use steroids\auth\authenticators\GoogleAuthenticator;
 use steroids\auth\components\captcha\CaptchaComponentInterface;
 use steroids\auth\components\captcha\ReCaptchaV3;
-use steroids\auth\enums\AuthAttributeTypes;
+use steroids\auth\enums\AuthAttributeTypeEnum;
 use InvalidArgumentException;
 use steroids\auth\forms\ConfirmForm;
 use steroids\auth\forms\LoginForm;
@@ -36,6 +36,10 @@ class AuthModule extends Module
 {
     use ModuleProvidersTrait;
 
+    const TWOFA_CODE_IS_SEND = '2fa code has been send';
+    const TWOFA_CODE_SUCCESS = 'Authentication success';
+    const TWOFA_CODE_FAILED = 'Authentication failed';
+
     /**
      * Email attribute in User model
      */
@@ -60,13 +64,13 @@ class AuthModule extends Module
      * What attributes user can be used as a login
      */
     public array $loginAvailableAttributes = [
-        AuthAttributeTypes::EMAIL,
+        AuthAttributeTypeEnum::EMAIL,
     ];
 
     /**
      * Main required attribute as login
      */
-    public string $registrationMainAttribute = AuthAttributeTypes::EMAIL;
+    public string $registrationMainAttribute = AuthAttributeTypeEnum::EMAIL;
 
     /**
      * Additional attributes for registration form. Will be validated by User model
@@ -174,16 +178,16 @@ class AuthModule extends Module
     public function getUserAttributeName($attribute)
     {
         $map = [
-            AuthAttributeTypes::EMAIL => $this->emailAttribute,
-            static::ATTRIBUTE_PHONE => $this->phoneAttribute,
-            static::ATTRIBUTE_LOGIN => $this->loginAttribute,
+            AuthAttributeTypeEnum::EMAIL => $this->emailAttribute,
+            AuthAttributeTypeEnum::PHONE => $this->phoneAttribute,
+            AuthAttributeTypeEnum::LOGIN => $this->loginAttribute,
         ];
         return ArrayHelper::getValue($map, $attribute);
     }
 
     /**
      * @param UserInterface|Model $user
-     * @param string $attributeType one of AuthAttributeTypes::EMAIL, AuthAttributeTypes::PHONE
+     * @param string $attributeType one of AuthAttributeTypeEnum::EMAIL, AuthAttributeTypeEnum::PHONE
      * @param bool $is2fa
      * @return null|AuthConfirm
      * @throws ModelSaveException|InvalidArgumentException
@@ -199,7 +203,7 @@ class AuthModule extends Module
             return null;
         }
 
-        $attribute = $attributeType === AuthAttributeTypes::PHONE
+        $attribute = $attributeType === AuthAttributeTypeEnum::PHONE
             ? $this->phoneAttribute
             : $this->emailAttribute;
 
@@ -254,9 +258,9 @@ class AuthModule extends Module
 
     /**
      * @param User $user
-     * @param string $login
-     * @param string $code
-     * @return bool | string
+     * @param string $login user email or phone for authenticate
+     * @param string $code verification code
+     * @return string
      * @throws ModelSaveException
      */
     public function authenticate2FA($user,$login,$code)
@@ -276,34 +280,36 @@ class AuthModule extends Module
             ->one();
 
         if($authValidate){
-            return true;
+            return AuthModule::TWOFA_CODE_IS_SEND;
         }
 
         if($authenticator instanceof NotifierAuthenticator && !$authValidate){
             $authenticator->sendCode($login);
 
-            return '2fa auth code send';
+            return AuthModule::TWOFA_CODE_IS_SEND;
         }
 
-        return $authenticator->validateCode($code,$login);
+        return $authenticator->validateCode($code,$login)
+            ? AuthModule::TWOFA_CODE_SUCCESS
+            : AuthModule::TWOFA_CODE_FAILED;
     }
 
     /**
      * @param string $login value of the user's login attributes
-     * @return string one of AuthAttributeTypes
+     * @return string one of AuthAttributeTypeEnum
      */
     public static function getNotifierAttributeTypeFromLogin(string $login): string
     {
         return strpos($login, '@') !== false
-            ? AuthAttributeTypes::EMAIL
-            : AuthAttributeTypes::PHONE;
+            ? AuthAttributeTypeEnum::EMAIL
+            : AuthAttributeTypeEnum::PHONE;
     }
 
     public static function getNotifierTypes()
     {
         return [
-            AuthAttributeTypes::EMAIL,
-            AuthAttributeTypes::PHONE
+            AuthAttributeTypeEnum::EMAIL,
+            AuthAttributeTypeEnum::PHONE
         ];
     }
 }

@@ -5,7 +5,7 @@ namespace steroids\auth\enums\meta;
 use Yii;
 use steroids\core\base\Enum;
 
-abstract class AuthAttributeTypesMeta extends Enum
+abstract class AuthAttributeTypeEnumMeta extends Enum
 {
     const EMAIL = 'email';
     const PHONE = 'phone';

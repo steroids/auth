@@ -2,7 +2,7 @@
 
 namespace steroids\auth\forms;
 
-use steroids\auth\enums\AuthAttributeTypes;
+use steroids\auth\enums\AuthAttributeTypeEnum;
 use steroids\auth\models\AuthConfirm;
 use steroids\auth\validators\VerifyCodeIsSendValidator;
 use steroids\auth\validators\ReCaptchaValidator;
@@ -68,8 +68,8 @@ class RegistrationForm extends RegistrationFormMeta
         $rules[] = ['token', ReCaptchaValidator::class];
 
         // Email
-        if ($module->registrationMainAttribute === AuthAttributeTypes::EMAIL ||
-            in_array(AuthAttributeTypes::EMAIL, $module->loginAvailableAttributes)) {
+        if ($module->registrationMainAttribute === AuthAttributeTypeEnum::EMAIL ||
+            in_array(AuthAttributeTypeEnum::EMAIL, $module->loginAvailableAttributes)) {
             $rules = [
                 ...$rules,
                 ['email', VerifyCodeIsSendValidator::class],
@@ -90,8 +90,8 @@ class RegistrationForm extends RegistrationFormMeta
         }
 
         // Phone
-        if ($module->registrationMainAttribute === AuthAttributeTypes::PHONE||
-            in_array(AuthAttributeTypes::PHONE, $module->loginAvailableAttributes)) {
+        if ($module->registrationMainAttribute === AuthAttributeTypeEnum::PHONE||
+            in_array(AuthAttributeTypeEnum::PHONE, $module->loginAvailableAttributes)) {
             $rules = [
                 ...$rules,
                 ['phone', VerifyCodeIsSendValidator::class],
@@ -112,8 +112,8 @@ class RegistrationForm extends RegistrationFormMeta
         }
 
         // Login
-        if ($module->registrationMainAttribute === AuthAttributeTypes::LOGIN ||
-            in_array(AuthAttributeTypes::LOGIN, $module->loginAvailableAttributes)) {
+        if ($module->registrationMainAttribute === AuthAttributeTypeEnum::LOGIN ||
+            in_array(AuthAttributeTypeEnum::LOGIN, $module->loginAvailableAttributes)) {
             $rules = [
                 ...$rules,
                 ['login', 'filter', 'filter' => fn($value) => mb_strtolower(trim($value))],

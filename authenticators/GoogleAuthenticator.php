@@ -10,13 +10,12 @@ use BaconQrCode\Writer;
 use PragmaRX\Google2FA\Exceptions\Google2FAException;
 use PragmaRX\Google2FA\Google2FA;
 use steroids\auth\enums\AuthenticatorEnum;
-use steroids\auth\models\UserAuthenticatorKeys;
+use steroids\auth\models\UserAuthenticatorKey;
 use Yii;
 
 /**
- * Class GoogleAuthentificator
+ * Class GoogleAuthenticator
  * @package steroids\auth\authenticators
- * @property-read string $secretKey
  * @property-read string $qrCode
  */
 class GoogleAuthenticator extends BaseAuthenticator
@@ -30,8 +29,14 @@ class GoogleAuthenticator extends BaseAuthenticator
     {
     }
 
+    /**
+     * @var string company name that will be shown in Google Authenticator app
+     */
     public string $company;
 
+    /**
+     * @var string company holder that will be shown in Google Authenticator app
+     */
     public string $holder;
 
 
@@ -47,15 +52,15 @@ class GoogleAuthenticator extends BaseAuthenticator
      * @throws \PragmaRX\Google2FA\Exceptions\SecretKeyTooShortException
      * @throws \steroids\core\exceptions\ModelSaveException
      */
-    public function getSecretKey()
+    protected function getSecretKey()
     {
-        $userAuthKeys = UserAuthenticatorKeys::findOne([
+        $userAuthKeys = UserAuthenticatorKey::findOne([
             'userId' => Yii::$app->user->id,
             'authenticatorType' => AuthenticatorEnum::GOOGLE_AUTH
         ]);
 
         if(!$userAuthKeys){
-            $userAuthKeys = new UserAuthenticatorKeys([
+            $userAuthKeys = new UserAuthenticatorKey([
                 'userId' => Yii::$app->user->id,
                 'secretKey' => (new Google2FA())->generateSecretKey()
             ]);
@@ -68,13 +73,17 @@ class GoogleAuthenticator extends BaseAuthenticator
 
     /**
      * @return string
+     * @throws \PragmaRX\Google2FA\Exceptions\IncompatibleWithGoogleAuthenticatorException
+     * @throws \PragmaRX\Google2FA\Exceptions\InvalidCharactersException
+     * @throws \PragmaRX\Google2FA\Exceptions\SecretKeyTooShortException
+     * @throws \steroids\core\exceptions\ModelSaveException
      */
     public function getQrCode()
     {
         $qrCodeUrl = (new Google2FA())->getQRCodeUrl(
             $this->company,
             $this->holder,
-            $this->secretKey
+            $this->getSecretKey()
         );
 
         $renderer = new ImageRenderer(
@@ -92,9 +101,9 @@ class GoogleAuthenticator extends BaseAuthenticator
      */
     public function validateCode(string $code, $login)
     {
-        $userAuthKeys = UserAuthenticatorKeys::findOne([
+        $userAuthKeys = UserAuthenticatorKey::findOne([
             'userId' => Yii::$app->user->id,
-            'authentificatorType' => $this->type
+            'authenticatorType' => $this->type
         ]);
 
         if(!$userAuthKeys){

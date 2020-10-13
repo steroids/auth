@@ -11,7 +11,7 @@ use \Yii;
  * @property string $secretKey
  * @property string $authenticatorType
  */
-abstract class UserAuthenticatorKeysMeta extends Model
+abstract class UserAuthenticatorKeyMeta extends Model
 {
     public static function tableName()
     {

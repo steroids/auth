@@ -6,7 +6,7 @@ use Yii;
 use steroids\auth\models\Auth2FaValidation;
 
 /**
- * Class BaseAuthentificator
+ * Class BaseAuthenticator
  * @package steroids\auth\authenticators
  * @property-read string $type
  */
@@ -40,7 +40,7 @@ abstract class BaseAuthenticator
     public function onCorrectCodeValidation(){
         $auth2FaValidationModel = new Auth2FaValidation([
             'userId' => Yii::$app->user->id,
-            'authentificatorType' => $this->type
+            'authenticatorType' => $this->type
         ]);
         $auth2FaValidationModel->saveOrPanic();
     }

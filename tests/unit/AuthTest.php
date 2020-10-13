@@ -6,7 +6,7 @@ use app\user\models\User;
 use Exception;
 use PHPUnit\Framework\TestCase;
 use steroids\auth\AuthModule;
-use steroids\auth\enums\AuthAttributeTypes;
+use steroids\auth\enums\AuthAttributeTypeEnum;
 use steroids\auth\forms\ConfirmForm;
 use steroids\auth\forms\LoginForm;
 use steroids\auth\forms\ProviderLoginForm;
@@ -24,8 +24,8 @@ class AuthTest extends TestCase
     public function testEmailWithConfirmAndRecovery()
     {
         $module = AuthModule::getInstance();
-        $module->registrationMainAttribute = AuthAttributeTypes::EMAIL;
-        $module->loginAvailableAttributes = [AuthAttributeTypes::EMAIL];
+        $module->registrationMainAttribute = AuthAttributeTypeEnum::EMAIL;
+        $module->loginAvailableAttributes = [AuthAttributeTypeEnum::EMAIL];
 
         // Register
         $registrationForm = new RegistrationForm();
@@ -81,8 +81,8 @@ class AuthTest extends TestCase
     public function testPhoneWithConfirm()
     {
         $module = AuthModule::getInstance();
-        $module->registrationMainAttribute = AuthAttributeTypes::PHONE;
-        $module->loginAvailableAttributes = [AuthAttributeTypes::PHONE];
+        $module->registrationMainAttribute = AuthAttributeTypeEnum::PHONE;
+        $module->loginAvailableAttributes = [AuthAttributeTypeEnum::PHONE];
 
         // Register
         $registrationForm = new RegistrationForm();
@@ -115,8 +115,8 @@ class AuthTest extends TestCase
     public function testEmailAuthorize()
     {
         $authModule = AuthModule::getInstance();
-        $authModule->registrationMainAttribute = AuthAttributeTypes::EMAIL;
-        $authModule->loginAvailableAttributes = [AuthAttributeTypes::EMAIL];
+        $authModule->registrationMainAttribute = AuthAttributeTypeEnum::EMAIL;
+        $authModule->loginAvailableAttributes = [AuthAttributeTypeEnum::EMAIL];
 
         // auth only by email/phone + code
         $authModule->isPasswordAvailable = false;
@@ -148,8 +148,8 @@ class AuthTest extends TestCase
     public function testPhoneAuth()
     {
         $authModule = AuthModule::getInstance();
-        $authModule->registrationMainAttribute = AuthAttributeTypes::PHONE;
-        $authModule->loginAvailableAttributes = [AuthAttributeTypes::PHONE];
+        $authModule->registrationMainAttribute = AuthAttributeTypeEnum::PHONE;
+        $authModule->loginAvailableAttributes = [AuthAttributeTypeEnum::PHONE];
 
         // auth only by email/phone + code
         $authModule->isPasswordAvailable = false;
@@ -183,11 +183,11 @@ class AuthTest extends TestCase
     public function testRegistration()
     {
         $authModule = AuthModule::getInstance();
-        $authModule->registrationMainAttribute = AuthAttributeTypes::EMAIL;
+        $authModule->registrationMainAttribute = AuthAttributeTypeEnum::EMAIL;
         $authModule->loginAvailableAttributes = [
-            AuthAttributeTypes::PHONE,
-            AuthAttributeTypes::EMAIL,
-            AuthAttributeTypes::LOGIN,
+            AuthAttributeTypeEnum::PHONE,
+            AuthAttributeTypeEnum::EMAIL,
+            AuthAttributeTypeEnum::LOGIN,
         ];
 
         //custom fields
@@ -246,7 +246,7 @@ class AuthTest extends TestCase
     public function testSocial()
     {
         $authModule = AuthModule::getInstance();
-        $authModule->registrationMainAttribute = AuthAttributeTypes::EMAIL;
+        $authModule->registrationMainAttribute = AuthAttributeTypeEnum::EMAIL;
         $authProviderName = 'test-auth-provider';
 
         $authModule->providersClasses = [
@@ -310,7 +310,7 @@ class AuthTest extends TestCase
     public function testCustomRegistrationFields()
     {
         $authModule = AuthModule::getInstance();
-        $authModule->registrationMainAttribute = AuthAttributeTypes::EMAIL;
+        $authModule->registrationMainAttribute = AuthAttributeTypeEnum::EMAIL;
 
         //custom field
         $authModule->registrationCustomAttributes = [

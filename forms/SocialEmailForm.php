@@ -3,7 +3,7 @@
 namespace steroids\auth\forms;
 
 use steroids\auth\AuthModule;
-use steroids\auth\enums\AuthAttributeTypes;
+use steroids\auth\enums\AuthAttributeTypeEnum;
 use steroids\auth\forms\meta\SocialEmailFormMeta;
 use steroids\auth\models\AuthConfirm;
 use steroids\auth\models\AuthSocial;
@@ -50,9 +50,9 @@ class SocialEmailForm extends SocialEmailFormMeta
             $userClass = \Yii::$app->user->identityClass;
 
             $module = AuthModule::getInstance();
-            $user = $userClass::findBy($this->email, [$module->getUserAttributeName(AuthAttributeTypes::EMAIL)]);
+            $user = $userClass::findBy($this->email, [$module->getUserAttributeName(AuthAttributeTypeEnum::EMAIL)]);
             if ($user) {
-                $module->confirm($user, AuthAttributeTypes::EMAIL);
+                $module->confirm($user, AuthAttributeTypeEnum::EMAIL);
             }
             return true;
         }

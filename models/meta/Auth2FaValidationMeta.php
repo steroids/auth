@@ -8,7 +8,7 @@ use \Yii;
 /**
  * @property string $id
  * @property string $createTime
- * @property string $authentificatorType
+ * @property string $authenticatorType
  * @property integer $userId
  */
 abstract class Auth2FaValidationMeta extends Model
