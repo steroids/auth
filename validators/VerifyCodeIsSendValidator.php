@@ -32,7 +32,7 @@ class VerifyCodeIsSendValidator extends Validator
         $user = $userClass::findBy($model->$attribute, [$module->getUserAttributeName($attribute)]);
 
         if (!$user) {
-            throw new \Exception('User not found');
+            $this->addError($model, $attribute, \Yii::t('steroids', 'Пользователь не найден'));
         }
 
         $confirmAlreadySend = AuthConfirm::find()
