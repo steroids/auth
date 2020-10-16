@@ -3,7 +3,6 @@
 namespace steroids\auth\models\meta;
 
 use steroids\core\base\Model;
-use steroids\auth\enums\SocialEnum;
 use steroids\core\behaviors\TimestampBehavior;
 use \Yii;
 
@@ -34,20 +33,22 @@ abstract class AuthSocialMeta extends Model
 
     public function rules()
     {
-        return array_merge(parent::rules(), [
+        return [
+            ...parent::rules(),
             ['userId', 'integer'],
-            [['externalId', 'socialName'], 'required'],
+            [['userId', 'externalId', 'socialName'], 'required'],
             [['externalId', 'socialName'], 'string', 'max' => 255],
             ['uid', 'string', 'max' => '36'],
             ['profileJson', 'string'],
-        ]);
+        ];
     }
 
     public function behaviors()
     {
-        return array_merge(parent::behaviors(), [
+        return [
+            ...parent::behaviors(),
             TimestampBehavior::class,
-        ]);
+        ];
     }
 
     public static function meta()
@@ -67,13 +68,12 @@ abstract class AuthSocialMeta extends Model
                 'isRequired' => true
             ],
             'socialName' => [
-                'appType' => 'enum',
-                'isRequired' => true,
-                'enumClassName' => SocialEnum::class
+                'isRequired' => true
             ],
             'createTime' => [
                 'label' => Yii::t('steroids', 'Добавлен'),
-                'appType' => 'autoTime'
+                'appType' => 'autoTime',
+                'touchOnUpdate' => false
             ],
             'updateTime' => [
                 'label' => Yii::t('steroids', 'Обновлен'),
