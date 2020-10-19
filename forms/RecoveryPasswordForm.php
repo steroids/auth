@@ -6,6 +6,8 @@ use steroids\auth\AuthModule;
 use steroids\auth\forms\meta\RecoveryPasswordFormMeta;
 use steroids\auth\models\AuthConfirm;
 use steroids\auth\UserInterface;
+use steroids\auth\validators\VerifyCodeIsSendValidator;
+use steroids\auth\validators\ReCaptchaValidator;
 use steroids\core\base\Model;
 
 class RecoveryPasswordForm extends RecoveryPasswordFormMeta
@@ -20,12 +22,31 @@ class RecoveryPasswordForm extends RecoveryPasswordFormMeta
      */
     public $confirm;
 
+    /**
+     * @var string
+     */
+    public $token;
+
+    public function fields()
+    {
+        return [
+            'confirm' => [
+                'uid',
+                'type',
+                'value',
+                'expireTime',
+            ],
+        ];
+    }
+
     public function rules()
     {
         return array_merge(parent::rules(), [
+            ['login', VerifyCodeIsSendValidator::class],
             ['login', 'filter', 'filter' => function($value) {
                 return mb_strtolower(trim($value));
             }],
+            ['token', ReCaptchaValidator::class]
         ]);
     }
 
@@ -44,8 +65,10 @@ class RecoveryPasswordForm extends RecoveryPasswordFormMeta
             $this->user = $userClass::findBy($this->login, $attributes);
 
             if ($this->user) {
-                $attribute = strpos($this->login, '@') !== false ? AuthModule::ATTRIBUTE_EMAIL : AuthModule::ATTRIBUTE_PHONE;
-                $this->confirm = $module->confirm($this->user, $attribute);
+                $this->confirm = $module->confirm(
+                    $this->user,
+                    AuthModule::getNotifierAttributeTypeFromLogin($this->login)
+                );
             }
             return true;
         }

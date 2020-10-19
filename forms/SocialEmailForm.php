@@ -3,10 +3,12 @@
 namespace steroids\auth\forms;
 
 use steroids\auth\AuthModule;
+use steroids\auth\enums\AuthAttributeTypeEnum;
 use steroids\auth\forms\meta\SocialEmailFormMeta;
 use steroids\auth\models\AuthConfirm;
 use steroids\auth\models\AuthSocial;
 use steroids\auth\UserInterface;
+use steroids\auth\validators\VerifyCodeIsSendValidator;
 
 class SocialEmailForm extends SocialEmailFormMeta
 {
@@ -27,6 +29,7 @@ class SocialEmailForm extends SocialEmailFormMeta
             ['email', 'filter', 'filter' => function($value) {
                 return mb_strtolower(trim($value));
             }],
+            ['email', VerifyCodeIsSendValidator::class],
             ['email', 'unique', 'targetClass' => $userClass],
             ['uid', function($attribute) {
                 $this->social = AuthSocial::findOne([
@@ -47,9 +50,9 @@ class SocialEmailForm extends SocialEmailFormMeta
             $userClass = \Yii::$app->user->identityClass;
 
             $module = AuthModule::getInstance();
-            $user = $userClass::findBy($this->email, [$module->getUserAttributeName(AuthModule::ATTRIBUTE_EMAIL)]);
+            $user = $userClass::findBy($this->email, [$module->getUserAttributeName(AuthAttributeTypeEnum::EMAIL)]);
             if ($user) {
-                $module->confirm($user, AuthModule::ATTRIBUTE_EMAIL);
+                $module->confirm($user, AuthAttributeTypeEnum::EMAIL);
             }
             return true;
         }

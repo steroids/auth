@@ -3,10 +3,14 @@
 namespace steroids\auth\forms;
 
 use steroids\auth\AuthModule;
+use steroids\auth\components\captcha\ReCaptchaV3;
+use steroids\auth\enums\AuthAttributeTypeEnum;
 use steroids\auth\forms\meta\LoginFormMeta;
 use steroids\auth\models\AuthConfirm;
 use steroids\auth\UserInterface;
+use steroids\auth\validators\VerifyCodeIsSendValidator;
 use steroids\auth\validators\LoginValidator;
+use steroids\auth\validators\ReCaptchaValidator;
 use steroids\core\validators\PhoneValidator;
 use yii\helpers\ArrayHelper;
 
@@ -21,6 +25,11 @@ class LoginForm extends LoginFormMeta
      * @var string
      */
     public $accessToken;
+
+    /**
+     * @var string
+     */
+    public $token;
 
     public function fields()
     {
@@ -44,13 +53,16 @@ class LoginForm extends LoginFormMeta
             ];
         }
 
-        if (in_array(AuthModule::ATTRIBUTE_EMAIL, $module->loginAvailableAttributes)
+        //Add captcha
+        $rules[] = ['token', ReCaptchaValidator::class];
+
+        if (in_array(AuthAttributeTypeEnum::EMAIL, $module->loginAvailableAttributes)
             && strpos($this->login, '@') !== false) {
             $rules[] = ['login', 'email'];
-        } elseif (in_array(AuthModule::ATTRIBUTE_PHONE, $module->loginAvailableAttributes)
+        } elseif (in_array(AuthAttributeTypeEnum::PHONE, $module->loginAvailableAttributes)
             && preg_match('/^\+?[0-9]+$/', trim($this->login))) {
             $rules[] = ['login', PhoneValidator::class];
-        } elseif (in_array(AuthModule::ATTRIBUTE_LOGIN, $module->loginAvailableAttributes)) {
+        } elseif (in_array(AuthAttributeTypeEnum::LOGIN, $module->loginAvailableAttributes)) {
             $rules[] = ['login', LoginValidator::class];
         }
 
@@ -83,6 +95,7 @@ class LoginForm extends LoginFormMeta
             ...$rules,
 
             // Check confirms
+            ['login',VerifyCodeIsSendValidator::class],
             ['login', function ($attribute) use ($module) {
                 if ($this->user && !$this->hasErrors()) {
                     $isConfirmed = AuthConfirm::find()
@@ -94,8 +107,8 @@ class LoginForm extends LoginFormMeta
                         ->exists();
                     if (!$isConfirmed) {
                         $messages = [
-                            AuthModule::ATTRIBUTE_EMAIL => \Yii::t('steroids', 'Email не подтвержден. Проверьте почту или восстановите пароль'),
-                            AuthModule::ATTRIBUTE_PHONE => \Yii::t('steroids', 'Телефон не подтвержден. Проверьте телефон или восстановите пароль'),
+                            AuthAttributeTypeEnum::EMAIL => \Yii::t('steroids', 'Email не подтвержден. Проверьте почту или восстановите пароль'),
+                            AuthAttributeTypeEnum::PHONE => \Yii::t('steroids', 'Телефон не подтвержден. Проверьте телефон или восстановите пароль'),
                         ];
                         $message = ArrayHelper::getValue($messages, $module->registrationMainAttribute, \Yii::t('steroids', 'Логин не подтвержден.'));
                         $this->addError($attribute, $message);

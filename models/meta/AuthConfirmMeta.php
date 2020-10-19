@@ -17,6 +17,7 @@ use \Yii;
  * @property string $expireTime
  * @property string $type
  * @property string $uid
+ * @property boolean $is2Fa
  */
 abstract class AuthConfirmMeta extends Model
 {
@@ -39,7 +40,7 @@ abstract class AuthConfirmMeta extends Model
             [['userId', 'value', 'code'], 'required'],
             ['value', 'string', 'max' => 255],
             ['code', 'string', 'max' => '32'],
-            ['isConfirmed', 'steroids\\core\\validators\\ExtBooleanValidator'],
+            [['isConfirmed', 'is2Fa'], 'steroids\\core\\validators\\ExtBooleanValidator'],
             ['expireTime', 'date', 'format' => 'php:Y-m-d H:i:s'],
             ['type', 'string', 'max' => '10'],
             ['uid', 'string', 'max' => '36'],
@@ -102,6 +103,10 @@ abstract class AuthConfirmMeta extends Model
                 'label' => Yii::t('steroids', 'UID'),
                 'isPublishToFrontend' => false,
                 'stringLength' => '36'
+            ],
+            'is2Fa' => [
+                'appType' => 'boolean',
+                'isPublishToFrontend' => false
             ]
         ]);
     }

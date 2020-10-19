@@ -39,9 +39,6 @@ class InitController extends Controller
 
         return [
             'config' => [
-                'http' => [
-                    'csrfToken' => Yii::$app->request->csrfToken,
-                ],
                 'locale' => [
                     'language' => Yii::$app->language,
                     'backendTimeZone' => Yii::$app->timeZone === 'Europe/Moscow' ? '+0300' : '+0000',

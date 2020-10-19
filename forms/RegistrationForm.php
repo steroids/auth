@@ -2,7 +2,10 @@
 
 namespace steroids\auth\forms;
 
+use steroids\auth\enums\AuthAttributeTypeEnum;
 use steroids\auth\models\AuthConfirm;
+use steroids\auth\validators\VerifyCodeIsSendValidator;
+use steroids\auth\validators\ReCaptchaValidator;
 use steroids\core\exceptions\ModelSaveException;
 use Yii;
 use steroids\auth\AuthModule;
@@ -13,6 +16,7 @@ use steroids\core\base\Model;
 use steroids\core\validators\PasswordValidator;
 use steroids\core\validators\PhoneValidator;
 use yii\base\Exception;
+use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
 use yii\validators\RequiredValidator;
 
@@ -33,6 +37,11 @@ class RegistrationForm extends RegistrationFormMeta
      */
     public $confirm;
 
+    /**
+     * @var string
+     */
+    public $token;
+
     public function fields()
     {
         return [
@@ -51,35 +60,60 @@ class RegistrationForm extends RegistrationFormMeta
      */
     public function rules()
     {
-        /** @var UserInterface $userClass */
-        $userClass = Yii::$app->user->identityClass;
-
         $rules = parent::rules();
         $module = AuthModule::getInstance();
+        $userClass = $module->userClass;
+
+        // Token
+        $rules[] = ['token', ReCaptchaValidator::class];
 
         // Email
-        if ($module->registrationMainAttribute === AuthModule::ATTRIBUTE_EMAIL ||
-            in_array(AuthModule::ATTRIBUTE_EMAIL, $module->loginAvailableAttributes)) {
+        if ($module->registrationMainAttribute === AuthAttributeTypeEnum::EMAIL ||
+            in_array(AuthAttributeTypeEnum::EMAIL, $module->loginAvailableAttributes)) {
             $rules = [
                 ...$rules,
+                ['email', VerifyCodeIsSendValidator::class],
                 ['email', 'filter', 'filter' => fn($value) => mb_strtolower(trim($value))],
-                ['email', 'unique', 'targetClass' => $userClass, 'targetAttribute' => $module->emailAttribute],
+                [
+                    'email',
+                    'unique',
+                    'targetClass' => AuthModule::resolveClass(AuthConfirm::class),
+                    'targetAttribute' => 'value',
+                    'filter' => function (ActiveQuery $query) {
+                        $query->andWhere([
+                            'type' => AuthAttributeTypeEnum::EMAIL,
+                            'isConfirmed' => true,
+                        ]);
+                    },
+                ],
             ];
         }
 
         // Phone
-        if ($module->registrationMainAttribute === AuthModule::ATTRIBUTE_PHONE ||
-            in_array(AuthModule::ATTRIBUTE_PHONE, $module->loginAvailableAttributes)) {
+        if ($module->registrationMainAttribute === AuthAttributeTypeEnum::PHONE||
+            in_array(AuthAttributeTypeEnum::PHONE, $module->loginAvailableAttributes)) {
             $rules = [
                 ...$rules,
+                ['phone', VerifyCodeIsSendValidator::class],
                 ['phone', PhoneValidator::class],
-                ['phone', 'unique', 'targetClass' => $userClass, 'targetAttribute' => $module->phoneAttribute],
+                [
+                    'phone',
+                    'unique',
+                    'targetClass' => AuthModule::resolveClass(AuthConfirm::class),
+                    'targetAttribute' => 'value',
+                    'filter' => function (ActiveQuery $query) {
+                        $query->andWhere([
+                            'type' => AuthAttributeTypeEnum::PHONE,
+                            'isConfirmed' => true,
+                        ]);
+                    },
+                ],
             ];
         }
 
         // Login
-        if ($module->registrationMainAttribute === AuthModule::ATTRIBUTE_LOGIN ||
-            in_array(AuthModule::ATTRIBUTE_LOGIN, $module->loginAvailableAttributes)) {
+        if ($module->registrationMainAttribute === AuthAttributeTypeEnum::LOGIN ||
+            in_array(AuthAttributeTypeEnum::LOGIN, $module->loginAvailableAttributes)) {
             $rules = [
                 ...$rules,
                 ['login', 'filter', 'filter' => fn($value) => mb_strtolower(trim($value))],
@@ -108,14 +142,24 @@ class RegistrationForm extends RegistrationFormMeta
      */
     public function register()
     {
-        /** @var UserInterface $userClass */
-        $userClass = Yii::$app->user->identityClass;
+        $module = AuthModule::getInstance();
+        $userClass = $module->userClass;
 
         if ($this->validate()) {
-            $module = AuthModule::getInstance();
+            // Check user already exists, but not phone/email confirmed
+            $mainAttribute = $module->registrationMainAttribute;
+            if (in_array($mainAttribute, [AuthAttributeTypeEnum::EMAIL, AuthAttributeTypeEnum::PHONE])
+                && !AuthConfirm::checkIsConfirmed($mainAttribute, $this->$mainAttribute)
+            ) {
+                /** @var UserInterface $userClass */
+                $userClass = $module->userClass;
+                $this->user = $userClass::findBy($this->$mainAttribute, [$module->getUserAttributeName($mainAttribute)]);
+            }
 
-            // Create user
-            $this->user = new $userClass();
+            // Create new user
+            if (!$this->user) {
+                $this->user = new $userClass();
+            }
 
             // Set email/phone/login
             if ($this->email) {
