@@ -37,7 +37,6 @@ class M000000000001Auth extends Migration
                 'createTime' => $this->dateTime(),
                 'expireTime' => $this->dateTime(),
             ]);
-            $this->createForeignKey('auth_logins', 'userId', $this->usersTable, 'id');
         }
     }
 
@@ -55,7 +54,6 @@ class M000000000001Auth extends Migration
                 'updateTime' => $this->dateTime(),
                 'expireTime' => $this->dateTime(),
             ]);
-            $this->createForeignKey('auth_confirms', 'userId', $this->usersTable, 'id');
         }
     }
 
@@ -72,25 +70,21 @@ class M000000000001Auth extends Migration
                 'createTime' => $this->dateTime(),
                 'updateTime' => $this->dateTime(),
             ]);
-            $this->createForeignKey('auth_socials', 'userId', $this->usersTable, 'id');
         }
     }
 
     protected function downLogins()
     {
-        $this->deleteForeignKey('auth_logins', 'userId', $this->usersTable, 'id');
         $this->dropTable('auth_logins');
     }
 
     protected function downConfirms()
     {
-        $this->deleteForeignKey('auth_confirms', 'userId', $this->usersTable, 'id');
         $this->dropTable('auth_confirms');
     }
 
     protected function downSocials()
     {
-        $this->deleteForeignKey('auth_socials', 'userId', $this->usersTable, 'id');
         $this->dropTable('auth_socials');
     }
 }

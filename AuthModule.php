@@ -114,7 +114,7 @@ class AuthModule extends Module
     /**
      * @var CaptchaComponentInterface|array|null
      */
-    public ?array $captcha = [];
+    public $captcha = [];
 
     public array $providersClasses = [];
 
@@ -165,10 +165,12 @@ class AuthModule extends Module
             'vk' => VkAuthProvider::class,
         ], $this->providersClasses);
 
-        $this->captcha = array_merge(
-            ['class' => ReCaptchaV3::class],
-            $this->captcha
-        );
+        if ($this->isCaptchaEnable && is_array($this->captcha)) {
+            $this->captcha = \Yii::createObject(array_merge(
+                ['class' => ReCaptchaV3::class],
+                $this->captcha
+            ));
+        }
     }
 
     /**
