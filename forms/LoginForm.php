@@ -70,7 +70,7 @@ class LoginForm extends LoginFormMeta
                     );
                     $this->user = $userClass::findBy($this->login, $attributes);
 
-                    if ($module->isPasswordAvailable && (!$this->user || !$this->user->validatePassword($this->password))) {
+                    if (!$this->user || ($module->isPasswordAvailable && !$this->user->validatePassword($this->password))) {
                         $this->password = null;
                         $this->addError($attribute, \Yii::t('steroids', 'Неверный логин или пароль'));
                     }
