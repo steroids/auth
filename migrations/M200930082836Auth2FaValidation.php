@@ -1,6 +1,6 @@
 <?php
 
-namespace app\auth\migrations;
+namespace steroids\auth\migrations;
 
 use steroids\core\base\Migration;
 

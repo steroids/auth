@@ -15,7 +15,7 @@ abstract class UserAuthenticatorKeyMeta extends Model
 {
     public static function tableName()
     {
-        return 'user_authenticator_keys';
+        return 'auth_authenticator_keys';
     }
 
     public function fields()

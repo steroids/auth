@@ -1,6 +1,6 @@
 <?php
 
-namespace app\auth\migrations;
+namespace steroids\auth\migrations;
 
 use steroids\core\base\Migration;
 
@@ -8,7 +8,7 @@ class M200930083445CreateUserAuthentificatorKeys extends Migration
 {
     public function safeUp()
     {
-        $this->createTable('user_authenticator_keys', [
+        $this->createTable('auth_authenticator_keys', [
             'id' => $this->primaryKey(),
             'userId' => $this->integer(),
             'secretKey' => $this->string(),
@@ -18,6 +18,6 @@ class M200930083445CreateUserAuthentificatorKeys extends Migration
 
     public function safeDown()
     {
-        $this->dropTable('user_authenticator_keys');
+        $this->dropTable('auth_authenticator_keys');
     }
 }
