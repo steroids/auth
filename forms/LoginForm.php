@@ -95,7 +95,7 @@ class LoginForm extends LoginFormMeta
             ...$rules,
 
             // Check confirms
-            ['login',VerifyCodeIsSendValidator::class],
+        //    ['login',VerifyCodeIsSendValidator::class],
             ['login', function ($attribute) use ($module) {
                 if ($this->user && !$this->hasErrors()) {
                     $isConfirmed = AuthConfirm::find()

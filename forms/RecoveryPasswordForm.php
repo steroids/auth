@@ -42,7 +42,7 @@ class RecoveryPasswordForm extends RecoveryPasswordFormMeta
     public function rules()
     {
         return array_merge(parent::rules(), [
-            ['login', VerifyCodeIsSendValidator::class],
+        //    ['login', VerifyCodeIsSendValidator::class],
             ['login', 'filter', 'filter' => function($value) {
                 return mb_strtolower(trim($value));
             }],

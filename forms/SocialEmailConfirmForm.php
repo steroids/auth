@@ -2,6 +2,7 @@
 
 namespace steroids\auth\forms;
 
+use steroids\auth\AuthModule;
 use steroids\auth\forms\meta\SocialEmailConfirmFormMeta;
 use steroids\auth\models\AuthConfirm;
 use steroids\auth\models\AuthSocial;
@@ -39,11 +40,11 @@ class SocialEmailConfirmForm extends SocialEmailConfirmFormMeta
      */
     public function rules()
     {
-        return array_merge(parent::rules(), [
-            ['email', 'filter', 'filter' => function($value) {
+        $rules = array_merge(parent::rules(), [
+            ['email', 'filter', 'filter' => function ($value) {
                 return mb_strtolower(trim($value));
             }],
-            ['uid', function($attribute) {
+            ['uid', function ($attribute) {
                 $this->social = AuthSocial::findOne([
                     'uid' => $this->uid,
                     'userId' => null,
@@ -52,13 +53,20 @@ class SocialEmailConfirmForm extends SocialEmailConfirmFormMeta
                     $this->addError($attribute, \Yii::t('steroids', 'Код авторизации не найден'));
                 }
             }],
-            ['code', function($attribute) {
-                $this->confirm = AuthConfirm::findByCode($this->email, $this->code);
-                if (!$this->confirm) {
-                    $this->addError($attribute, \Yii::t('steroids', 'Код неверен или устарел'));
-                }
-            }],
         ]);
+
+        if (!YII_DEBUG || !AuthModule::getInstance()->debugSkipConfirmCodeCheck) {
+            $rules = array_merge($rules, [
+                ['code', function ($attribute) {
+                    $this->confirm = AuthConfirm::findByCode($this->login, $this->code);
+                    if (!$this->confirm) {
+                        $this->addError($attribute, \Yii::t('steroids', 'Код неверен или устарел'));
+                    }
+                }],
+            ]);
+        }
+
+        return $rules;
     }
 
     /**

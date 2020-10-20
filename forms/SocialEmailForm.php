@@ -29,7 +29,7 @@ class SocialEmailForm extends SocialEmailFormMeta
             ['email', 'filter', 'filter' => function($value) {
                 return mb_strtolower(trim($value));
             }],
-            ['email', VerifyCodeIsSendValidator::class],
+        //    ['email', VerifyCodeIsSendValidator::class],
             ['email', 'unique', 'targetClass' => $userClass],
             ['uid', function($attribute) {
                 $this->social = AuthSocial::findOne([
