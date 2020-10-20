@@ -28,24 +28,22 @@ class RecoveryPasswordConfirmForm extends RecoveryPasswordConfirmFormMeta
 
     public function rules()
     {
-        $rules = array_merge(parent::rules(), [
+        return array_merge(parent::rules(), [
             ['newPassword', PasswordValidator::class],
             ['newPassword', 'compare', 'compareAttribute' => 'newPasswordAgain'],
             ['login', 'filter', 'filter' => fn($value) => mb_strtolower(trim($value))],
-        ]);
-
-        if (!YII_DEBUG || !AuthModule::getInstance()->debugSkipConfirmCodeCheck) {
-            $rules = array_merge($rules, [
-                ['code', function ($attribute) {
+            ['code', function ($attribute) {
+                if (!YII_DEBUG || !AuthModule::getInstance()->debugSkipConfirmCodeCheck) {
                     $this->confirm = AuthConfirm::findByCode($this->login, $this->code);
-                    if (!$this->confirm) {
-                        $this->addError($attribute, \Yii::t('steroids', 'Код неверен или устарел'));
-                    }
-                }],
-            ]);
-        }
+                } else {
+                    $this->confirm = AuthConfirm::findByLogin($this->login);
+                }
 
-        return $rules;
+                if (!$this->confirm) {
+                    $this->addError($attribute, \Yii::t('steroids', 'Код неверен или устарел'));
+                }
+            }],
+        ]);
     }
 
 
