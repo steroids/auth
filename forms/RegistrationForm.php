@@ -148,7 +148,7 @@ class RegistrationForm extends RegistrationFormMeta
         if ($this->validate()) {
             // Check user already exists, but not phone/email confirmed
             $mainAttribute = $module->registrationMainAttribute;
-            if (in_array($mainAttribute, [AuthAttributeTypeEnum::EMAIL, AuthAttributeTypeEnum::PHONE])
+            if (!$this->user && in_array($mainAttribute, [AuthAttributeTypeEnum::EMAIL, AuthAttributeTypeEnum::PHONE])
                 && !AuthConfirm::checkIsConfirmed($mainAttribute, $this->$mainAttribute)
             ) {
                 /** @var UserInterface $userClass */
