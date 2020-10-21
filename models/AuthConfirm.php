@@ -26,21 +26,20 @@ class AuthConfirm extends AuthConfirmMeta
         return AuthModule::instantiateClass(static::class, $row);
     }
 
-    /**
-     * @param string $login
-     * @param string $code
-     * @return static
-     */
-    public static function findByCode($login, $code)
+    public static function checkLoginIsUid(string $login): string
     {
         // Check if login is uid
-        $login = static::find()
+        return static::find()
             ->select('value')
             ->where(['uid' => $login])
             ->scalar() ?: $login;
+    }
 
-        /** @var static $confirm */
-        $confirm = static::find()
+    public static function findByCode($login, $code): ?AuthConfirm
+    {
+        $login = static:: checkLoginIsUid($login);
+
+        return static::find()
             ->where(['code' => trim($code)])
             ->andWhere([
                 'or',
@@ -50,8 +49,24 @@ class AuthConfirm extends AuthConfirmMeta
             ->andWhere(['>=', 'expireTime', date('Y-m-d H:i:s')])
             ->orderBy(['id' => SORT_DESC])
             ->limit(1)
-            ->one() ?: null;
-        return $confirm;
+            ->one();
+    }
+
+    public static function findByLogin(string $login): ?AuthConfirm
+    {
+        $login = static:: checkLoginIsUid($login);
+
+        /** @var static $confirm */
+        return static::find()
+            ->andWhere([
+                'or',
+                ['value' => mb_strtolower(trim($login))],
+                ['uid' => mb_strtolower(trim($login))],
+            ])
+            ->andWhere(['>=', 'expireTime', date('Y-m-d H:i:s')])
+            ->orderBy(['id' => SORT_DESC])
+            ->limit(1)
+            ->one();
     }
 
     /**

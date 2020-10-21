@@ -2,6 +2,7 @@
 
 namespace steroids\auth\forms;
 
+use steroids\auth\AuthModule;
 use steroids\auth\forms\meta\SocialEmailConfirmFormMeta;
 use steroids\auth\models\AuthConfirm;
 use steroids\auth\models\AuthSocial;
@@ -52,8 +53,13 @@ class SocialEmailConfirmForm extends SocialEmailConfirmFormMeta
                     $this->addError($attribute, \Yii::t('steroids', 'Код авторизации не найден'));
                 }
             }],
-            ['code', function($attribute) {
-                $this->confirm = AuthConfirm::findByCode($this->email, $this->code);
+            ['code', function ($attribute) {
+                if (!YII_DEBUG || !AuthModule::getInstance()->debugSkipConfirmCodeCheck) {
+                    $this->confirm = AuthConfirm::findByCode($this->login, $this->code);
+                } else {
+                    $this->confirm = AuthConfirm::findByLogin($this->login);
+                }
+
                 if (!$this->confirm) {
                     $this->addError($attribute, \Yii::t('steroids', 'Код неверен или устарел'));
                 }

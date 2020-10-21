@@ -2,6 +2,7 @@
 
 namespace steroids\auth\forms;
 
+use steroids\auth\AuthModule;
 use steroids\auth\forms\meta\ConfirmFormMeta;
 use steroids\auth\models\AuthConfirm;
 
@@ -28,8 +29,13 @@ class ConfirmForm extends ConfirmFormMeta
     {
         return array_merge(parent::rules(), [
             ['login', 'filter', 'filter' => fn($value) => mb_strtolower(trim($value))],
-            ['code', function($attribute) {
-                $this->confirm = AuthConfirm::findByCode($this->login, $this->code);
+            ['code', function ($attribute) {
+                if (!YII_DEBUG || !AuthModule::getInstance()->debugSkipConfirmCodeCheck) {
+                    $this->confirm = AuthConfirm::findByCode($this->login, $this->code);
+                } else {
+                    $this->confirm = AuthConfirm::findByLogin($this->login);
+                }
+
                 if (!$this->confirm) {
                     $this->addError($attribute, \Yii::t('steroids', 'Код неверен или устарел'));
                 }

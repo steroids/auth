@@ -72,7 +72,7 @@ class RegistrationForm extends RegistrationFormMeta
             in_array(AuthAttributeTypeEnum::EMAIL, $module->loginAvailableAttributes)) {
             $rules = [
                 ...$rules,
-                ['email', VerifyCodeIsSendValidator::class],
+            //    ['email', VerifyCodeIsSendValidator::class],
                 ['email', 'filter', 'filter' => fn($value) => mb_strtolower(trim($value))],
                 [
                     'email',
@@ -94,7 +94,7 @@ class RegistrationForm extends RegistrationFormMeta
             in_array(AuthAttributeTypeEnum::PHONE, $module->loginAvailableAttributes)) {
             $rules = [
                 ...$rules,
-                ['phone', VerifyCodeIsSendValidator::class],
+            //    ['phone', VerifyCodeIsSendValidator::class],
                 ['phone', PhoneValidator::class],
                 [
                     'phone',

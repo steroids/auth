@@ -118,6 +118,8 @@ class AuthModule extends Module
 
     public array $providersClasses = [];
 
+    public bool $debugSkipConfirmCodeCheck = false;
+
     /**
      * @param int|null $length
      * @param string $attributeType
@@ -222,12 +224,12 @@ class AuthModule extends Module
             ->andWhere(['>=', 'expireTime', date('Y-m-d H:i:s')])
             ->one();
 
-        if($confirmHasBeenAlreadySend){
+        if ($confirmHasBeenAlreadySend) {
             return null;
         }
 
         // Create confirm
-        $model = AuthConfirm::instantiate(array_merge($authConfirmAttributes,[
+        $model = AuthConfirm::instantiate(array_merge($authConfirmAttributes, [
             'code' => static::generateCode($this->confirmCodeLength, $attributeType)
         ]));
 
@@ -278,20 +280,20 @@ class AuthModule extends Module
                 'userId' => $user->id,
                 'authenticatorType' => $authenticator->type,
             ])
-            ->andWhere(['>=','createTime', date("Y-m-d H:i", strtotime($this->auth2FaValidationLiveTime))])
+            ->andWhere(['>=', 'createTime', date("Y-m-d H:i", strtotime($this->auth2FaValidationLiveTime))])
             ->one();
 
-        if($authValidate){
+        if ($authValidate) {
             return self::TWOFA_CODE_IS_SEND;
         }
 
-        if($authenticator instanceof NotifierAuthenticator && !$authValidate){
+        if ($authenticator instanceof NotifierAuthenticator && !$authValidate) {
             $authenticator->sendCode($login);
 
             return self::TWOFA_CODE_IS_SEND;
         }
 
-        return $authenticator->validateCode($code,$login)
+        return $authenticator->validateCode($code, $login)
             ? self::TWOFA_CODE_SUCCESS
             : self::TWOFA_CODE_FAILED;
     }
