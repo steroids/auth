@@ -29,6 +29,13 @@ abstract class AuthConfirmMeta extends Model
     public function fields()
     {
         return [
+            'uid',
+            'type',
+            'value',
+            'code',
+            'is2Fa',
+            'createTime',
+            'expireTime',
         ];
     }
 
@@ -69,6 +76,7 @@ abstract class AuthConfirmMeta extends Model
             ],
             'value' => [
                 'label' => Yii::t('steroids', 'Логин'),
+                'isPublishToFrontend' => false,
                 'isRequired' => true
             ],
             'code' => [
@@ -82,6 +90,7 @@ abstract class AuthConfirmMeta extends Model
             ],
             'createTime' => [
                 'label' => Yii::t('steroids', 'Время отправки'),
+                'isPublishToFrontend' => false,
                 'appType' => 'autoTime',
                 'touchOnUpdate' => false
             ],
@@ -92,6 +101,7 @@ abstract class AuthConfirmMeta extends Model
             ],
             'expireTime' => [
                 'label' => Yii::t('steroids', 'Действителен до'),
+                'isPublishToFrontend' => false,
                 'appType' => 'dateTime'
             ],
             'type' => [
