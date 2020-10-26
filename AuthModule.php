@@ -8,6 +8,7 @@ use steroids\auth\components\captcha\CaptchaComponentInterface;
 use steroids\auth\components\captcha\ReCaptchaV3;
 use steroids\auth\enums\AuthAttributeTypeEnum;
 use InvalidArgumentException;
+use steroids\auth\exceptions\ConfirmCodeAlreadySentException;
 use steroids\auth\forms\ConfirmForm;
 use steroids\auth\forms\LoginForm;
 use steroids\auth\forms\RecoveryPasswordConfirmForm;
@@ -194,7 +195,7 @@ class AuthModule extends Module
      * @param string $attributeType one of AuthAttributeTypeEnum::EMAIL, AuthAttributeTypeEnum::PHONE
      * @param bool $is2fa
      * @return null|AuthConfirm
-     * @throws ModelSaveException|InvalidArgumentException
+     * @throws ModelSaveException|InvalidArgumentException|ConfirmCodeAlreadySentException
      */
 
     public function confirm($user, $attributeType = null, $is2fa = false)
@@ -225,7 +226,7 @@ class AuthModule extends Module
             ->one();
 
         if ($confirmHasBeenAlreadySend) {
-            return null;
+            throw new ConfirmCodeAlreadySentException();
         }
 
         // Create confirm

@@ -3,12 +3,11 @@
 namespace steroids\auth\forms;
 
 use steroids\auth\AuthModule;
-use steroids\auth\components\captcha\ReCaptchaV3;
 use steroids\auth\enums\AuthAttributeTypeEnum;
+use steroids\auth\exceptions\ConfirmCodeAlreadySentException;
 use steroids\auth\forms\meta\LoginFormMeta;
 use steroids\auth\models\AuthConfirm;
 use steroids\auth\UserInterface;
-use steroids\auth\validators\VerifyCodeIsSendValidator;
 use steroids\auth\validators\LoginValidator;
 use steroids\auth\validators\ReCaptchaValidator;
 use steroids\core\validators\PhoneValidator;
@@ -95,7 +94,6 @@ class LoginForm extends LoginFormMeta
             ...$rules,
 
             // Check confirms
-        //    ['login',VerifyCodeIsSendValidator::class],
             ['login', function ($attribute) use ($module) {
                 if ($this->user && !$this->hasErrors()) {
                     $isConfirmed = AuthConfirm::find()
@@ -131,7 +129,11 @@ class LoginForm extends LoginFormMeta
             } else {
                 // Send confirm code
                 $module = AuthModule::getInstance();
-                $module->confirm($this->user, $module->registrationMainAttribute);
+                try {
+                    $module->confirm($this->user, $module->registrationMainAttribute);
+                } catch (ConfirmCodeAlreadySentException $e) {
+                    $this->addError($module->registrationMainAttribute, ConfirmCodeAlreadySentException::getDefaultMessage());
+                }
             }
         }
     }
