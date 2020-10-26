@@ -67,27 +67,18 @@ class ProviderLoginForm extends ProviderLoginFormMeta
      */
     public function login()
     {
-        if ($this->validate()) {
-            // Auth via provider
-            $profile = $this->provider->auth($this->params);
-
-            // Find or create AuthSocial
-            $this->social = AuthSocial::findOrCreate($this->name, $profile);
-
-            $user = \Yii::$app->user->identity;
-            if ($user) {
-                // Connect
-                $this->social->appendUser($user->email);
-
-            } elseif (!$this->social->isEmailNeed) {
-                // Create
-                \Yii::$app->user->login($this->social->user);
-            }
-
-            if (!\Yii::$app->user->isGuest) {
-                $this->accessToken = \Yii::$app->user->accessToken;
-            }
-
+        if (!$this->validate()) {
+            return;
         }
+
+        // Auth via provider
+        $profile = $this->provider->auth($this->params);
+
+        // Find or create AuthSocial
+        $this->social = AuthSocial::findOrCreate($this->name, $profile);
+        $this->social->appendUser();
+
+        \Yii::$app->user->login($this->social->user);
+        $this->accessToken = \Yii::$app->user->accessToken;
     }
 }

@@ -37,9 +37,9 @@ class AuthSocial extends AuthSocialMeta
         $model->profileJson = Json::encode($profile);
         $model->saveOrPanic();
 
-        if ($profile->email) {
-            $model->appendUser($profile->email);
-        }
+//        if ($profile->email) {
+//            $model->appendUser($profile->email);
+//        }
 
         return $model;
     }
@@ -77,26 +77,38 @@ class AuthSocial extends AuthSocialMeta
      * @param string $email
      * @throws ModelSaveException
      */
-    public function appendUser($email)
+    public function appendUser()
     {
-        /** @var UserInterface|Model $userClass */
-        $userClass = \Yii::$app->user->identityClass;
-
-        $user = $userClass::findByEmail($email);
-        if (!$user) {
-            /** @var UserInterface|Model $user */
-            $user = new $userClass();
-            $user->attributes = [
-                'role' => \Yii::$app->user->defaultRole,
-                'email' => $email,
-                'username' => $this->profile->name,
-            ];
-            $user->saveOrPanic();
-        }
+        $user = $this->findOrCreateUser();
 
         $this->userId = $user->primaryKey;
         $this->populateRelation('user', $user);
         $this->saveOrPanic();
+    }
+
+    private function findOrCreateUser()
+    {
+        if (!\Yii::$app->user->isGuest) {
+            return \Yii::$app->user->identity;
+        }
+
+        $socialUser = $this->user;
+        if ($socialUser) {
+            return $socialUser;
+        }
+
+        /** @var UserInterface|Model $userClass */
+        $userClass = \Yii::$app->user->identityClass;
+
+        /** @var UserInterface|Model $user */
+        $user = new $userClass();
+        $user->attributes = [
+            'role' => \Yii::$app->user->defaultRole,
+            'username' => $this->profile->name,
+        ];
+        $user->saveOrPanic();
+
+        return $user;
     }
 
     /**
