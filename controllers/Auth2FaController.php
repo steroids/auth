@@ -12,14 +12,14 @@ use PragmaRX\Google2FA\Google2FA;
 use steroids\auth\AuthModule;
 use yii\web\Controller;
 
-class Auth2FAController extends Controller
+class Auth2FaController extends Controller
 {
     public static function apiMap()
     {
         return [
             'auth' => [
                 'items' => [
-                    'two-fa-validate-code' => 'POST /auth/2fa/validate-code',
+                    'two-fa-validate-code' => 'POST /auth/auth-2fa/validate-code',
                 ],
             ],
         ];
