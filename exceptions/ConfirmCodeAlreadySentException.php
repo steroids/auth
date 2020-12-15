@@ -5,9 +5,9 @@ namespace steroids\auth\exceptions;
 
 
 use Yii;
-use yii\base\Exception;
+use yii\web\HttpException;
 
-class ConfirmCodeAlreadySentException extends Exception
+class ConfirmCodeAlreadySentException extends HttpException
 {
     /**
      * Constructor.
