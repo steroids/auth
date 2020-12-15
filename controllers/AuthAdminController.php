@@ -37,35 +37,35 @@ class AuthAdminController extends CrudApiController
                     ],
                     'logins' => [
                         'label' => \Yii::t('steroids', 'История входа'),
-                        'urlRule' => "GET $baseUrl/<$idParam:\d>/logins",
+                        'urlRule' => "GET $baseUrl/<$idParam:\d+>/logins",
                     ],
                     'logout' => [
                         'label' => \Yii::t('steroids', 'Разлогинить на определенном устройстве'),
-                        'urlRule' => "POST $baseUrl/<$idParam:\d>/logins/<loginId>/logout",
+                        'urlRule' => "POST $baseUrl/<$idParam:\d+>/logins/<loginId>/logout",
                     ],
                     'logout-all' => [
                         'label' => \Yii::t('steroids', 'Разлогинить на всех устройствах'),
-                        'urlRule' => "POST $baseUrl/<$idParam:\d>/logout-all",
+                        'urlRule' => "POST $baseUrl/<$idParam:\d+>/logout-all",
                     ],
                     'confirm-send' => [
                         'label' => \Yii::t('steroids', 'Повторно отправить код подтверждения'),
-                        'urlRule' => "POST $baseUrl/<$idParam:\d>/confirms",
+                        'urlRule' => "POST $baseUrl/<$idParam:\d+>/confirms",
                     ],
                     'confirms' => [
                         'label' => \Yii::t('steroids', 'История подтверждений'),
-                        'urlRule' => "GET $baseUrl/<$idParam:\d>/confirms",
+                        'urlRule' => "GET $baseUrl/<$idParam:\d+>/confirms",
                     ],
                     'confirm-accept' => [
                         'label' => \Yii::t('steroids', 'Отметить подтвержденным почту или телефон'),
-                        'urlRule' => "POST $baseUrl/<$idParam:\d>/confirms/<confirmId>/accept",
+                        'urlRule' => "POST $baseUrl/<$idParam:\d+>/confirms/<confirmId>/accept",
                     ],
                     'ban' => [
                         'label' => \Yii::t('steroids', 'Блокировка пользователя'),
-                        'urlRule' => "POST $baseUrl/<$idParam:\d>/ban",
+                        'urlRule' => "POST $baseUrl/<$idParam:\d+>/ban",
                     ],
                     'password' => [
                         'label' => \Yii::t('steroids', 'Обновить пароль'),
-                        'urlRule' => "POST $baseUrl/<$idParam:\d>/password",
+                        'urlRule' => "POST $baseUrl/<$idParam:\d+>/password",
                     ],
                 ],
             ]),
