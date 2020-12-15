@@ -222,10 +222,13 @@ class AuthModule extends Module
         $confirmHasBeenAlreadySend = AuthConfirm::find()
             ->where($authConfirmAttributes)
             ->andWhere(['>=', 'expireTime', date('Y-m-d H:i:s')])
+            ->andWhere(['isConfirmed' => false])
             ->one();
 
         if ($confirmHasBeenAlreadySend) {
-            throw new ConfirmCodeAlreadySentException();
+            $diffInSeconds = strtotime($confirmHasBeenAlreadySend->expireTime) - strtotime("now");
+            $message = 'Код уже был отправлен, повторная отправка возможна через ' . $diffInSeconds;
+            throw new ConfirmCodeAlreadySentException($message);
         }
 
         $authConfirmAttributes['code'] = static::generateCode($this->confirmCodeLength, $attributeType);
