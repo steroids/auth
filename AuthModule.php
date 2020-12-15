@@ -217,7 +217,6 @@ class AuthModule extends Module
             'value' => $user->getAttribute($attribute),
             'userId' => $user->getId(),
             'is2Fa' => $is2fa,
-            'code' => static::generateCode($this->confirmCodeLength, $attributeType),
         ];
 
         $confirmHasBeenAlreadySend = AuthConfirm::find()
@@ -228,6 +227,8 @@ class AuthModule extends Module
         if ($confirmHasBeenAlreadySend) {
             throw new ConfirmCodeAlreadySentException();
         }
+
+        $authConfirmAttributes['code'] = static::generateCode($this->confirmCodeLength, $attributeType);
 
         // Create confirm
         $model = AuthConfirm::instantiate(array_merge($authConfirmAttributes, [
