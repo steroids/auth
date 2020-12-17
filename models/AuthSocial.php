@@ -109,10 +109,12 @@ class AuthSocial extends AuthSocialMeta
         if (!$user) {
             /** @var UserInterface|Model $user */
             $user = new $userClass();
-            $user->setAttribute(AuthModule::getInstance()->emailAttribute, $email);
             $user->setAttribute(AuthModule::getInstance()->nameAttribute, $this->profile->name);
             $user->saveOrPanic();
         }
+
+        $user->setAttribute(AuthModule::getInstance()->emailAttribute, $email);
+        $user->saveOrPanic();
 
         $this->appendUser($user);
     }

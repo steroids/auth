@@ -3,10 +3,11 @@
 namespace steroids\auth\forms;
 
 use steroids\auth\AuthModule;
+use steroids\auth\enums\AuthAttributeTypeEnum;
 use steroids\auth\forms\meta\RecoveryPasswordFormMeta;
 use steroids\auth\models\AuthConfirm;
 use steroids\auth\UserInterface;
-use steroids\auth\validators\ReCaptchaValidator;
+use steroids\auth\validators\CaptchaValidator;
 use steroids\core\base\Model;
 
 class RecoveryPasswordForm extends RecoveryPasswordFormMeta
@@ -44,7 +45,7 @@ class RecoveryPasswordForm extends RecoveryPasswordFormMeta
             ['login', 'filter', 'filter' => function ($value) {
                 return mb_strtolower(trim($value));
             }],
-            ['token', ReCaptchaValidator::class]
+            ['token', CaptchaValidator::class]
         ]);
     }
 
@@ -64,7 +65,7 @@ class RecoveryPasswordForm extends RecoveryPasswordFormMeta
 
             if ($this->user) {
 
-                $confirmAttribute = AuthModule::getNotifierAttributeTypeFromLogin($this->login);
+                $confirmAttribute = AuthAttributeTypeEnum::resolveNotifierByLogin($this->login);
                 $this->confirm = $module->confirm($this->user, $confirmAttribute);
             }
         }

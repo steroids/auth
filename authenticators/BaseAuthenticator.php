@@ -2,47 +2,38 @@
 
 namespace steroids\auth\authenticators;
 
-use Yii;
-use steroids\auth\models\Auth2FaValidation;
+use steroids\auth\models\AuthTwoFactor;
 
 /**
  * Class BaseAuthenticator
  * @package steroids\auth\authenticators
- * @property-read string $type
  */
 abstract class BaseAuthenticator
 {
     /**
      * Send code that shall be verified later
-     *
-     * @param string $login value of the user's login attribute
+     * @param AuthTwoFactor $twoFactor
+     * @return mixed
      */
-    abstract public function sendCode(string $login);
-
-    /**
-     * @return string one of AuthenticatorEnum values
-     */
-    abstract public function getType();
+    abstract public function start(AuthTwoFactor $twoFactor);
 
     /**
      * With success result must call onCorrectCode
-     *
-     * @param string $code code that should be validated
-     * @param string $login value of the user's login attribute
+     * @param AuthTwoFactor $twoFactor
+     * @param string $code
      * @return bool
      */
-    abstract public function validateCode(string $code, string $login);
-
+    abstract public function check(AuthTwoFactor $twoFactor, string $code);
 
     /**
-     * @throws \steroids\core\exceptions\ModelSaveException
+     * Provider name in config
+     * @var string
      */
-    public function onCorrectCodeValidation()
-    {
-        $auth2FaValidationModel = new Auth2FaValidation([
-            'userId' => Yii::$app->user->id,
-            'authenticatorType' => $this->type
-        ]);
-        $auth2FaValidationModel->saveOrPanic();
-    }
+    public string $name;
+
+    /**
+     * Code interval, while its actual
+     * @var int
+     */
+    public int $expireSec = 120;
 }

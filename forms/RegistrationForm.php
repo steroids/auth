@@ -4,7 +4,7 @@ namespace steroids\auth\forms;
 
 use steroids\auth\enums\AuthAttributeTypeEnum;
 use steroids\auth\models\AuthConfirm;
-use steroids\auth\validators\ReCaptchaValidator;
+use steroids\auth\validators\CaptchaValidator;
 use steroids\core\exceptions\ModelSaveException;
 use Yii;
 use steroids\auth\AuthModule;
@@ -64,7 +64,7 @@ class RegistrationForm extends RegistrationFormMeta
         $userClass = $module->userClass;
 
         // Token
-        $rules[] = ['token', ReCaptchaValidator::class];
+        $rules[] = ['token', CaptchaValidator::class];
 
         // Email
         if ($module->registrationMainAttribute === AuthAttributeTypeEnum::EMAIL ||

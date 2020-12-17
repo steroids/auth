@@ -5,6 +5,8 @@ namespace steroids\auth\controllers;
 use steroids\auth\AuthModule;
 use steroids\auth\exceptions\ConfirmCodeAlreadySentException;
 use steroids\auth\forms\ConfirmForm;
+use steroids\auth\forms\TwoFactorConfirmForm;
+use steroids\auth\forms\Validate2FaCode;
 use steroids\auth\models\AuthConfirm;
 use Yii;
 use yii\web\Controller;
@@ -28,6 +30,7 @@ class AuthController extends Controller
                     'confirm' => 'POST api/v1/auth/confirms/<uid>',
                     'resend-confirm' => 'POST api/v1/auth/confirms/<uid>/resend',
                     'logout' => 'POST api/v1/auth/logout',
+                    'two-factor-confirm' => 'POST api/v1/auth/2fa/<providerName>',
                     'ws' => 'GET api/v1/auth/ws',
                 ],
             ],
@@ -128,7 +131,7 @@ class AuthController extends Controller
     public function actionResendConfirm(string $uid)
     {
         $prev = AuthConfirm::findOrPanic(['uid' => $uid]);
-        $confirm = AuthModule::getInstance()->confirm($prev->user, $prev->type, $prev->is2Fa);
+        $confirm = AuthModule::getInstance()->confirm($prev->user, $prev->type);
         if ($confirm->isReused) {
             throw new ConfirmCodeAlreadySentException(\Yii::t('steroids', 'Код уже был отправлен'));
         }
@@ -152,5 +155,17 @@ class AuthController extends Controller
         return [
             'token' => \Yii::$app->user->refreshWsToken(),
         ];
+    }
+
+    /**
+     * @return TwoFactorConfirmForm
+     */
+    public function actionTwoFactorConfirm()
+    {
+        $model = new TwoFactorConfirmForm();
+        $model->user = Yii::$app->user->identity;
+        $model->load(Yii::$app->request->post());
+        $model->validate();
+        return $model;
     }
 }

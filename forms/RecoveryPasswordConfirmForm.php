@@ -33,12 +33,7 @@ class RecoveryPasswordConfirmForm extends RecoveryPasswordConfirmFormMeta
             ['newPassword', 'compare', 'compareAttribute' => 'newPasswordAgain'],
             ['login', 'filter', 'filter' => fn($value) => mb_strtolower(trim($value))],
             ['code', function ($attribute) {
-                if (!YII_DEBUG || !AuthModule::getInstance()->debugSkipConfirmCodeCheck) {
-                    $this->confirm = AuthConfirm::findByCode($this->login, $this->code);
-                } else {
-                    $this->confirm = AuthConfirm::findByLogin($this->login);
-                }
-
+                $this->confirm = AuthConfirm::findByCode($this->login, $this->code);
                 if (!$this->confirm) {
                     $this->addError($attribute, \Yii::t('steroids', 'Код неверен или устарел'));
                 }

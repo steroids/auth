@@ -7,17 +7,21 @@ use steroids\auth\providers\BaseAuthProvider;
 
 class TestAuthProvider extends BaseAuthProvider
 {
+    protected static $params;
 
     /**
      * @inheritDoc
      */
     public function auth(array $params)
     {
-        return new AuthProfile([
-            'id' => 'test-external-id',
-            'email' => 'test@email.com',
-            'name' => 'testUsername',
-            'avatarUrl' => 'picture-url.com',
-        ]);
+        if (!static::$params) {
+            static::$params = [
+                'id' => 'test-exte' . time() . 'rnal-id',
+                'email' => 'test' . time() . '@email.com',
+                'name' => 'test' . time() . 'Username',
+                'avatarUrl' => 'picture-url.com',
+            ];
+        }
+        return new AuthProfile(static::$params);
     }
 }

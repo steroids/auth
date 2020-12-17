@@ -6,10 +6,9 @@ use steroids\auth\AuthModule;
 use steroids\auth\models\meta\AuthConfirmMeta;
 use steroids\auth\UserInterface;
 use steroids\core\base\Model;
-use steroids\core\behaviors\TimestampBehavior;
 use steroids\core\behaviors\UidBehavior;
-use \steroids\exceptions\ModelSaveException;
 use yii\db\ActiveQuery;
+use yii\db\ActiveRecord;
 
 /**
  * @property-read UserInterface|Model $user
@@ -26,42 +25,22 @@ class AuthConfirm extends AuthConfirmMeta
         return AuthModule::instantiateClass(static::class, $row);
     }
 
-    public static function checkLoginIsUid(string $login): string
+    /**
+     * @param string $login
+     * @param string|null $code
+     * @return AuthConfirm|ActiveRecord|null
+     */
+    public static function findByCode(string $login, string $code = null): ?AuthConfirm
     {
-        // Check if login is uid
-        return static::find()
-            ->select('value')
-            ->where(['uid' => $login])
-            ->scalar() ?: $login;
-    }
-
-    public static function findByCode($login, $code): ?AuthConfirm
-    {
-        $login = static:: checkLoginIsUid($login);
-
-        return static::find()
-            ->where(['code' => trim($code)])
-            ->andWhere([
-                'or',
-                ['value' => mb_strtolower(trim($login))],
-                ['uid' => mb_strtolower(trim($login))],
-            ])
-            ->andWhere(['>=', 'expireTime', date('Y-m-d H:i:s')])
-            ->orderBy(['id' => SORT_DESC])
-            ->limit(1)
-            ->one();
-    }
-
-    public static function findByLogin(string $login): ?AuthConfirm
-    {
-        $login = static:: checkLoginIsUid($login);
+        $login = mb_strtolower(trim($login));
 
         /** @var static $confirm */
         return static::find()
+            ->andFilterWhere(['code' => trim($code)])
             ->andWhere([
                 'or',
-                ['value' => mb_strtolower(trim($login))],
-                ['uid' => mb_strtolower(trim($login))],
+                ['LOWER(value)' => $login],
+                ['uid' => $login],
             ])
             ->andWhere(['>=', 'expireTime', date('Y-m-d H:i:s')])
             ->orderBy(['id' => SORT_DESC])

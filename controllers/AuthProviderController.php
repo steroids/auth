@@ -6,9 +6,9 @@ use Yii;
 use yii\web\Controller;
 use steroids\auth\forms\SocialEmailConfirmForm;
 use steroids\auth\forms\SocialEmailForm;
-use steroids\auth\forms\ProviderLoginForm;
+use steroids\auth\forms\AuthProviderLoginForm;
 
-class SocialController extends Controller
+class AuthProviderController extends Controller
 {
     public static function apiMap()
     {
@@ -26,12 +26,12 @@ class SocialController extends Controller
 
     /**
      * Login
-     * @return ProviderLoginForm
+     * @return AuthProviderLoginForm
      * @throws \Exception
      */
     public function actionLogin()
     {
-        $model = new ProviderLoginForm();
+        $model = new AuthProviderLoginForm();
         if ($model->load(Yii::$app->request->post())) {
             $model->login();
         }

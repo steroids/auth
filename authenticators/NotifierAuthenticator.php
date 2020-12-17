@@ -1,56 +1,46 @@
 <?php
 
+namespace steroids\auth\authenticators;
 
-namespace steroids\auth\models;
-
-use steroids\auth\enums\AuthenticatorEnum;
-use steroids\auth\authenticators\BaseAuthenticator;
 use steroids\auth\AuthModule;
-use steroids\auth\UserInterface;
-use Yii;
-use yii\base\InvalidConfigException;
+use steroids\auth\models\AuthConfirm;
+use steroids\auth\models\AuthTwoFactor;
 
 /**
  * Class NotifierAuthenticator
  * @package steroids\auth\models
  */
-
 class NotifierAuthenticator extends BaseAuthenticator
 {
-    public function getType()
-    {
-        return AuthenticatorEnum::NOTIFIER_AUTH;
-    }
+    public ?string $attributeType = null;
 
     /**
      * @inheritDoc
      * @throws \yii\base\Exception
      */
-    public function sendCode(string $login)
+    public function start(AuthTwoFactor $twoFactor)
     {
-        /** @var UserInterface $user */
-        $user = Yii::$app->user->identityClass;
-
-        if (!$user) {
-            throw new InvalidConfigException('Context app user must be set before sending 2FA code');
-        }
-
-        $userAttributeType = AuthModule::getNotifierAttributeTypeFromLogin($login);
-        AuthModule::getInstance()->confirm($user, $userAttributeType, true);
+        AuthModule::getInstance()->confirm($twoFactor->user, $this->attributeType);
     }
 
     /**
      * @inheritDoc
      * @throws \steroids\core\exceptions\ModelSaveException
      */
-    public function validateCode(string $code, string $login)
+    public function check(AuthTwoFactor $twoFactor, string $code)
     {
-        if (!AuthConfirm::findByCode($login, $code)){
-            return false;
+        // Get login
+        $module = AuthModule::getInstance();
+        $attributeType = $this->attributeType ?: $module->registrationMainAttribute;
+        $login = $twoFactor->user->getAttribute($module->getUserAttributeName($attributeType));
+
+        // Confirm
+        $confirm = AuthConfirm::findByCode($login, $code);
+        if ($confirm) {
+            $confirm->markConfirmed();
+            return true;
         }
 
-        $this->onCorrectCodeValidation();
-
-        return true;
+        return false;
     }
 }

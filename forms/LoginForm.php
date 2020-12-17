@@ -8,7 +8,7 @@ use steroids\auth\forms\meta\LoginFormMeta;
 use steroids\auth\models\AuthConfirm;
 use steroids\auth\UserInterface;
 use steroids\auth\validators\LoginValidator;
-use steroids\auth\validators\ReCaptchaValidator;
+use steroids\auth\validators\CaptchaValidator;
 use steroids\core\validators\PhoneValidator;
 use yii\helpers\ArrayHelper;
 
@@ -55,7 +55,7 @@ class LoginForm extends LoginFormMeta
         }
 
         //Add captcha
-        $rules[] = ['token', ReCaptchaValidator::class];
+        $rules[] = ['token', CaptchaValidator::class];
 
         if (in_array(AuthAttributeTypeEnum::EMAIL, $module->loginAvailableAttributes)
             && strpos($this->login, '@') !== false) {

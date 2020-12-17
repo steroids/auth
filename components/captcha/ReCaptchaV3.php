@@ -1,10 +1,7 @@
 <?php
 
-
 namespace steroids\auth\components\captcha;
 
-
-use http\Client;
 use yii\base\Component;
 use yii\base\InvalidConfigException;
 use yii\db\Exception;
@@ -13,8 +10,13 @@ class ReCaptchaV3 extends Component implements CaptchaComponentInterface
 {
     public string $secretKey;
 
+    /**
+     * @inheritDoc
+     */
     public function init()
     {
+        parent::init();
+
         if (empty($this->secretKey)) {
             throw new InvalidConfigException('You must provide secret key to use ReCaptchaV3');
         }

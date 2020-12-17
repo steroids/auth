@@ -9,11 +9,15 @@ use steroids\auth\AuthModule;
 use steroids\auth\enums\AuthAttributeTypeEnum;
 use steroids\auth\forms\ConfirmForm;
 use steroids\auth\forms\LoginForm;
-use steroids\auth\forms\ProviderLoginForm;
+use steroids\auth\forms\AuthProviderLoginForm;
 use steroids\auth\forms\RecoveryPasswordConfirmForm;
 use steroids\auth\forms\RecoveryPasswordForm;
 use steroids\auth\forms\RegistrationForm;
+use steroids\auth\forms\TwoFactorConfirmForm;
+use steroids\auth\models\AuthConfirm;
 use steroids\auth\tests\mocks\TestAuthProvider;
+use steroids\auth\tests\mocks\TestPayForm;
+use steroids\auth\validators\TwoFactorRequireValidator;
 use yii\base\Exception as YiiBaseException;
 use yii\helpers\Json;
 
@@ -250,11 +254,11 @@ class AuthTest extends TestCase
         $authModule->registrationMainAttribute = AuthAttributeTypeEnum::EMAIL;
         $authProviderName = 'test-auth-provider';
 
-        $authModule->providersClasses = [
+        $authModule->authProvidersClasses = [
             $authProviderName => TestAuthProvider::class,
         ];
 
-        $authModule->providers = [
+        $authModule->authProviders = [
             $authProviderName => [
                 'class' => TestAuthProvider::class,
                 //configure any properties there
@@ -265,7 +269,7 @@ class AuthTest extends TestCase
         $authModule->isPasswordAvailable = false;
 
         // Register
-        $regSocialForm = new ProviderLoginForm();
+        $regSocialForm = new AuthProviderLoginForm();
 
         // Get auth-name from frontend
         $regSocialForm->name = $authProviderName;
@@ -332,5 +336,58 @@ class AuthTest extends TestCase
         $regForm->register();
 
         $this->assertNotNull($regForm->user);
+    }
+
+    /**
+     * Тестирование 2FA функционала (provider: notifier)
+     */
+    public function testTwoFactorNotifier()
+    {
+        $authModule = AuthModule::getInstance();
+        $authModule->registrationMainAttribute = AuthAttributeTypeEnum::EMAIL;
+        $authModule->twoFactorProviders = [
+            'notifier' => [
+                'attributeType' => AuthAttributeTypeEnum::EMAIL,
+            ],
+            'google' => [],
+        ];
+
+        // Register
+        $regForm = new RegistrationForm();
+        $regForm->email = 'test' . time() . '@test.dot';
+        $regForm->password = '123456';
+        $regForm->passwordAgain = '123456';
+        $regForm->register();
+        $this->assertNotNull($regForm->user);
+
+        // Run validator in pay form
+        $payForm = new TestPayForm();
+        $payForm->user = $regForm->user;
+        $payForm->providerName = 'notifier';
+        $payForm->amount = 10;
+        $payForm->validate();
+        $this->assertEquals('{"amount":["2FA_REQUIRED:notifier"]}', Json::encode($payForm->errors));
+
+        // Send verification code (wrong)
+        $confirmForm = new TwoFactorConfirmForm();
+        $confirmForm->user = $regForm->user;
+        $confirmForm->providerName = $payForm->providerName;
+        $confirmForm->code = '123aa';
+        $confirmForm->validate();
+        $this->assertEquals('{"code":["Валидация не пройдена"]}', Json::encode($confirmForm->errors));
+
+        // Send verification code (true)
+        $confirmForm->clearErrors();
+        $confirmForm->code = AuthConfirm::find()
+            ->select('code')
+            ->where(['userId' => $regForm->user->getId()])
+            ->scalar();
+        $confirmForm->validate();
+        $this->assertEquals('[]', Json::encode($confirmForm->errors));
+
+        // Run validator in pay form again
+        $payForm->clearErrors();
+        $payForm->validate();
+        $this->assertEquals('[]', Json::encode($payForm->errors));
     }
 }
