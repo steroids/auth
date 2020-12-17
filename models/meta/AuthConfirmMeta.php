@@ -18,6 +18,7 @@ use \Yii;
  * @property string $type
  * @property string $uid
  * @property boolean $is2Fa
+ * @property boolean $isReused
  */
 abstract class AuthConfirmMeta extends Model
 {
@@ -29,13 +30,13 @@ abstract class AuthConfirmMeta extends Model
     public function fields()
     {
         return [
-            'uid',
-            'type',
             'value',
-            'code',
-            'is2Fa',
+            'isConfirmed',
             'createTime',
             'expireTime',
+            'type',
+            'uid',
+            'isReused',
         ];
     }
 
@@ -47,7 +48,7 @@ abstract class AuthConfirmMeta extends Model
             [['userId', 'value', 'code'], 'required'],
             ['value', 'string', 'max' => 255],
             ['code', 'string', 'max' => '32'],
-            [['isConfirmed', 'is2Fa'], 'steroids\\core\\validators\\ExtBooleanValidator'],
+            [['isConfirmed', 'is2Fa', 'isReused'], 'steroids\\core\\validators\\ExtBooleanValidator'],
             ['expireTime', 'date', 'format' => 'php:Y-m-d H:i:s'],
             ['type', 'string', 'max' => '10'],
             ['uid', 'string', 'max' => '36'],
@@ -76,22 +77,24 @@ abstract class AuthConfirmMeta extends Model
             ],
             'value' => [
                 'label' => Yii::t('steroids', 'Логин'),
-                'isPublishToFrontend' => false,
-                'isRequired' => true
+                'isRequired' => true,
+                'isPublishToFrontend' => true
             ],
             'code' => [
                 'label' => Yii::t('steroids', 'Код'),
                 'isRequired' => true,
+                'isPublishToFrontend' => false,
                 'stringLength' => '32'
             ],
             'isConfirmed' => [
                 'label' => Yii::t('steroids', 'Подтвержден?'),
-                'appType' => 'boolean'
+                'appType' => 'boolean',
+                'isPublishToFrontend' => true
             ],
             'createTime' => [
                 'label' => Yii::t('steroids', 'Время отправки'),
-                'isPublishToFrontend' => false,
                 'appType' => 'autoTime',
+                'isPublishToFrontend' => true,
                 'touchOnUpdate' => false
             ],
             'updateTime' => [
@@ -101,22 +104,27 @@ abstract class AuthConfirmMeta extends Model
             ],
             'expireTime' => [
                 'label' => Yii::t('steroids', 'Действителен до'),
-                'isPublishToFrontend' => false,
-                'appType' => 'dateTime'
+                'appType' => 'dateTime',
+                'isPublishToFrontend' => true
             ],
             'type' => [
                 'label' => Yii::t('steroids', 'Тип (емаил или телефон)'),
-                'isPublishToFrontend' => false,
+                'isPublishToFrontend' => true,
                 'stringLength' => '10'
             ],
             'uid' => [
                 'label' => Yii::t('steroids', 'UID'),
-                'isPublishToFrontend' => false,
+                'isPublishToFrontend' => true,
                 'stringLength' => '36'
             ],
             'is2Fa' => [
                 'appType' => 'boolean',
                 'isPublishToFrontend' => false
+            ],
+            'isReused' => [
+                'label' => Yii::t('steroids', 'Используется повторно'),
+                'appType' => 'boolean',
+                'isPublishToFrontend' => true
             ]
         ]);
     }

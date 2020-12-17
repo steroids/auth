@@ -4,7 +4,6 @@ namespace steroids\auth\forms;
 
 use steroids\auth\AuthModule;
 use steroids\auth\enums\AuthAttributeTypeEnum;
-use steroids\auth\exceptions\ConfirmCodeAlreadySentException;
 use steroids\auth\forms\meta\LoginFormMeta;
 use steroids\auth\models\AuthConfirm;
 use steroids\auth\UserInterface;
@@ -30,10 +29,13 @@ class LoginForm extends LoginFormMeta
      */
     public $token;
 
+    public ?AuthConfirm $confirm = null;
+
     public function fields()
     {
         return [
             'accessToken',
+            'confirm',
         ];
     }
 
@@ -129,11 +131,7 @@ class LoginForm extends LoginFormMeta
             } else {
                 // Send confirm code
                 $module = AuthModule::getInstance();
-                try {
-                    $module->confirm($this->user, $module->registrationMainAttribute);
-                } catch (ConfirmCodeAlreadySentException $e) {
-                    $this->addError($module->registrationMainAttribute, ConfirmCodeAlreadySentException::getDefaultMessage());
-                }
+                $this->confirm = $module->confirm($this->user, $module->registrationMainAttribute);
             }
         }
     }

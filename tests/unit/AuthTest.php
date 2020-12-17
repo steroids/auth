@@ -15,6 +15,7 @@ use steroids\auth\forms\RecoveryPasswordForm;
 use steroids\auth\forms\RegistrationForm;
 use steroids\auth\tests\mocks\TestAuthProvider;
 use yii\base\Exception as YiiBaseException;
+use yii\helpers\Json;
 
 class AuthTest extends TestCase
 {
@@ -86,7 +87,7 @@ class AuthTest extends TestCase
 
         // Register
         $registrationForm = new RegistrationForm();
-        $registrationForm->phone = '+7' . time();
+        $registrationForm->phone = '+7' . (string)rand(1000000000, 9999999999);
         $registrationForm->password = '123456';
         $registrationForm->passwordAgain = '123456';
 
@@ -156,7 +157,7 @@ class AuthTest extends TestCase
 
         // Register
         $regForm = new RegistrationForm();
-        $regForm->phone = '+7' . time();
+        $regForm->phone = '+7' . (string)rand(1000000000, 9999999999);
 
         $regForm->register();
         $this->assertNotNull($regForm->user);
@@ -203,7 +204,7 @@ class AuthTest extends TestCase
         $regForm = new RegistrationForm();
         $regForm->email = 'test' . time() . rand(0, 5000) . '@test.com';
         $regForm->custom = [
-            'phone' => '+7' . time(),
+            'phone' => '+7' . (string)rand(1000000000, 9999999999),
             'login' => 'any-login' . time(),
         ];
 
@@ -218,20 +219,20 @@ class AuthTest extends TestCase
         // Confirm registration
         $regForm->confirm->markConfirmed();
 
-        //Login via phone
+        // Login via phone
         $loginForm = new LoginForm();
         $loginForm->login = $user->phone;
         $loginForm->login();
 
+        $this->assertEquals('[]', Json::encode($loginForm->errors));
         $this->assertNotNull($loginForm->user);
 
-        //reset user
-        $loginForm->user = null;
-
-        //Login via login
+        // Login via login
+        $loginForm = new LoginForm();
         $loginForm->login = $user->login;
         $loginForm->login();
 
+        $this->assertEquals('[]', Json::encode($loginForm->errors));
         $this->assertNotNull($loginForm->user);
     }
 
@@ -260,25 +261,27 @@ class AuthTest extends TestCase
             ],
         ];
 
-        // auth only by email/phone + code
+        // Auth only by email/phone + code
         $authModule->isPasswordAvailable = false;
 
         // Register
         $regSocialForm = new ProviderLoginForm();
 
-        //get auth-name from frontend
+        // Get auth-name from frontend
         $regSocialForm->name = $authProviderName;
         $regSocialForm->login();
 
         /** @var User $user */
         $user = $regSocialForm->social->user;
         $this->assertNotNull($user);
+        $this->assertNotNull($user->email);
 
-        //Recovery
+        // Recovery
         $recoveryForm = new RecoveryPasswordForm();
         $recoveryForm->login = $user->email;
+        $recoveryForm->send();
 
-        $this->assertTrue($recoveryForm->send());
+        $this->assertEquals('[]', Json::encode($recoveryForm->errors));
 
         $recoveryForm->confirm->markConfirmed();
 
@@ -294,7 +297,7 @@ class AuthTest extends TestCase
 
         $this->assertNotNull($confirmForm->confirm->user);
 
-        //Login via email and password
+        // Login via email and password
         $loginForm = new LoginForm();
         $loginForm->login = $user->email;
         $loginForm->password = $password;

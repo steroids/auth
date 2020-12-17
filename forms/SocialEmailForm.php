@@ -4,8 +4,8 @@ namespace steroids\auth\forms;
 
 use steroids\auth\AuthModule;
 use steroids\auth\enums\AuthAttributeTypeEnum;
-use steroids\auth\exceptions\ConfirmCodeAlreadySentException;
 use steroids\auth\forms\meta\SocialEmailFormMeta;
+use steroids\auth\models\AuthConfirm;
 use steroids\auth\models\AuthSocial;
 use steroids\auth\UserInterface;
 
@@ -15,6 +15,11 @@ class SocialEmailForm extends SocialEmailFormMeta
      * @var AuthSocial
      */
     public $social;
+
+    /**
+     * @var AuthConfirm
+     */
+    public ?AuthConfirm $confirm = null;
 
     /**
      * @inheritdoc
@@ -53,11 +58,7 @@ class SocialEmailForm extends SocialEmailFormMeta
         $module = AuthModule::getInstance();
         $user = $userClass::findBy($this->email, [$module->getUserAttributeName(AuthAttributeTypeEnum::EMAIL)]);
         if ($user) {
-            try {
-                $module->confirm($user, AuthAttributeTypeEnum::EMAIL);
-            } catch (ConfirmCodeAlreadySentException $e) {
-                $this->addError($module->registrationMainAttribute, ConfirmCodeAlreadySentException::getDefaultMessage());
-            }
+            $this->confirm = $module->confirm($user, AuthAttributeTypeEnum::EMAIL);
         }
         return true;
     }

@@ -3,6 +3,7 @@
 namespace steroids\auth\controllers;
 
 use steroids\auth\AuthModule;
+use steroids\auth\exceptions\ConfirmCodeAlreadySentException;
 use steroids\auth\forms\ConfirmForm;
 use steroids\auth\models\AuthConfirm;
 use Yii;
@@ -119,13 +120,20 @@ class AuthController extends Controller
      * Resend confirm code
      * @param string $uid
      * @return AuthConfirm|null
+     * @throws ConfirmCodeAlreadySentException
      * @throws \steroids\core\exceptions\ModelSaveException
      * @throws \yii\base\Exception
      * @throws \yii\web\NotFoundHttpException
      */
     public function actionResendConfirm(string $uid)
     {
-        return AuthModule::getInstance()->resendConfirm($uid);
+        $prev = AuthConfirm::findOrPanic(['uid' => $uid]);
+        $confirm = AuthModule::getInstance()->confirm($prev->user, $prev->type, $prev->is2Fa);
+        if ($confirm->isReused) {
+            throw new ConfirmCodeAlreadySentException(\Yii::t('steroids', 'Код уже был отправлен'));
+        }
+
+        return $confirm;
     }
 
     /**

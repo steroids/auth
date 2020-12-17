@@ -79,7 +79,7 @@ class SocialEmailConfirmForm extends SocialEmailConfirmFormMeta
                 $this->confirm->markConfirmed();
 
                 // Append user
-                $this->social->appendUser($this->email);
+                $this->social->appendEmail($this->email);
 
                 // Login
                 \Yii::$app->user->login($this->social->user);

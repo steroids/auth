@@ -7,8 +7,6 @@ use steroids\auth\authenticators\GoogleAuthenticator;
 use steroids\auth\components\captcha\CaptchaComponentInterface;
 use steroids\auth\components\captcha\ReCaptchaV3;
 use steroids\auth\enums\AuthAttributeTypeEnum;
-use InvalidArgumentException;
-use steroids\auth\exceptions\ConfirmCodeAlreadySentException;
 use steroids\auth\forms\ConfirmForm;
 use steroids\auth\forms\LoginForm;
 use steroids\auth\forms\RecoveryPasswordConfirmForm;
@@ -30,6 +28,7 @@ use steroids\core\base\Model;
 use steroids\core\base\Module;
 use steroids\core\traits\ModuleProvidersTrait;
 use steroids\core\exceptions\ModelSaveException;
+use yii\base\Exception;
 use yii\base\InvalidConfigException;
 use yii\helpers\ArrayHelper;
 
@@ -55,6 +54,11 @@ class AuthModule extends Module
      * Login attribute in User model
      */
     public string $loginAttribute = 'login';
+
+    /**
+     * Username attribute in User model
+     */
+    public string $nameAttribute = 'username';
 
     /**
      * Password hash attribute in User model
@@ -97,6 +101,11 @@ class AuthModule extends Module
      * Maximum mins for confirm code
      */
     public int $confirmExpireMins = 60;
+
+    /**
+     * Timeout limit in second for repeat send
+     */
+    public int $confirmRepeatLimitSec = 60;
 
     /**
      * User class name which implement UserInterface
@@ -195,52 +204,58 @@ class AuthModule extends Module
      * @param string $attributeType one of AuthAttributeTypeEnum::EMAIL, AuthAttributeTypeEnum::PHONE
      * @param bool $is2fa
      * @return null|AuthConfirm
-     * @throws ModelSaveException|InvalidArgumentException|ConfirmCodeAlreadySentException
+     * @throws ModelSaveException
+     * @throws Exception
      */
-
     public function confirm($user, $attributeType = null, $is2fa = false)
     {
+        // Validate attribute type
         if (!$attributeType) {
             $attributeType = $this->registrationMainAttribute;
         }
-
         if (!in_array($attributeType, self::getNotifierTypes())) {
-            return null;
+            throw new Exception('Wrong attribute type: ' . $attributeType);
         }
 
-        $attribute = $attributeType === AuthAttributeTypeEnum::PHONE
-            ? $this->phoneAttribute
-            : $this->emailAttribute;
-
-        $authConfirmAttributes = [
-            'type' => $attributeType,
-            'value' => $user->getAttribute($attribute),
+        // AuthConfirm params
+        $params = [
             'userId' => $user->getId(),
+            'type' => $attributeType,
             'is2Fa' => $is2fa,
+            'value' => $user->getAttribute(
+                $attributeType === AuthAttributeTypeEnum::PHONE
+                    ? $this->phoneAttribute
+                    : $this->emailAttribute
+            ),
         ];
 
-        $confirmHasBeenAlreadySend = AuthConfirm::find()
-            ->where($authConfirmAttributes)
-            ->andWhere(['>=', 'expireTime', date('Y-m-d H:i:s')])
-            ->andWhere(['isConfirmed' => false])
-            ->one();
+        /** @var AuthConfirm $model */
+        $model = null;
 
-        if ($confirmHasBeenAlreadySend) {
-            $diffInSeconds = strtotime($confirmHasBeenAlreadySend->expireTime) - strtotime("now");
-            $message = 'Код уже был отправлен, повторная отправка возможна через ' . $diffInSeconds;
-            throw new ConfirmCodeAlreadySentException($message);
+        // Check already sent (on limit confirmRepeatLimitSec)
+        if ($this->confirmRepeatLimitSec > 0) {
+            $model = AuthConfirm::find()
+                ->where($params)
+                ->andWhere(['>=', 'createTime', date('Y-m-d H:i:s', strtotime('-' . $this->confirmRepeatLimitSec . ' seconds'))])
+                ->andWhere(['isConfirmed' => false])
+                ->one();
+            if ($model) {
+                // Mark reused
+                $model->isReused = true;
+            }
         }
 
-        $authConfirmAttributes['code'] = static::generateCode($this->confirmCodeLength, $attributeType);
+        // Or create new
+        if (!$model) {
+            $model = AuthConfirm::instantiate(array_merge($params, [
+                'code' => static::generateCode($this->confirmCodeLength, $attributeType)
+            ]));
+        }
 
-        // Create confirm
-        $model = AuthConfirm::instantiate(array_merge($authConfirmAttributes, [
-            'code' => static::generateCode($this->confirmCodeLength, $attributeType)
-        ]));
-
+        // Save
         $model->saveOrPanic();
 
-        // Send mail
+        // Send sms/mail
         $user->sendNotify(AuthConfirm::TEMPLATE_NAME, [
             'confirm' => $model,
         ]);

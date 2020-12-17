@@ -37,7 +37,8 @@ abstract class BaseAuthenticator
     /**
      * @throws \steroids\core\exceptions\ModelSaveException
      */
-    public function onCorrectCodeValidation(){
+    public function onCorrectCodeValidation()
+    {
         $auth2FaValidationModel = new Auth2FaValidation([
             'userId' => Yii::$app->user->id,
             'authenticatorType' => $this->type
