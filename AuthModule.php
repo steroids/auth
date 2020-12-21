@@ -34,6 +34,8 @@ use yii\helpers\ArrayHelper;
 
 class AuthModule extends Module
 {
+    const EVENT_CONFIRMATION_RESEND = 'confirmation_resend';
+
     /**
      * Email attribute in User model
      */
@@ -240,11 +242,12 @@ class AuthModule extends Module
     /**
      * @param UserInterface|Model $user
      * @param string $attributeType one of AuthAttributeTypeEnum::EMAIL, AuthAttributeTypeEnum::PHONE
+     * @param null|AuthConfirm $prevConfirm previous confirmation
      * @return null|AuthConfirm
      * @throws ModelSaveException
      * @throws Exception
      */
-    public function confirm($user, $attributeType = null)
+    public function confirm($user, $attributeType = null, $prevConfirm = null)
     {
         // Validate attribute type
         if (!$attributeType) {
@@ -278,6 +281,8 @@ class AuthModule extends Module
             if ($model) {
                 // Mark reused
                 $model->isReused = true;
+                $model->saveOrPanic();
+                return $model;
             }
         }
 
@@ -286,7 +291,10 @@ class AuthModule extends Module
             $code = static::getInstance()->enableDebugStaticCode
                 ? str_repeat('1', static::getInstance()->confirmCodeLength)
                 : static::generateCode($this->confirmCodeLength, $attributeType);
-            $model = AuthConfirm::instantiate(array_merge($params, ['code' => $code]));
+            $model = AuthConfirm::instantiate(array_merge($params, [
+                'code' => $code,
+                'prevId' => $prevConfirm ? $prevConfirm->primaryKey : null,
+            ]));
         }
 
         // Save
@@ -296,6 +304,12 @@ class AuthModule extends Module
         $user->sendNotify(AuthConfirm::TEMPLATE_NAME, [
             'confirm' => $model,
         ]);
+
+        // Complete previous confirmation
+        if ($prevConfirm && !$prevConfirm->isConfirmed) {
+            $prevConfirm->expireTime = date('Y-m-d H:i:s');
+            $prevConfirm->saveOrPanic();
+        }
 
         return $model;
     }

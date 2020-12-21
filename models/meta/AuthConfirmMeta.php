@@ -18,6 +18,7 @@ use \Yii;
  * @property string $type
  * @property string $uid
  * @property boolean $isReused
+ * @property integer $prevId
  */
 abstract class AuthConfirmMeta extends Model
 {
@@ -43,7 +44,7 @@ abstract class AuthConfirmMeta extends Model
     {
         return [
             ...parent::rules(),
-            ['userId', 'integer'],
+            [['userId', 'prevId'], 'integer'],
             [['userId', 'value', 'code'], 'required'],
             ['value', 'string', 'max' => 255],
             ['code', 'string', 'max' => '32'],
@@ -120,7 +121,12 @@ abstract class AuthConfirmMeta extends Model
                 'label' => Yii::t('steroids', 'Используется повторно'),
                 'appType' => 'boolean',
                 'isPublishToFrontend' => true
-            ]
+            ],
+            'prevId' => [
+                'label' => Yii::t('steroids', 'Предыдущее подтверждение'),
+                'appType' => 'integer',
+                'isPublishToFrontend' => false,
+            ],
         ]);
     }
 }

@@ -3,6 +3,7 @@
 namespace steroids\auth\controllers;
 
 use steroids\auth\AuthModule;
+use steroids\auth\ConfirmationResendEvent;
 use steroids\auth\exceptions\ConfirmCodeAlreadySentException;
 use steroids\auth\forms\ConfirmForm;
 use steroids\auth\forms\TwoFactorConfirmForm;
@@ -131,10 +132,19 @@ class AuthController extends Controller
     public function actionResendConfirm(string $uid)
     {
         $prev = AuthConfirm::findOrPanic(['uid' => $uid]);
-        $confirm = AuthModule::getInstance()->confirm($prev->user, $prev->type);
+        $confirm = AuthModule::getInstance()->confirm($prev->user, $prev->type, $prev);
         if ($confirm->isReused) {
             throw new ConfirmCodeAlreadySentException(\Yii::t('steroids', 'Код уже был отправлен'));
         }
+
+        $confirm->prevId = $prev->primaryKey;
+        $confirm->saveOrPanic();
+
+        // Trigger event
+        AuthModule::getInstance()->trigger(AuthModule::EVENT_CONFIRMATION_RESEND, new ConfirmationResendEvent([
+            'prevConfirm' => $prev,
+            'newConfirm' => $confirm,
+        ]));
 
         return $confirm;
     }
