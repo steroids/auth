@@ -89,6 +89,11 @@ class AuthModule extends Module
     public bool $isPasswordAvailable = true;
 
     /**
+     * Whether user should be registered if wasn't found while attempting to login
+     */
+    public bool $autoRegistration = false;
+
+    /**
      * Generated code length (on confirm email or phone)
      */
     public int $confirmCodeLength = 6;

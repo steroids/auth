@@ -64,16 +64,22 @@ class AuthController extends Controller
 
     /**
      * Login
-     * @return LoginForm
+     * @return LoginForm|RegistrationForm
      * @throws \Exception
      */
     public function actionLogin()
     {
-        /** @var LoginForm $model */
-        $model = AuthModule::instantiateClass(LoginForm::class);
-        $model->load(Yii::$app->request->post());
-        $model->login();
-        return $model;
+        /** @var LoginForm $loginForm */
+        $loginForm = AuthModule::instantiateClass(LoginForm::class);
+        $loginForm->load(Yii::$app->request->post());
+        $loginForm->login();
+
+        // if a user isn't registered but auto registration is enabled
+        if (AuthModule::getInstance()->autoRegistration && !$loginForm->user) {
+            return $this->actionRegistration();
+        }
+
+        return $loginForm;
     }
 
     /**
