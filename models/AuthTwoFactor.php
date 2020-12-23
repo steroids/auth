@@ -39,7 +39,7 @@ class AuthTwoFactor extends AuthTwoFactorMeta
             ])
             ->andWhere([
                 'or',
-                ['<', 'expireTime', date('Y-m-d H:i:s')],
+                ['>=', 'expireTime', date('Y-m-d H:i:s')],
                 ['expireTime' => null]
             ])
             ->orderBy(['id' => SORT_DESC]);
@@ -55,7 +55,7 @@ class AuthTwoFactor extends AuthTwoFactorMeta
                 'userId' => $userId,
             ]);
             if ($model->provider->expireSec > 0) {
-                $model->expireTime = date('Y-m-d H:i:s', strtotime('-' . $model->provider->expireSec . ' seconds'));
+                $model->expireTime = date('Y-m-d H:i:s', strtotime('+' . $model->provider->expireSec . ' seconds'));
             }
             $model->saveOrPanic();
         }
@@ -78,8 +78,9 @@ class AuthTwoFactor extends AuthTwoFactorMeta
     public function start()
     {
         if (!$this->isConfirmed) {
-            $this->provider->start($this);
+            return $this->provider->start($this);
         }
+        return null;
     }
 
     /**

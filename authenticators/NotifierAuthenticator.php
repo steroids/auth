@@ -17,10 +17,11 @@ class NotifierAuthenticator extends BaseAuthenticator
     /**
      * @inheritDoc
      * @throws \yii\base\Exception
+     * @return AuthConfirm
      */
     public function start(AuthTwoFactor $twoFactor)
     {
-        AuthModule::getInstance()->confirm($twoFactor->user, $this->attributeType);
+        return AuthModule::getInstance()->confirm($twoFactor->user, $this->attributeType);
     }
 
     /**

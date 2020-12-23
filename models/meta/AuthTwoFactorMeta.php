@@ -25,6 +25,10 @@ abstract class AuthTwoFactorMeta extends Model
     public function fields()
     {
         return [
+            'providerName',
+            'createTime',
+            'expireTime',
+            'isConfirmed',
         ];
     }
 
@@ -63,7 +67,7 @@ abstract class AuthTwoFactorMeta extends Model
             ],
             'providerName' => [
                 'label' => Yii::t('steroids', 'Название провайдера'),
-                'isPublishToFrontend' => false
+                'isPublishToFrontend' => true
             ],
             'providerSecret' => [
                 'label' => Yii::t('steroids', 'Секретный код/ключ'),
@@ -73,18 +77,18 @@ abstract class AuthTwoFactorMeta extends Model
             'createTime' => [
                 'label' => Yii::t('steroids', 'Время создания'),
                 'appType' => 'autoTime',
-                'isPublishToFrontend' => false,
+                'isPublishToFrontend' => true,
                 'touchOnUpdate' => false
             ],
             'expireTime' => [
                 'label' => Yii::t('steroids', 'Действителен до'),
                 'appType' => 'dateTime',
-                'isPublishToFrontend' => false
+                'isPublishToFrontend' => true
             ],
             'isConfirmed' => [
                 'label' => Yii::t('steroids', 'Подтвержден?'),
                 'appType' => 'boolean',
-                'isPublishToFrontend' => false
+                'isPublishToFrontend' => true
             ]
         ]);
     }

@@ -44,6 +44,8 @@ class GoogleAuthenticator extends BaseAuthenticator
         if (!$twoFactor->providerSecret) {
             $twoFactor->providerSecret = (new Google2FA())->generateSecretKey();
         }
+
+        return null;
     }
 
     /**

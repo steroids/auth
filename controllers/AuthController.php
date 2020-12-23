@@ -9,6 +9,7 @@ use steroids\auth\forms\ConfirmForm;
 use steroids\auth\forms\TwoFactorConfirmForm;
 use steroids\auth\forms\Validate2FaCode;
 use steroids\auth\models\AuthConfirm;
+use steroids\auth\models\AuthTwoFactor;
 use Yii;
 use yii\web\Controller;
 use steroids\auth\forms\RecoveryPasswordConfirmForm;
@@ -31,7 +32,8 @@ class AuthController extends Controller
                     'confirm' => 'POST api/v1/auth/confirms/<uid>',
                     'resend-confirm' => 'POST api/v1/auth/confirms/<uid>/resend',
                     'logout' => 'POST api/v1/auth/logout',
-                    'two-factor-confirm' => 'POST api/v1/auth/2fa/<providerName>',
+                    'two-factor-send' => 'POST /api/v1/auth/2fa/<providerName>/send',
+                    'two-factor-confirm' => 'POST /api/v1/auth/2fa/<providerName>/confirm',
                     'ws' => 'GET api/v1/auth/ws',
                 ],
             ],
@@ -174,12 +176,30 @@ class AuthController extends Controller
     }
 
     /**
+     * @param $providerName
+     * @return array
+     * @throws \yii\base\Exception
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function actionTwoFactorSend($providerName)
+    {
+        $user = Yii::$app->user->model;
+        $twoFactor = AuthTwoFactor::findForUser($providerName, $user->id, true);
+        $providerData = $twoFactor->start();
+        return array_merge(
+            $twoFactor->toFrontend(),
+            ['providerData' => $providerData],
+        );
+    }
+
+    /**
      * @return TwoFactorConfirmForm
      */
-    public function actionTwoFactorConfirm()
+    public function actionTwoFactorConfirm($providerName)
     {
         $model = new TwoFactorConfirmForm();
         $model->user = Yii::$app->user->identity;
+        $model->providerName = $providerName;
         $model->load(Yii::$app->request->post());
         $model->validate();
         return $model;
