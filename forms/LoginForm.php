@@ -97,7 +97,7 @@ class LoginForm extends LoginFormMeta
 
             // Check confirms
             ['login', function ($attribute) use ($module) {
-                if ($this->user && !$this->hasErrors()) {
+                if ($this->user && !$this->hasErrors() && $module->isPasswordAvailable) {
                     $isConfirmed = AuthConfirm::find()
                         ->where([
                             'userId' => $this->user->getId(),
