@@ -71,13 +71,21 @@ class AuthController extends Controller
      */
     public function actionLogin()
     {
+        $module = AuthModule::getInstance();
+
         /** @var LoginForm $loginForm */
         $loginForm = AuthModule::instantiateClass(LoginForm::class);
         $loginForm->load(Yii::$app->request->post());
         $loginForm->login();
 
         // if a user isn't registered but auto registration is enabled
-        if (AuthModule::getInstance()->autoRegistration && !$loginForm->user) {
+        if ($module->autoRegistration && !$loginForm->user) {
+            // prepare request params for registration
+            $registrationRequestParams = Yii::$app->request->post();
+            unset($registrationRequestParams['login']);
+            $registrationRequestParams[$module->registrationMainAttribute] = Yii::$app->request->post('login');
+            Yii::$app->request->setBodyParams($registrationRequestParams);
+
             return $this->actionRegistration();
         }
 
