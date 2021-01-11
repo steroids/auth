@@ -97,6 +97,8 @@ class LoginForm extends LoginFormMeta
 
             // Check confirms
             ['login', function ($attribute) use ($module) {
+                // we should check if a user is confirmed only when authorization is performed by password
+                // because if not confirmation code should be sent at every user attempt to login
                 if ($this->user && !$this->hasErrors() && $module->isPasswordAvailable) {
                     $isConfirmed = AuthConfirm::find()
                         ->where([
