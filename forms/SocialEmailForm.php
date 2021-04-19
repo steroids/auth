@@ -26,8 +26,7 @@ class SocialEmailForm extends SocialEmailFormMeta
      */
     public function rules()
     {
-        /** @var UserInterface $userClass */
-        $userClass = \Yii::$app->user->identityClass;
+        $userClass = AuthModule::getInstance()->userClass;
 
         return array_merge(parent::rules(), [
             ['email', 'filter', 'filter' => function($value) {
@@ -52,10 +51,8 @@ class SocialEmailForm extends SocialEmailFormMeta
             return false;
         }
 
-        /** @var UserInterface $userClass */
-        $userClass = \Yii::$app->user->identityClass;
-
         $module = AuthModule::getInstance();
+        $userClass = $module->userClass;
         $user = $userClass::findBy($this->email, [$module->getUserAttributeName(AuthAttributeTypeEnum::EMAIL)]);
         if ($user) {
             $this->confirm = $module->confirm($user, AuthAttributeTypeEnum::EMAIL);

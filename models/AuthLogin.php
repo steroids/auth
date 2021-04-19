@@ -99,9 +99,7 @@ class AuthLogin extends AuthLoginMeta
      */
     public function getUser()
     {
-        /** @var UserInterface $userClass */
-        $userClass = \Yii::$app->user->identityClass;
-
+        $userClass = AuthModule::getInstance()->userClass;
         return $this->hasOne($userClass, ['id' => 'userId']);
     }
 

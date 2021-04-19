@@ -89,6 +89,11 @@ class AuthModule extends Module
     public bool $isPasswordAvailable = true;
 
     /**
+     * If true, user need confirm email/phone before first login
+     */
+    public bool $isConfirmRequired = true;
+
+    /**
      * Whether user should be registered if wasn't found while attempting to login
      */
     public bool $autoRegistration = false;
@@ -110,7 +115,7 @@ class AuthModule extends Module
 
     /**
      * User class name which implement UserInterface
-     * @var string
+     * @var UserInterface|string
      */
     public string $userClass = '';
 

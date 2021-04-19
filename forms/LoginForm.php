@@ -74,7 +74,7 @@ class LoginForm extends LoginFormMeta
                 $module->isPasswordAvailable ? 'password' : 'login',
                 function ($attribute) use ($module) {
                     /** @var UserInterface $userClass */
-                    $userClass = \Yii::$app->user->identityClass;
+                    $userClass = AuthModule::getInstance()->userClass;
 
                     // Find user by email/phone/login
                     $attributes = array_map(
@@ -99,7 +99,7 @@ class LoginForm extends LoginFormMeta
             ['login', function ($attribute) use ($module) {
                 // we should check if a user is confirmed only when authorization is performed by password
                 // because if not confirmation code should be sent at every user attempt to login
-                if ($this->user && !$this->hasErrors() && $module->isPasswordAvailable) {
+                if ($this->user && !$this->hasErrors() && $module->isPasswordAvailable && $module->isConfirmRequired) {
                     $isConfirmed = AuthConfirm::find()
                         ->where([
                             'userId' => $this->user->getId(),

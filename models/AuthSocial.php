@@ -78,8 +78,7 @@ class AuthSocial extends AuthSocialMeta
      */
     public function appendBlank()
     {
-        /** @var UserInterface|Model $userClass */
-        $userClass = \Yii::$app->user->identityClass;
+        $userClass = AuthModule::getInstance()->userClass;
 
         /** @var UserInterface|Model $user */
         $user = new $userClass();
@@ -102,8 +101,7 @@ class AuthSocial extends AuthSocialMeta
             return;
         }
 
-        /** @var UserInterface|Model $userClass */
-        $userClass = \Yii::$app->user->identityClass;
+        $userClass = AuthModule::getInstance()->userClass;
 
         $user = $userClass::findBy($email, [AuthAttributeTypeEnum::EMAIL]);
         if (!$user) {
@@ -136,9 +134,7 @@ class AuthSocial extends AuthSocialMeta
      */
     public function getUser()
     {
-        /** @var UserInterface|Model $userClass */
-        $userClass = \Yii::$app->user->identityClass;
-
+        $userClass = AuthModule::getInstance()->userClass;
         return $this->hasOne($userClass, ['id' => 'userId']);
     }
 }

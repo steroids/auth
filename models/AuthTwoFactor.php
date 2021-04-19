@@ -107,8 +107,7 @@ class AuthTwoFactor extends AuthTwoFactorMeta
      */
     public function getUser()
     {
-        /** @var UserInterface|Model $userClass */
-        $userClass = \Yii::$app->user->identityClass;
+        $userClass = AuthModule::getInstance()->userClass;
         return $this->hasOne($userClass, ['id' => 'userId']);
     }
 }

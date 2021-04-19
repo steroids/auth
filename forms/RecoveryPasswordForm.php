@@ -52,9 +52,8 @@ class RecoveryPasswordForm extends RecoveryPasswordFormMeta
     public function send()
     {
         if ($this->validate()) {
-            /** @var UserInterface $userClass */
-            $userClass = \Yii::$app->user->identityClass;
             $module = AuthModule::getInstance();
+            $userClass = $module->userClass;
 
             // Find user by email/phone/login
             $attributes = array_map(
