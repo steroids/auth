@@ -43,7 +43,6 @@ class AuthLogin extends AuthLoginMeta
             'ipAddress' => $request->userIP,
             'userAgent' => $request->userAgent,
             'accessToken' => \Yii::$app->security->generateRandomString(static::ACCESS_TOKEN_LENGTH),
-            'wsToken' => \Yii::$app->security->generateRandomString(static::WS_TOKEN_LENGTH),
             'expireTime' => date('Y-m-d H:i:s', strtotime('+' . static::LOGIN_DURATION_DAYS . ' days')),
         ]);
         $model->saveOrPanic();
