@@ -38,7 +38,7 @@ abstract class AuthLoginMeta extends Model
     {
         return array_merge(parent::rules(), [
             [['userId', 'authId'], 'integer'],
-            [['userId', 'accessToken', 'wsToken', 'ipAddress', 'userAgent'], 'required'],
+            [['userId', 'accessToken', 'ipAddress', 'userAgent'], 'required'],
             [['accessToken', 'ipAddress'], 'string', 'max' => '64'],
             ['wsToken', 'string', 'max' => '16'],
             [['location', 'userAgent'], 'string', 'max' => 255],
@@ -84,7 +84,6 @@ abstract class AuthLoginMeta extends Model
             ],
             'wsToken' => [
                 'label' => Yii::t('steroids', 'Ws Token'),
-                'isRequired' => true,
                 'stringLength' => '16'
             ],
             'ipAddress' => [
