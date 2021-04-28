@@ -2,13 +2,14 @@
 
 namespace steroids\auth;
 
-use app\user\models\User;
+use steroids\auth\authenticators\NotifierAuthenticator;
+use Yii;
+use steroids\auth\authenticators\BaseAuthenticator;
+use steroids\auth\providers\BaseAuthProvider;
 use steroids\auth\authenticators\GoogleAuthenticator;
 use steroids\auth\components\captcha\CaptchaComponentInterface;
 use steroids\auth\components\captcha\ReCaptchaV3;
 use steroids\auth\enums\AuthAttributeTypeEnum;
-use InvalidArgumentException;
-use steroids\auth\exceptions\ConfirmCodeAlreadySentException;
 use steroids\auth\forms\ConfirmForm;
 use steroids\auth\forms\LoginForm;
 use steroids\auth\forms\RecoveryPasswordConfirmForm;
@@ -16,30 +17,24 @@ use steroids\auth\forms\RecoveryPasswordForm;
 use steroids\auth\forms\RegistrationForm;
 use steroids\auth\forms\SocialEmailConfirmForm;
 use steroids\auth\forms\SocialEmailForm;
-use steroids\auth\forms\ProviderLoginForm;
-use steroids\auth\models\Auth2FaValidation;
+use steroids\auth\forms\AuthProviderLoginForm;
 use steroids\auth\models\AuthConfirm;
 use steroids\auth\models\AuthLogin;
 use steroids\auth\models\AuthSocial;
-use steroids\auth\models\NotifierAuthenticator;
 use steroids\auth\providers\FacebookAuthProvider;
 use steroids\auth\providers\GoogleAuthProvider;
 use steroids\auth\providers\SteamAuthProvider;
 use steroids\auth\providers\VkAuthProvider;
 use steroids\core\base\Model;
 use steroids\core\base\Module;
-use steroids\core\traits\ModuleProvidersTrait;
 use steroids\core\exceptions\ModelSaveException;
+use yii\base\Exception;
 use yii\base\InvalidConfigException;
 use yii\helpers\ArrayHelper;
 
 class AuthModule extends Module
 {
-    use ModuleProvidersTrait;
-
-    const TWOFA_CODE_IS_SEND = '2fa code has been send';
-    const TWOFA_CODE_SUCCESS = 'Authentication success';
-    const TWOFA_CODE_FAILED = 'Authentication failed';
+    const EVENT_CONFIRMATION_RESEND = 'confirmation_resend';
 
     /**
      * Email attribute in User model
@@ -55,6 +50,11 @@ class AuthModule extends Module
      * Login attribute in User model
      */
     public string $loginAttribute = 'login';
+
+    /**
+     * Username attribute in User model
+     */
+    public string $nameAttribute = 'username';
 
     /**
      * Password hash attribute in User model
@@ -89,6 +89,16 @@ class AuthModule extends Module
     public bool $isPasswordAvailable = true;
 
     /**
+     * If true, user need confirm email/phone before first login
+     */
+    public bool $isConfirmRequired = true;
+
+    /**
+     * Whether user should be registered if wasn't found while attempting to login
+     */
+    public bool $autoRegistration = false;
+
+    /**
      * Generated code length (on confirm email or phone)
      */
     public int $confirmCodeLength = 6;
@@ -99,27 +109,51 @@ class AuthModule extends Module
     public int $confirmExpireMins = 60;
 
     /**
+     * Timeout limit in second for repeat send
+     */
+    public int $confirmRepeatLimitSec = 60;
+
+    /**
      * User class name which implement UserInterface
-     * @var string
+     * @var UserInterface|string
      */
     public string $userClass = '';
 
     /**
-     * Should captcha be used in auth forms
-     * @var bool
-     */
-    public bool $isCaptchaEnable = false;
-
-    public string $auth2FaValidationLiveTime = '-2 minutes';
-
-    /**
+     * Captcha component (null for disabled)
      * @var CaptchaComponentInterface|array|null
      */
-    public $captcha = [];
+    public $captcha;
 
-    public array $providersClasses = [];
+    /**
+     * Auth (social) providers configs
+     * @var array
+     */
+    public array $authProviders = [];
 
-    public bool $debugSkipConfirmCodeCheck = false;
+    /**
+     * Auth (social) provider default classes
+     * @var array
+     */
+    public array $authProvidersClasses = [];
+
+    /**
+     * Two factor authenticator providers configs
+     * @var array
+     */
+    public array $twoFactorProviders = [];
+
+    /**
+     * Two factor authenticator provider default classes
+     * @var array
+     */
+    public array $twoFactorProvidersClasses = [];
+
+    /**
+     * Flag for enable static code "111111" in confirmations
+     * @var bool
+     */
+    public bool $enableDebugStaticCode = false;
 
     /**
      * @param int|null $length
@@ -157,23 +191,48 @@ class AuthModule extends Module
             'steroids\auth\forms\RegistrationForm' => RegistrationForm::class,
             'steroids\auth\forms\SocialEmailConfirmForm' => SocialEmailConfirmForm::class,
             'steroids\auth\forms\SocialEmailForm' => SocialEmailForm::class,
-            'steroids\auth\forms\ProviderLoginForm' => ProviderLoginForm::class,
+            'steroids\auth\forms\AuthProviderLoginForm' => AuthProviderLoginForm::class,
             'steroids\auth\AuthProfile' => AuthProfile::class,
         ], $this->classesMap);
 
-        $this->providersClasses = array_merge([
+        $this->authProvidersClasses = array_merge([
             'facebook' => FacebookAuthProvider::class,
             'google' => GoogleAuthProvider::class,
             'steam' => SteamAuthProvider::class,
             'vk' => VkAuthProvider::class,
-        ], $this->providersClasses);
+        ], $this->authProvidersClasses);
 
-        if ($this->isCaptchaEnable && is_array($this->captcha)) {
+        $this->twoFactorProvidersClasses = array_merge([
+            'google' => GoogleAuthenticator::class,
+            'notifier' => NotifierAuthenticator::class,
+        ], $this->twoFactorProvidersClasses);
+
+        if (is_array($this->captcha)) {
             $this->captcha = \Yii::createObject(array_merge(
                 ['class' => ReCaptchaV3::class],
                 $this->captcha
             ));
         }
+    }
+
+    /**
+     * @param string $name
+     * @return BaseAuthProvider
+     * @throws InvalidConfigException
+     */
+    public function getAuthProvider(string $name)
+    {
+        return $this->getProvider($name, 'authProviders', 'authProvidersClasses');
+    }
+
+    /**
+     * @param string $name
+     * @return BaseAuthenticator
+     * @throws InvalidConfigException
+     */
+    public function getTwoFactorProvider(string $name)
+    {
+        return $this->getProvider($name, 'twoFactorProviders', 'twoFactorProvidersClasses');
     }
 
     /**
@@ -193,132 +252,102 @@ class AuthModule extends Module
     /**
      * @param UserInterface|Model $user
      * @param string $attributeType one of AuthAttributeTypeEnum::EMAIL, AuthAttributeTypeEnum::PHONE
-     * @param bool $is2fa
+     * @param null|AuthConfirm $prevConfirm previous confirmation
      * @return null|AuthConfirm
-     * @throws ModelSaveException|InvalidArgumentException|ConfirmCodeAlreadySentException
+     * @throws ModelSaveException
+     * @throws Exception
      */
-
-    public function confirm($user, $attributeType = null, $is2fa = false)
+    public function confirm($user, $attributeType = null, $prevConfirm = null)
     {
+        // Validate attribute type
         if (!$attributeType) {
             $attributeType = $this->registrationMainAttribute;
         }
-
-        if (!in_array($attributeType, self::getNotifierTypes())) {
-            return null;
+        if (!in_array($attributeType, AuthAttributeTypeEnum::getNotifierTypes())) {
+            throw new Exception('Wrong attribute type: ' . $attributeType);
         }
 
-        $attribute = $attributeType === AuthAttributeTypeEnum::PHONE
-            ? $this->phoneAttribute
-            : $this->emailAttribute;
-
-        $authConfirmAttributes = [
-            'type' => $attributeType,
-            'value' => $user->getAttribute($attribute),
+        // AuthConfirm params
+        $params = [
             'userId' => $user->getId(),
-            'is2Fa' => $is2fa,
+            'type' => $attributeType,
+            'value' => $user->getAttribute(
+                $attributeType === AuthAttributeTypeEnum::PHONE
+                    ? $this->phoneAttribute
+                    : $this->emailAttribute
+            ),
         ];
 
-        $confirmHasBeenAlreadySend = AuthConfirm::find()
-            ->where($authConfirmAttributes)
-            ->andWhere(['>=', 'expireTime', date('Y-m-d H:i:s')])
-            ->andWhere(['isConfirmed' => false])
-            ->one();
+        /** @var AuthConfirm $model */
+        $model = null;
 
-        if ($confirmHasBeenAlreadySend) {
-            $diffInSeconds = strtotime($confirmHasBeenAlreadySend->expireTime) - strtotime("now");
-            $message = 'Код уже был отправлен, повторная отправка возможна через ' . $diffInSeconds;
-            throw new ConfirmCodeAlreadySentException($message);
+        // Check already sent (on limit confirmRepeatLimitSec)
+        if ($this->confirmRepeatLimitSec > 0) {
+            $model = AuthConfirm::find()
+                ->where($params)
+                ->andWhere(['>=', 'createTime', date('Y-m-d H:i:s', strtotime('-' . $this->confirmRepeatLimitSec . ' seconds'))])
+                ->andWhere(['isConfirmed' => false])
+                ->one();
+            if ($model) {
+                // Mark reused
+                $model->isReused = true;
+                $model->saveOrPanic();
+                return $model;
+            }
         }
 
-        $authConfirmAttributes['code'] = static::generateCode($this->confirmCodeLength, $attributeType);
+        // Or create new
+        if (!$model) {
+            $code = static::getInstance()->enableDebugStaticCode
+                ? str_repeat('1', static::getInstance()->confirmCodeLength)
+                : static::generateCode($this->confirmCodeLength, $attributeType);
+            $model = AuthConfirm::instantiate(array_merge($params, [
+                'code' => $code,
+                'prevId' => $prevConfirm ? $prevConfirm->primaryKey : null,
+            ]));
+        }
 
-        // Create confirm
-        $model = AuthConfirm::instantiate(array_merge($authConfirmAttributes, [
-            'code' => static::generateCode($this->confirmCodeLength, $attributeType)
-        ]));
-
+        // Save
         $model->saveOrPanic();
 
-        // Send mail
+        // Send sms/mail
         $user->sendNotify(AuthConfirm::TEMPLATE_NAME, [
             'confirm' => $model,
         ]);
+
+        // Complete previous confirmation
+        if ($prevConfirm && !$prevConfirm->isConfirmed) {
+            $prevConfirm->expireTime = date('Y-m-d H:i:s');
+            $prevConfirm->saveOrPanic();
+        }
 
         return $model;
     }
 
     /**
-     * @param string $prevConfirmUid
-     * @return AuthConfirm|null
-     * @throws ModelSaveException
-     * @throws \yii\web\NotFoundHttpException
+     * @param string $name
+     * @param string $itemsKey
+     * @param string $classesKey
+     * @return array|mixed|object|null
+     * @throws InvalidConfigException
      */
-    public function resendConfirm(string $prevConfirmUid)
+    protected function getProvider(string $name, string $itemsKey, string $classesKey)
     {
-        $prevConfirm = AuthConfirm::findOrPanic(['uid' => $prevConfirmUid]);
-        return $this->confirm($prevConfirm->user, $prevConfirm->type);
-    }
+        /** @var array $items */
+        $items = $this->$itemsKey;
 
-    public function coreComponents()
-    {
-        return parent::coreComponents(); // TODO: Change the autogenerated stub
-    }
-
-    /**
-     * @param User $user
-     * @param string $login user email or phone for authenticate
-     * @param string $code verification code
-     * @return string one of self::TWOFA_CODE_IS_SEND, self::TWOFA_CODE_SUCCESS, self::TWOFA_CODE_FAILED
-     * @throws ModelSaveException|\yii\base\Exception
-     */
-    public function authenticate2FA(User $user, string $login, string $code)
-    {
-        $authenticator = !$login
-            ? new GoogleAuthenticator()
-            : new NotifierAuthenticator();
-
-
-        //checking if user recently used 2Fa
-        $authValidate = Auth2FaValidation::find()
-            ->where([
-                'userId' => $user->id,
-                'authenticatorType' => $authenticator->type,
-            ])
-            ->andWhere(['>=', 'createTime', date("Y-m-d H:i", strtotime($this->auth2FaValidationLiveTime))])
-            ->one();
-
-        if ($authValidate) {
-            return self::TWOFA_CODE_IS_SEND;
+        if (!$items || !isset($items[$name])) {
+            throw new Exception('Not found provider: ' . $name);
         }
 
-        if ($authenticator instanceof NotifierAuthenticator && !$authValidate) {
-            $authenticator->sendCode($login);
-
-            return self::TWOFA_CODE_IS_SEND;
+        if (is_array($items[$name])) {
+            $items[$name] = Yii::createObject(array_merge(
+                ['class' => ArrayHelper::getValue($this->$classesKey, $name)],
+                $items[$name],
+                ['name' => $name]
+            ));
         }
 
-        return $authenticator->validateCode($code, $login)
-            ? self::TWOFA_CODE_SUCCESS
-            : self::TWOFA_CODE_FAILED;
-    }
-
-    /**
-     * @param string $login value of the user's login attributes
-     * @return string one of AuthAttributeTypeEnum
-     */
-    public static function getNotifierAttributeTypeFromLogin(string $login): string
-    {
-        return strpos($login, '@') !== false
-            ? AuthAttributeTypeEnum::EMAIL
-            : AuthAttributeTypeEnum::PHONE;
-    }
-
-    public static function getNotifierTypes()
-    {
-        return [
-            AuthAttributeTypeEnum::EMAIL,
-            AuthAttributeTypeEnum::PHONE
-        ];
+        return $items[$name];
     }
 }

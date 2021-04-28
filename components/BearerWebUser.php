@@ -21,8 +21,6 @@ class BearerWebUser extends \yii\web\User
 {
     protected const WS_TOKEN_CACHE_TIME = 60;
 
-    public $defaultRole = 'user';
-
     /**
      * @var AuthLogin
      */

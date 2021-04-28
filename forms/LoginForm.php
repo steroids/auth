@@ -4,12 +4,11 @@ namespace steroids\auth\forms;
 
 use steroids\auth\AuthModule;
 use steroids\auth\enums\AuthAttributeTypeEnum;
-use steroids\auth\exceptions\ConfirmCodeAlreadySentException;
 use steroids\auth\forms\meta\LoginFormMeta;
 use steroids\auth\models\AuthConfirm;
 use steroids\auth\UserInterface;
 use steroids\auth\validators\LoginValidator;
-use steroids\auth\validators\ReCaptchaValidator;
+use steroids\auth\validators\CaptchaValidator;
 use steroids\core\validators\PhoneValidator;
 use yii\helpers\ArrayHelper;
 
@@ -30,10 +29,13 @@ class LoginForm extends LoginFormMeta
      */
     public $token;
 
+    public ?AuthConfirm $confirm = null;
+
     public function fields()
     {
         return [
             'accessToken',
+            'confirm',
         ];
     }
 
@@ -53,7 +55,7 @@ class LoginForm extends LoginFormMeta
         }
 
         //Add captcha
-        $rules[] = ['token', ReCaptchaValidator::class];
+        $rules[] = ['token', CaptchaValidator::class];
 
         if (in_array(AuthAttributeTypeEnum::EMAIL, $module->loginAvailableAttributes)
             && strpos($this->login, '@') !== false) {
@@ -72,7 +74,7 @@ class LoginForm extends LoginFormMeta
                 $module->isPasswordAvailable ? 'password' : 'login',
                 function ($attribute) use ($module) {
                     /** @var UserInterface $userClass */
-                    $userClass = \Yii::$app->user->identityClass;
+                    $userClass = AuthModule::getInstance()->userClass;
 
                     // Find user by email/phone/login
                     $attributes = array_map(
@@ -95,7 +97,9 @@ class LoginForm extends LoginFormMeta
 
             // Check confirms
             ['login', function ($attribute) use ($module) {
-                if ($this->user && !$this->hasErrors()) {
+                // we should check if a user is confirmed only when authorization is performed by password
+                // because if not confirmation code should be sent at every user attempt to login
+                if ($this->user && !$this->hasErrors() && $module->isPasswordAvailable && $module->isConfirmRequired) {
                     $isConfirmed = AuthConfirm::find()
                         ->where([
                             'userId' => $this->user->getId(),
@@ -129,11 +133,7 @@ class LoginForm extends LoginFormMeta
             } else {
                 // Send confirm code
                 $module = AuthModule::getInstance();
-                try {
-                    $module->confirm($this->user, $module->registrationMainAttribute);
-                } catch (ConfirmCodeAlreadySentException $e) {
-                    $this->addError($module->registrationMainAttribute, ConfirmCodeAlreadySentException::getDefaultMessage());
-                }
+                $this->confirm = $module->confirm($this->user, $module->registrationMainAttribute);
             }
         }
     }

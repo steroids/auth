@@ -4,8 +4,8 @@ namespace steroids\auth\forms;
 
 use steroids\auth\AuthModule;
 use steroids\auth\enums\AuthAttributeTypeEnum;
-use steroids\auth\exceptions\ConfirmCodeAlreadySentException;
 use steroids\auth\forms\meta\SocialEmailFormMeta;
+use steroids\auth\models\AuthConfirm;
 use steroids\auth\models\AuthSocial;
 use steroids\auth\UserInterface;
 
@@ -17,12 +17,16 @@ class SocialEmailForm extends SocialEmailFormMeta
     public $social;
 
     /**
+     * @var AuthConfirm
+     */
+    public ?AuthConfirm $confirm = null;
+
+    /**
      * @inheritdoc
      */
     public function rules()
     {
-        /** @var UserInterface $userClass */
-        $userClass = \Yii::$app->user->identityClass;
+        $userClass = AuthModule::getInstance()->userClass;
 
         return array_merge(parent::rules(), [
             ['email', 'filter', 'filter' => function($value) {
@@ -47,17 +51,11 @@ class SocialEmailForm extends SocialEmailFormMeta
             return false;
         }
 
-        /** @var UserInterface $userClass */
-        $userClass = \Yii::$app->user->identityClass;
-
         $module = AuthModule::getInstance();
+        $userClass = $module->userClass;
         $user = $userClass::findBy($this->email, [$module->getUserAttributeName(AuthAttributeTypeEnum::EMAIL)]);
         if ($user) {
-            try {
-                $module->confirm($user, AuthAttributeTypeEnum::EMAIL);
-            } catch (ConfirmCodeAlreadySentException $e) {
-                $this->addError($module->registrationMainAttribute, ConfirmCodeAlreadySentException::getDefaultMessage());
-            }
+            $this->confirm = $module->confirm($user, AuthAttributeTypeEnum::EMAIL);
         }
         return true;
     }

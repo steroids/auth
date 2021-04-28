@@ -3,12 +3,13 @@
 namespace steroids\auth\forms;
 
 use steroids\auth\AuthModule;
-use steroids\auth\forms\meta\ProviderLoginFormMeta;
+use steroids\auth\enums\AuthAttributeTypeEnum;
+use steroids\auth\forms\meta\AuthProviderLoginFormMeta;
 use steroids\auth\models\AuthConfirm;
 use steroids\auth\models\AuthSocial;
 use steroids\auth\providers\BaseAuthProvider;
 
-class ProviderLoginForm extends ProviderLoginFormMeta
+class AuthProviderLoginForm extends AuthProviderLoginFormMeta
 {
     /**
      * @var array
@@ -53,7 +54,7 @@ class ProviderLoginForm extends ProviderLoginFormMeta
         return [
             ...parent::rules(),
             ['name', function ($attribute) {
-                $this->provider = AuthModule::getInstance()->getProvider($this->$attribute);
+                $this->provider = AuthModule::getInstance()->getAuthProvider($this->$attribute);
                 if (!$this->provider) {
                     $this->addError($attribute, \Yii::t('steroids', 'Такой провайдер не найден'));
                 }
@@ -76,7 +77,13 @@ class ProviderLoginForm extends ProviderLoginFormMeta
 
         // Find or create AuthSocial
         $this->social = AuthSocial::findOrCreate($this->name, $profile);
-        $this->social->appendUser();
+        if (!\Yii::$app->user->isGuest) {
+            $this->social->appendUser(\Yii::$app->user->identity);
+        } elseif ($profile->email) {
+            $this->social->appendEmail($profile->email);
+        } elseif (AuthModule::getInstance()->registrationMainAttribute !== AuthAttributeTypeEnum::EMAIL) {
+            $this->social->appendBlank();
+        }
 
         \Yii::$app->user->login($this->social->user);
         $this->accessToken = \Yii::$app->user->accessToken;

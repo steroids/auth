@@ -36,7 +36,7 @@ abstract class AuthSocialMeta extends Model
         return [
             ...parent::rules(),
             ['userId', 'integer'],
-            [['userId', 'externalId', 'socialName'], 'required'],
+            [['externalId', 'socialName'], 'required'],
             [['externalId', 'socialName'], 'string', 'max' => 255],
             ['uid', 'string', 'max' => '36'],
             ['profileJson', 'string'],
@@ -60,8 +60,7 @@ abstract class AuthSocialMeta extends Model
             ],
             'userId' => [
                 'label' => Yii::t('steroids', 'Пользователь'),
-                'appType' => 'integer',
-                'isRequired' => true
+                'appType' => 'integer'
             ],
             'externalId' => [
                 'label' => Yii::t('steroids', 'Внешний ИД'),

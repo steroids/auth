@@ -3,8 +3,13 @@
 namespace steroids\auth\controllers;
 
 use steroids\auth\AuthModule;
+use steroids\auth\ConfirmationResendEvent;
+use steroids\auth\exceptions\ConfirmCodeAlreadySentException;
 use steroids\auth\forms\ConfirmForm;
+use steroids\auth\forms\TwoFactorConfirmForm;
+use steroids\auth\forms\Validate2FaCode;
 use steroids\auth\models\AuthConfirm;
+use steroids\auth\models\AuthTwoFactor;
 use Yii;
 use yii\web\Controller;
 use steroids\auth\forms\RecoveryPasswordConfirmForm;
@@ -27,6 +32,8 @@ class AuthController extends Controller
                     'confirm' => 'POST api/v1/auth/confirms/<uid>',
                     'resend-confirm' => 'POST api/v1/auth/confirms/<uid>/resend',
                     'logout' => 'POST api/v1/auth/logout',
+                    'two-factor-send' => 'POST /api/v1/auth/2fa/<providerName>/send',
+                    'two-factor-confirm' => 'POST /api/v1/auth/2fa/<providerName>/confirm',
                     'ws' => 'GET api/v1/auth/ws',
                 ],
             ],
@@ -59,16 +66,32 @@ class AuthController extends Controller
 
     /**
      * Login
-     * @return LoginForm
+     * @return LoginForm|RegistrationForm
      * @throws \Exception
      */
     public function actionLogin()
     {
-        /** @var LoginForm $model */
-        $model = AuthModule::instantiateClass(LoginForm::class);
-        $model->load(Yii::$app->request->post());
-        $model->login();
-        return $model;
+        $module = AuthModule::getInstance();
+
+        /** @var LoginForm $loginForm */
+        $loginForm = AuthModule::instantiateClass(LoginForm::class);
+        $loginForm->load(Yii::$app->request->post());
+        $loginForm->login();
+
+        // if a user isn't registered but auto registration is enabled
+        if ($module->autoRegistration && !$loginForm->user) {
+            $registrationFormParams = Yii::$app->request->post();
+            unset($registrationFormParams['login']);
+            $registrationFormParams[$module->registrationMainAttribute] = Yii::$app->request->post('login');
+
+            /** @var RegistrationForm $model */
+            $model = AuthModule::instantiateClass(RegistrationForm::class);
+            $model->load($registrationFormParams);
+            $model->register();
+            return $model;
+        }
+
+        return $loginForm;
     }
 
     /**
@@ -119,13 +142,29 @@ class AuthController extends Controller
      * Resend confirm code
      * @param string $uid
      * @return AuthConfirm|null
+     * @throws ConfirmCodeAlreadySentException
      * @throws \steroids\core\exceptions\ModelSaveException
      * @throws \yii\base\Exception
      * @throws \yii\web\NotFoundHttpException
      */
     public function actionResendConfirm(string $uid)
     {
-        return AuthModule::getInstance()->resendConfirm($uid);
+        $prev = AuthConfirm::findOrPanic(['uid' => $uid]);
+        $confirm = AuthModule::getInstance()->confirm($prev->user, $prev->type, $prev);
+        if ($confirm->isReused) {
+            throw new ConfirmCodeAlreadySentException(\Yii::t('steroids', 'Код уже был отправлен'));
+        }
+
+        $confirm->prevId = $prev->primaryKey;
+        $confirm->saveOrPanic();
+
+        // Trigger event
+        AuthModule::getInstance()->trigger(AuthModule::EVENT_CONFIRMATION_RESEND, new ConfirmationResendEvent([
+            'prevConfirm' => $prev,
+            'newConfirm' => $confirm,
+        ]));
+
+        return $confirm;
     }
 
     /**
@@ -144,5 +183,35 @@ class AuthController extends Controller
         return [
             'token' => \Yii::$app->user->refreshWsToken(),
         ];
+    }
+
+    /**
+     * @param $providerName
+     * @return array
+     * @throws \yii\base\Exception
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function actionTwoFactorSend($providerName)
+    {
+        $user = Yii::$app->user->model;
+        $twoFactor = AuthTwoFactor::findForUser($providerName, $user->id, true);
+        $providerData = $twoFactor->start();
+        return array_merge(
+            $twoFactor->toFrontend(),
+            ['providerData' => $providerData],
+        );
+    }
+
+    /**
+     * @return TwoFactorConfirmForm
+     */
+    public function actionTwoFactorConfirm($providerName)
+    {
+        $model = new TwoFactorConfirmForm();
+        $model->user = Yii::$app->user->identity;
+        $model->providerName = $providerName;
+        $model->load(Yii::$app->request->post());
+        $model->validate();
+        return $model;
     }
 }

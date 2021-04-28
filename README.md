@@ -76,3 +76,36 @@ SocialConfirmForm
     [email]
     [code]
 ```
+
+## Использование 2FA
+
+1. В конфигурации необходимо объявить провайдеры, которые могут использоваться для 2fa, их сейчас может быть два - `notifier` и `google`.
+
+```
+    'modules' => [
+        'auth' => [
+            'twoFactorProviders' => [
+                'notifier' => [],
+            ],
+        ],
+    ],
+```
+
+2. В формах, где необходима 2FA, необходимо добавить TwoFactorRequireValidator
+
+```
+    [
+        'amount',
+        TwoFactorRequireValidator::class,
+        'userId' => $this->user->primaryKey,
+        'providerName' => 'notifier',
+        'codeAttribute' => 'code',
+    ]
+```
+
+Последний параметр `codeAttribute` не обязательный. Он необходим для случая, когда 2fa используется и обрабатывается
+на фронтенде прям в форме (с помощью onTwoFactor обработчика компонента `Form`) и затем форма отправляет те же данные, только с кодом
+подтверждения (`code`).
+
+Если обработчик `onTwoFactor` не указывается на фронтенде, то код будет вводить в отдельной форме (например, в модальном окне)
+и отправляться на бекенд методом `POST /api/v1/auth/2fa/<providerName>/confirm`. Тогда `codeAttribute` указывать не нужно.

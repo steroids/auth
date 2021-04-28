@@ -5,7 +5,7 @@ namespace steroids\auth\forms\meta;
 use \Yii;
 use steroids\core\base\FormModel;
 
-abstract class ProviderLoginFormMeta extends FormModel
+abstract class AuthProviderLoginFormMeta extends FormModel
 {
     public $name;
 

@@ -4,7 +4,7 @@ namespace steroids\auth\forms;
 
 use steroids\auth\enums\AuthAttributeTypeEnum;
 use steroids\auth\models\AuthConfirm;
-use steroids\auth\validators\ReCaptchaValidator;
+use steroids\auth\validators\CaptchaValidator;
 use steroids\core\exceptions\ModelSaveException;
 use Yii;
 use steroids\auth\AuthModule;
@@ -64,7 +64,7 @@ class RegistrationForm extends RegistrationFormMeta
         $userClass = $module->userClass;
 
         // Token
-        $rules[] = ['token', ReCaptchaValidator::class];
+        $rules[] = ['token', CaptchaValidator::class];
 
         // Email
         if ($module->registrationMainAttribute === AuthAttributeTypeEnum::EMAIL ||
@@ -88,7 +88,7 @@ class RegistrationForm extends RegistrationFormMeta
         }
 
         // Phone
-        if ($module->registrationMainAttribute === AuthAttributeTypeEnum::PHONE||
+        if ($module->registrationMainAttribute === AuthAttributeTypeEnum::PHONE ||
             in_array(AuthAttributeTypeEnum::PHONE, $module->loginAvailableAttributes)) {
             $rules = [
                 ...$rules,
@@ -220,8 +220,8 @@ class RegistrationForm extends RegistrationFormMeta
             $value = $this->isAttributeSafe($attribute)
                 ? $this->$attribute
                 : ArrayHelper::getValue($this->custom, $attribute);
-            if ($validator->isEmpty($value)) {
-                $this->addError($attribute, $validator->message);
+            if ($validator->isEmpty(is_string($value) ? trim($value) : $value)) {
+                $this->addError($attribute, $this->getRequiredAttributeErrorMessage($attribute));
             }
         }
 
@@ -238,5 +238,12 @@ class RegistrationForm extends RegistrationFormMeta
         } else {
             parent::onUnsafeAttribute($name, $value);
         }
+    }
+
+    public function getRequiredAttributeErrorMessage($attribute)
+    {
+        return Yii::t('yii', '{attribute} cannot be blank.', [
+            'attribute' => $attribute,
+        ]);
     }
 }

@@ -224,7 +224,6 @@ class AuthAdminController extends CrudApiController
     /**
      * @return AuthConfirm|null
      * @throws NotFoundHttpException
-     * @throws \steroids\auth\exceptions\ConfirmCodeAlreadySentException
      * @throws \steroids\core\exceptions\ModelSaveException
      * @throws \yii\base\Exception
      */

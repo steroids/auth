@@ -54,12 +54,7 @@ class SocialEmailConfirmForm extends SocialEmailConfirmFormMeta
                 }
             }],
             ['code', function ($attribute) {
-                if (!YII_DEBUG || !AuthModule::getInstance()->debugSkipConfirmCodeCheck) {
-                    $this->confirm = AuthConfirm::findByCode($this->login, $this->code);
-                } else {
-                    $this->confirm = AuthConfirm::findByLogin($this->login);
-                }
-
+                $this->confirm = AuthConfirm::findByCode($this->email, $this->code);
                 if (!$this->confirm) {
                     $this->addError($attribute, \Yii::t('steroids', 'Код неверен или устарел'));
                 }
@@ -79,7 +74,7 @@ class SocialEmailConfirmForm extends SocialEmailConfirmFormMeta
                 $this->confirm->markConfirmed();
 
                 // Append user
-                $this->social->appendUser($this->email);
+                $this->social->appendEmail($this->email);
 
                 // Login
                 \Yii::$app->user->login($this->social->user);
