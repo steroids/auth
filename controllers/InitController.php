@@ -12,7 +12,7 @@ class InitController extends Controller
     public static function apiMap()
     {
         return [
-            'init' => 'api/v1/init',
+            'init' => 'api/<version>/init',
         ];
     }
 
