@@ -78,6 +78,11 @@ class AuthSocial extends AuthSocialMeta
      */
     public function appendBlank()
     {
+        // Skip already appended
+        if ($this->userId) {
+            return;
+        }
+
         $userClass = AuthModule::getInstance()->userClass;
 
         /** @var UserInterface|Model $user */
