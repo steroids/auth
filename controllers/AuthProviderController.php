@@ -15,10 +15,10 @@ class AuthProviderController extends Controller
         return [
             'auth-social' => [
                 'items' => [
-                    'login' => 'POST api/v1/auth/social',
-                    'email' => 'POST api/v1/auth/social/email',
-                    'email-confirm' => 'POST api/v1/auth/social/email/confirm',
-                    'proxy' => 'GET api/v1/auth/social/proxy',
+                    'login' => 'POST api/<version>/auth/social',
+                    'email' => 'POST api/<version>/auth/social/email',
+                    'email-confirm' => 'POST api/<version>/auth/social/email/confirm',
+                    'proxy' => 'GET api/<version>/auth/social/proxy',
                 ],
             ],
         ];

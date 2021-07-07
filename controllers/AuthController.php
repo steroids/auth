@@ -24,17 +24,17 @@ class AuthController extends Controller
         return [
             'auth' => [
                 'items' => [
-                    'registration' => 'POST api/v1/auth/registration',
-                    'registration-confirm' => 'POST api/v1/auth/registration/confirm',
-                    'login' => 'POST api/v1/auth/login',
-                    'recovery' => 'POST api/v1/auth/recovery',
-                    'recovery-confirm' => 'POST api/v1/auth/recovery/confirm',
-                    'confirm' => 'POST api/v1/auth/confirms/<uid>',
-                    'resend-confirm' => 'POST api/v1/auth/confirms/<uid>/resend',
-                    'logout' => 'POST api/v1/auth/logout',
-                    'two-factor-send' => 'POST /api/v1/auth/2fa/<providerName>/send',
-                    'two-factor-confirm' => 'POST /api/v1/auth/2fa/<providerName>/confirm',
-                    'ws' => 'GET api/v1/auth/ws',
+                    'registration' => 'POST api/<version>/auth/registration',
+                    'registration-confirm' => 'POST api/<version>/auth/registration/confirm',
+                    'login' => 'POST api/<version>/auth/login',
+                    'recovery' => 'POST api/<version>/auth/recovery',
+                    'recovery-confirm' => 'POST api/<version>/auth/recovery/confirm',
+                    'confirm' => 'POST api/<version>/auth/confirms/<uid>',
+                    'resend-confirm' => 'POST api/<version>/auth/confirms/<uid>/resend',
+                    'logout' => 'POST api/<version>/auth/logout',
+                    'two-factor-send' => 'POST /api/<version>/auth/2fa/<providerName>/send',
+                    'two-factor-confirm' => 'POST /api/<version>/auth/2fa/<providerName>/confirm',
+                    'ws' => 'GET api/<version>/auth/ws',
                 ],
             ],
         ];

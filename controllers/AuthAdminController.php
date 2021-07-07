@@ -22,7 +22,7 @@ class AuthAdminController extends CrudApiController
         return AuthModule::getInstance()->userClass;
     }
 
-    public static function apiMap($baseUrl = '/api/v1/admin/auth')
+    public static function apiMap($baseUrl = '/api/<version>/admin/auth')
     {
         /** @var Model $modelClass */
         $modelClass = static::modelClass();
