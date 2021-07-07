@@ -19,6 +19,7 @@ use yii\web\IdentityInterface;
  */
 class BearerWebUser extends \yii\web\User
 {
+    protected const REQUEST_ACCESS_TOKEN_KEY = 'accessToken';
     protected const WS_TOKEN_CACHE_TIME = 60;
 
     /**
@@ -153,10 +154,16 @@ class BearerWebUser extends \yii\web\User
             if ($this->_login) {
                 $this->_accessToken = $this->_login->accessToken;
             } else {
+                // Try get from headers
                 $authHeader = \Yii::$app->request->headers->get('Authorization');
                 $this->_accessToken = $authHeader && preg_match('/^Bearer\s+(.*)$/', $authHeader, $match)
                     ? trim($match[1])
                     : null;
+
+                // Try get from get param
+                if (!$this->_accessToken) {
+                    $this->_accessToken = Yii::$app->request->get(static::REQUEST_ACCESS_TOKEN_KEY);
+                }
             }
         }
         return $this->_accessToken;
