@@ -9,6 +9,7 @@ use steroids\auth\models\AuthConfirm;
 use steroids\auth\UserInterface;
 use steroids\auth\validators\CaptchaValidator;
 use steroids\core\base\Model;
+use Yii;
 
 class RecoveryPasswordForm extends RecoveryPasswordFormMeta
 {
@@ -45,7 +46,23 @@ class RecoveryPasswordForm extends RecoveryPasswordFormMeta
             ['login', 'filter', 'filter' => function ($value) {
                 return mb_strtolower(trim($value));
             }],
-            ['token', CaptchaValidator::class]
+            ['token', CaptchaValidator::class],
+
+            ['login', function ($attribute) {
+                $module = AuthModule::getInstance();
+                $userClass = $module->userClass;
+
+                // Find user by email/phone/login
+                $attributes = array_map(
+                    fn($attribute) => $module->getUserAttributeName($attribute),
+                    $module->loginAvailableAttributes
+                );
+                $this->user = $userClass::findBy($this->$attribute, $attributes);
+
+                if (!$this->user) {
+                    $this->addError($attribute, Yii::t('steroids', 'Пользователь с указанным логином не найден'));
+                }
+            }],
         ]);
     }
 
@@ -53,20 +70,8 @@ class RecoveryPasswordForm extends RecoveryPasswordFormMeta
     {
         if ($this->validate()) {
             $module = AuthModule::getInstance();
-            $userClass = $module->userClass;
-
-            // Find user by email/phone/login
-            $attributes = array_map(
-                fn($attribute) => $module->getUserAttributeName($attribute),
-                $module->loginAvailableAttributes
-            );
-            $this->user = $userClass::findBy($this->login, $attributes);
-
-            if ($this->user) {
-
-                $confirmAttribute = AuthAttributeTypeEnum::resolveNotifierByLogin($this->login);
-                $this->confirm = $module->confirm($this->user, $confirmAttribute);
-            }
+            $confirmAttribute = AuthAttributeTypeEnum::resolveNotifierByLogin($this->login);
+            $this->confirm = $module->confirm($this->user, $confirmAttribute);
         }
     }
 }
