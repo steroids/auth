@@ -36,21 +36,24 @@ abstract class AuthLoginMeta extends Model
 
     public function rules()
     {
-        return array_merge(parent::rules(), [
+        return [
+            ...parent::rules(),
             [['userId', 'authId'], 'integer'],
             [['userId', 'accessToken', 'ipAddress', 'userAgent'], 'required'],
             [['accessToken', 'ipAddress'], 'string', 'max' => '64'],
             ['wsToken', 'string', 'max' => '16'],
-            [['location', 'userAgent'], 'string', 'max' => 255],
+            ['location', 'string', 'max' => 255],
+            ['userAgent', 'string', 'max' => '2000'],
             ['expireTime', 'date', 'format' => 'php:Y-m-d H:i:s'],
-        ]);
+        ];
     }
 
     public function behaviors()
     {
-        return array_merge(parent::behaviors(), [
+        return [
+            ...parent::behaviors(),
             TimestampBehavior::class,
-        ]);
+        ];
     }
 
     /**
@@ -92,15 +95,17 @@ abstract class AuthLoginMeta extends Model
                 'stringLength' => '64'
             ],
             'location' => [
-                'label' => Yii::t('steroids', 'Месторасположение'),
+                'label' => Yii::t('steroids', 'Месторасположение')
             ],
             'userAgent' => [
                 'label' => Yii::t('steroids', 'Браузер'),
-                'isRequired' => true
+                'isRequired' => true,
+                'stringLength' => '2000'
             ],
             'createTime' => [
                 'label' => Yii::t('steroids', 'Время входа'),
-                'appType' => 'autoTime'
+                'appType' => 'autoTime',
+                'touchOnUpdate' => false
             ],
             'expireTime' => [
                 'label' => Yii::t('steroids', 'Действителен до'),

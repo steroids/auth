@@ -41,7 +41,7 @@ class AuthLogin extends AuthLoginMeta
             'userId' => $identity->getId(),
             'authId' => $social ? $social->primaryKey : null,
             'ipAddress' => $request->userIP,
-            'userAgent' => $request->userAgent,
+            'userAgent' => substr($request->userAgent, 0, 2000),
             'accessToken' => \Yii::$app->security->generateRandomString(static::ACCESS_TOKEN_LENGTH),
             'expireTime' => date('Y-m-d H:i:s', strtotime('+' . static::LOGIN_DURATION_DAYS . ' days')),
         ]);
