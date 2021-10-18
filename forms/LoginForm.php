@@ -7,9 +7,10 @@ use steroids\auth\enums\AuthAttributeTypeEnum;
 use steroids\auth\forms\meta\LoginFormMeta;
 use steroids\auth\models\AuthConfirm;
 use steroids\auth\UserInterface;
-use steroids\auth\validators\LoginValidator;
 use steroids\auth\validators\CaptchaValidator;
+use steroids\auth\validators\LoginValidator;
 use steroids\core\validators\PhoneValidator;
+use steroids\notifier\exceptions\InvalidPhoneNumberException;
 use yii\helpers\ArrayHelper;
 
 class LoginForm extends LoginFormMeta
@@ -133,7 +134,11 @@ class LoginForm extends LoginFormMeta
             } else {
                 // Send confirm code
                 $module = AuthModule::getInstance();
-                $this->confirm = $module->confirm($this->user, $module->registrationMainAttribute);
+                try {
+                    $this->confirm = $module->confirm($this->user, $module->registrationMainAttribute);
+                } catch (InvalidPhoneNumberException $e) {
+                    $this->addError($module->registrationMainAttribute, InvalidPhoneNumberException::getDefaultMessage());
+                }
             }
         }
     }

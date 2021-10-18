@@ -6,6 +6,7 @@ use steroids\auth\enums\AuthAttributeTypeEnum;
 use steroids\auth\models\AuthConfirm;
 use steroids\auth\validators\CaptchaValidator;
 use steroids\core\exceptions\ModelSaveException;
+use steroids\notifier\exceptions\InvalidPhoneNumberException;
 use Yii;
 use steroids\auth\AuthModule;
 use steroids\auth\forms\meta\RegistrationFormMeta;
@@ -195,8 +196,11 @@ class RegistrationForm extends RegistrationFormMeta
                     throw new ModelSaveException($this->user);
                 }
 
-                // Confirm email
-                $this->confirm = $module->confirm($this->user, $module->registrationMainAttribute);
+                try {
+                    $this->confirm = $module->confirm($this->user, $module->registrationMainAttribute);
+                } catch (InvalidPhoneNumberException $e) {
+                    $this->addError($module->registrationMainAttribute, InvalidPhoneNumberException::getDefaultMessage());
+                }
 
                 $transaction->commit();
             } catch (\Exception $e) {

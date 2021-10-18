@@ -9,6 +9,7 @@ use steroids\auth\models\AuthConfirm;
 use steroids\auth\UserInterface;
 use steroids\auth\validators\CaptchaValidator;
 use steroids\core\base\Model;
+use steroids\notifier\exceptions\InvalidPhoneNumberException;
 use Yii;
 
 class RecoveryPasswordForm extends RecoveryPasswordFormMeta
@@ -71,7 +72,12 @@ class RecoveryPasswordForm extends RecoveryPasswordFormMeta
         if ($this->validate()) {
             $module = AuthModule::getInstance();
             $confirmAttribute = AuthAttributeTypeEnum::resolveNotifierByLogin($this->login);
-            $this->confirm = $module->confirm($this->user, $confirmAttribute);
+
+            try {
+                $this->confirm = $module->confirm($this->user, $confirmAttribute);
+            } catch (InvalidPhoneNumberException $e) {
+                $this->addError($confirmAttribute, InvalidPhoneNumberException::getDefaultMessage());
+            }
         }
     }
 }
