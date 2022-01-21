@@ -118,6 +118,12 @@ class LoginForm extends LoginFormMeta
                     }
                 }
             }],
+            //check isBanned
+            ['login', function ($attribute) {
+                if ($this->user->getIsBanned()) {
+                    $this->addError($attribute, \Yii::t('steroids', 'Аккаунт заблокирован, обратитесь в техническую поддержку'));
+                }
+            }]
         ];
     }
 

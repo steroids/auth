@@ -31,4 +31,9 @@ interface UserInterface extends IdentityInterface
      * @return string
      */
     public function getName();
+
+    /**
+     * @return bool
+     */
+    public function getIsBanned();
 }
