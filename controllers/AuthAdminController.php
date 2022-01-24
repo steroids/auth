@@ -63,6 +63,10 @@ class AuthAdminController extends CrudApiController
                         'label' => \Yii::t('steroids', 'Блокировка пользователя'),
                         'urlRule' => "POST $baseUrl/<$idParam:\d+>/ban",
                     ],
+                    'unban' => [
+                        'label' => \Yii::t('steroids', 'Разблокировка пользователя'),
+                        'urlRule' => "POST $baseUrl/<$idParam:\d+>/unban",
+                    ],
                     'password' => [
                         'label' => \Yii::t('steroids', 'Обновить пароль'),
                         'urlRule' => "POST $baseUrl/<$idParam:\d+>/password",
@@ -164,10 +168,28 @@ class AuthAdminController extends CrudApiController
         return $searchModel;
     }
 
+    /**
+     * @throws NotFoundHttpException
+     * @throws \steroids\core\exceptions\ModelSaveException
+     */
     public function actionBan()
     {
         $user = $this->findModel();
-        // TODO
+
+        $user->isBanned = true;
+        $user->saveOrPanic();
+    }
+
+    /**
+     * @throws NotFoundHttpException
+     * @throws \steroids\core\exceptions\ModelSaveException
+     */
+    public function actionUnban()
+    {
+        $user = $this->findModel();
+
+        $user->isBanned = false;
+        $user->saveOrPanic();
     }
 
     /**
