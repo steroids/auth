@@ -36,4 +36,9 @@ interface UserInterface extends IdentityInterface
      * @return bool
      */
     public function getIsBanned();
+
+    /**
+     * @param bool $value
+     */
+    public function setIsBanned($value);
 }

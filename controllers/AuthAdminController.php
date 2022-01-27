@@ -178,6 +178,10 @@ class AuthAdminController extends CrudApiController
 
         $user->isBanned = true;
         $user->saveOrPanic();
+
+        /** @var AuthLogin $authLoginClass */
+        $authLoginClass = AuthModule::resolveClass(AuthLogin::class);
+        $authLoginClass::logoutAll($user->primaryKey);
     }
 
     /**
