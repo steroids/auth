@@ -58,11 +58,17 @@ class LoginForm extends LoginFormMeta
         //Add captcha
         $rules[] = ['token', CaptchaValidator::class];
 
-        if (in_array(AuthAttributeTypeEnum::EMAIL, $module->loginAvailableAttributes)
-            && strpos($this->login, '@') !== false) {
+        if (
+            in_array(AuthAttributeTypeEnum::EMAIL, $module->loginAvailableAttributes) &&
+            $this->login &&
+            strpos($this->login, '@') !== false
+        ) {
             $rules[] = ['login', 'email'];
-        } elseif (in_array(AuthAttributeTypeEnum::PHONE, $module->loginAvailableAttributes)
-            && preg_match('/^\+?[0-9]+$/', trim($this->login))) {
+        } elseif (
+            in_array(AuthAttributeTypeEnum::PHONE, $module->loginAvailableAttributes) &&
+            $this->login &&
+            preg_match('/^\+?[0-9]+$/', trim($this->login))
+        ) {
             $rules[] = ['login', PhoneValidator::class];
         } elseif (in_array(AuthAttributeTypeEnum::LOGIN, $module->loginAvailableAttributes)) {
             $rules[] = ['login', LoginValidator::class];
